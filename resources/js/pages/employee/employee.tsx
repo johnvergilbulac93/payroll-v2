@@ -52,7 +52,9 @@ export default function EmployeeList({ employees }: Props) {
                 onPerPage={(value) => updateFilters({ limit: value, page: 1 })}
                 onEdit={(employee) => router.visit(show(employee.id))}
                 onDelete={(value) => onConfirm(value)}
-                onSetupSchedule={(value) => router.visit(scheduleIndex.url(Number(value)))}
+                onSetupSchedule={(value) =>
+                    router.visit(scheduleIndex.url(Number(value)))
+                }
             />
             <ConfirmDialog
                 size="sm"

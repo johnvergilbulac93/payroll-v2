@@ -1,7 +1,24 @@
 import { Head, useForm } from '@inertiajs/react';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { useMemo, useState } from 'react';
+import { FormDialog } from '@/components/base-modal';
 import Heading from '@/components/heading';
+import { Button } from '@/components/ui/button';
+import {
+    Field,
+    FieldGroup,
+    FieldLabel,
+    FieldError,
+} from '@/components/ui/field';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import {
     Table,
     TableBody,
@@ -21,10 +38,7 @@ import { cn } from '@/lib/utils';
 import type { Employee } from '@/types/employee';
 import type { ScheduleTemplate } from '@/types/schedule-template';
 import { DAYS_OF_WEEK } from '@/types/schedule-template';
-
 import type { ShiftCode } from '@/types/shift-code';
-import { Button } from '@/components/ui/button';
-
 type Props = {
     employee: Employee;
     templates: ScheduleTemplate[];
@@ -40,9 +54,10 @@ export default function EmployeeSchedule({
     templates,
     shiftCodes,
 }: Props) {
-    const [dialogOpen, setDialogOpen] = useState(false);
+    const [visible, setVisible] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
 
     const empId = Number(employee?.id);
 
@@ -87,8 +102,13 @@ export default function EmployeeSchedule({
             setData('EmpID', employeeId);
             setData('DayOfWeek', dayOfWeek);
             setTitle(`Assign shift - ${DAY_LABEL_MAP[dayOfWeek]}`);
-            setDialogOpen(true);
+            setDescription(employee.FullName);
+            setVisible(true);
         }
+    };
+
+    const onSubmit = () => {
+        console.log('Submitting form data:', data);
     };
 
     return (
@@ -165,7 +185,55 @@ export default function EmployeeSchedule({
                     </Table>
                 </div>
             </div>
-
+            <FormDialog
+                key="schedule-dialog"
+                open={visible}
+                onOpenChange={setVisible}
+                title={title}
+                description={description}
+                addText="Submit"
+                loading={processing}
+                onAdd={onSubmit}
+                onCancel={() => setVisible(false)}
+                size="lg"
+            >
+                <FieldGroup>
+                    <Field data-invalid={!!errors.ShiftCodeID}>
+                        <FieldLabel htmlFor="data.ShiftCodeID">
+                            Shift schedule
+                        </FieldLabel>
+                        <Select
+                            value={data.ShiftCodeID}
+                            onValueChange={(value) =>
+                                setData('ShiftCodeID', value)
+                            }
+                        >
+                            <SelectTrigger
+                                id="data.ShiftCodeID"
+                                aria-invalid={!!errors.ShiftCodeID}
+                            >
+                                <SelectValue placeholder="Select a shift" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Year</SelectLabel>
+                                    {shiftCodes.map((row) => (
+                                        <SelectItem
+                                            key={row.id}
+                                            value={String(row.id)}
+                                        >
+                                            {row.Name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                        {errors.ShiftCodeID && (
+                            <FieldError>{errors.ShiftCodeID}</FieldError>
+                        )}
+                    </Field>
+                </FieldGroup>
+            </FormDialog>
         </div>
     );
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Main;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Main\EMployee\ScheduleEmployeeRequest;
+use App\Http\Resources\Main\Shift\ShiftResource;
 use App\Models\Employee;
 use App\Models\ScheduleTemplate;
 use App\Models\ShiftCode;
@@ -18,18 +20,18 @@ class ScheduleController extends Controller
             'employee' => $employee->only('id', 'FullName', 'EmpNbr'),
             'templates' => $employee->load('scheduleTemplate.shiftCode:id,Name,TimeIn,TimeOut')
                 ->scheduleTemplate,
-            'shiftCodes' => ShiftCode::select('id', 'Name', 'TimeIn', 'TimeOut')
-                ->orderBy('id', 'desc')
-                ->get()
+            'shiftCodes' => ShiftResource::collection(ShiftCode::get())->resolve()
+
         ]);
     }
 
-    // public function storeSchedule(Request $request, $employee)
-    // {
-    //     // Validate and store the schedule for the employee
-    //     // You can implement your logic here
+    public function storeSchedule(ScheduleEmployeeRequest $request)
+    {
+        dd($request->validated());
+        // Validate and store the schedule for the employee
+        // You can implement your logic here
 
-    //     return redirect()->route('employee.scheduleIndex', ['employee' => $employee])
-    //                      ->with('success', 'Schedule updated successfully.');
-    // }
+        // return redirect()->route('employee.scheduleIndex', ['employee' => $employee])
+        //     ->with('success', 'Schedule updated successfully.');
+    }
 }
