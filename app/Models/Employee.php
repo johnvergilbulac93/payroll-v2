@@ -35,6 +35,14 @@ class Employee extends Model
     {
         return $this->HasMany(ScheduleTemplate::class, 'EmpID');
     }
+    public function position(): BelongsTo
+    {
+        return $this->belongsTo(EmployeePosition::class, 'Position');
+    }
+    public function areas(): BelongsTo
+    {
+        return $this->belongsTo(AreaAssignment::class, 'Assignment');
+    }
     protected static function booted(): void
     {
         static::creating(function (Employee $employee) {
@@ -58,13 +66,16 @@ class Employee extends Model
         });
 
         static::saving(function (Employee $employee) {
+            $middleInitial = $employee->MidName
+                ? mb_strtoupper(mb_substr($employee->MidName, 0, 1)) . '.'
+                : null;
+
             $employee->FullName = collect([
                 $employee->FirstName,
-                $employee->MidName,
+                $middleInitial,
+                $employee->LastName,
                 $employee->Suffix,
             ])->filter()->implode(' ');
-
-            $employee->FullName = $employee->LastName . ', ' . $employee->FullName;
         });
     }
     public function scopeFilter(Builder $query, array $filters)

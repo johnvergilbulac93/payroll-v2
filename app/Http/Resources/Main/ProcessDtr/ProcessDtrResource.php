@@ -2,8 +2,10 @@
 
 namespace App\Http\Resources\Main\ProcessDtr;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class ProcessDtrResource extends JsonResource
 {
@@ -14,6 +16,19 @@ class ProcessDtrResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'Status' => $this->status,
+            'FullName' => $this->FullName,
+            'EmpNbr' => $this->EmpNbr,
+            'Image' => $this->Image ? Storage::disk('public')->url($this->Image) : null,
+            'Period' => $this->period,
+            'Remarks' => $this->last_remarks,
+            'ProcessedAt' => $this->last_processed_at
+                ? Carbon::parse($this->last_processed_at)->calendar()
+                : null,
+            'DTRRecords' => $this->dtr_records
+
+        ];
     }
 }

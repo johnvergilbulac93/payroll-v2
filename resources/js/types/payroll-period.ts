@@ -38,5 +38,7 @@ export type EmployeeDtrPeriod = {
     ProcessAt: string;
     RecordCount: number;
     Period: string;
+    EmpNbr: string;
+    Image?: string;
     DTRRecords?: DTRRecordsDetails[];
 };

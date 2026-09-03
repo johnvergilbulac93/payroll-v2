@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Main\Employee\EmployeeRequest;
 use App\Http\Resources\Main\Employee\EmployeeResource;
 use App\Http\Resources\Main\Employee\EmployeeResourceCollection;
+use App\Models\AreaAssignment;
 use App\Models\Employee;
+use App\Models\EmployeePosition;
 use App\Models\Group;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -34,7 +36,9 @@ class EmployeeController extends Controller
         return Inertia::render(
             'employee/employee-form',
             [
-                'groups' => Group::select('id as value', 'name as label')->get()
+                'groups' => Group::select('id as value', 'name as label')->get(),
+                'areas' => AreaAssignment::select('id as value', 'name as label', 'type')->get(),
+                'positions' => EmployeePosition::select('id as value', 'name as label', 'type')->get()
             ]
         );
     }
@@ -52,7 +56,9 @@ class EmployeeController extends Controller
     {
         return Inertia::render('employee/employee-form', [
             'employee' => (new EmployeeResource($employee))->resolve(),
-            'groups' => Group::select('id as value', 'name as label')->get()
+            'groups' => Group::select('id as value', 'name as label')->get(),
+            'areas' => AreaAssignment::select('id as value', 'name as label', 'type')->get(),
+            'positions' => EmployeePosition::select('id as value', 'name as label', 'type')->get()
         ]);
     }
     public function update(EmployeeRequest $request, Employee $employee)

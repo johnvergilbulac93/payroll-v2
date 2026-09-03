@@ -39,6 +39,7 @@ type FormDialogProps = {
     loading?: boolean;
     size?: DialogSize;
     disabled?: boolean;
+    canAdd?: boolean
 };
 
 export function FormDialog({
@@ -54,6 +55,7 @@ export function FormDialog({
     loading = false,
     size = 'md',
     disabled,
+    canAdd= true
 }: FormDialogProps) {
     const isBusy = loading;
 
@@ -98,16 +100,18 @@ export function FormDialog({
                     >
                         {cancelText}
                     </Button>
-                    <Button
-                        type="button"
-                        onClick={handleAdd}
-                        disabled={isBusy || disabled}
-                    >
-                        {isBusy && (
-                            <IconLoader2 className="size-4 animate-spin" />
-                        )}
-                        {addText}
-                    </Button>
+                    {canAdd && (
+                        <Button
+                            type="button"
+                            onClick={handleAdd}
+                            disabled={isBusy || disabled}
+                        >
+                            {isBusy && (
+                                <IconLoader2 className="size-4 animate-spin" />
+                            )}
+                            {addText}
+                        </Button>
+                    )}
                 </DialogFooter>
             </DialogContent>
         </Dialog>

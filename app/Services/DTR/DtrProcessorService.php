@@ -282,8 +282,8 @@ class DtrProcessorService
         $expectedEnd = $in->copy()->setTimeFromTimeString($shiftCode->TimeOut->format('H:i'));
 
         $breakMinutes = $shiftCode->BreakMinutes ?? 0;
-        $shiftMinutes = (int) round($shiftCode->total_hours * 60);
-        $isHalfDay = $shiftCode->total_hours <= 4;
+        $shiftMinutes = (int) round($shiftCode->TotalHours * 60);
+        $isHalfDay = $shiftCode->TotalHours <= 4;
 
         // Late — unchanged, based on raw punches.
         $lateHours = (int) max(0, floor(($in->getTimestamp() - $expectedStart->getTimestamp()) / 60));
@@ -320,8 +320,8 @@ class DtrProcessorService
         $renderedHours = $this->floorToHalfHour($renderedMinutes);
         $overtimeHours = $this->floorToHalfHour($overtimeMinutes);
 
-        $daysWorked = $shiftCode->total_hours > 0
-            ? round($renderedHours / $shiftCode->total_hours, 4)
+        $daysWorked = $shiftCode->TotalHours > 0
+            ? round($renderedHours / $shiftCode->TotalHours, 4)
             : 0.0;
 
         return [$lateHours, $undertimeHours, $renderedHours, $overtimeHours, $daysWorked];

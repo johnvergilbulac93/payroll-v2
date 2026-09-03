@@ -131,11 +131,11 @@ export default function ShiftCodeList({ shift_codes }: Props) {
         Name: '',
         TimeIn: new Date().toTimeString().slice(0, 5),
         TimeOut: new Date().toTimeString().slice(0, 5),
-        BreakMinutes: 0,
-        GracePeriodMinutes: 0,
+        BreakMinutes: '',
+        GracePeriodMinutes: '',
         CrossesMidNight: false,
         IsWorkingDay: false,
-        TotalHours: 0,
+        TotalHours: '',
         IsActive: true,
     });
     const { getData, isLoading } = usePaginationIndexFilters({
@@ -159,13 +159,13 @@ export default function ShiftCodeList({ shift_codes }: Props) {
         const totalHours = calculateTotalHours(
             data.TimeIn,
             data.TimeOut,
-            data.BreakMinutes,
-            data.GracePeriodMinutes,
+            Number(data.BreakMinutes) || 0,
+            Number(data.GracePeriodMinutes) || 0,
             data.CrossesMidNight,
         );
 
-        if (data.TotalHours !== totalHours) {
-            setData('TotalHours', totalHours);
+        if (Number(data.TotalHours) !== totalHours) {
+            setData('TotalHours', String(totalHours));
         }
     }, [
         data.TimeIn,
@@ -207,11 +207,11 @@ export default function ShiftCodeList({ shift_codes }: Props) {
             Name: row.Name,
             TimeIn: row.TimeIn ?? '',
             TimeOut: row.TimeOut ?? '',
-            BreakMinutes: row.BreakMinutes,
-            GracePeriodMinutes: row.GracePeriodMinutes,
+            BreakMinutes: String(row.BreakMinutes),
+            GracePeriodMinutes: String(row.GracePeriodMinutes),
             CrossesMidNight: row.CrossesMidNight,
             IsWorkingDay: row.IsWorkingDay,
-            TotalHours: row.TotalHours,
+            TotalHours: String(row.TotalHours),
             IsActive: row.IsActive,
         });
         setIsAdd(false);
@@ -287,7 +287,7 @@ export default function ShiftCodeList({ shift_codes }: Props) {
                                 <ItemContent>
                                     <ItemTitle>{row.Name} </ItemTitle>
                                     <ItemDescription>
-                                        {row.Schedule}
+                                        {row.Schedule ? row.Schedule : '--'}
                                         <br />
                                         <Badge
                                             variant="outline"
@@ -396,14 +396,10 @@ export default function ShiftCodeList({ shift_codes }: Props) {
                             id="BreakMinutes"
                             tabIndex={4}
                             name="BreakMinutes"
-                            min={0}
                             type="number"
                             aria-invalid={!!errors.BreakMinutes}
                             onChange={(e) =>
-                                setData(
-                                    'BreakMinutes',
-                                    Number(e.target.value) || 0,
-                                )
+                                setData('BreakMinutes', e.target.value)
                             }
                         />
                         {errors.BreakMinutes && (
@@ -420,19 +416,13 @@ export default function ShiftCodeList({ shift_codes }: Props) {
                             id="GracePeriodMinutes"
                             name="GracePeriodMinutes"
                             type="number"
-                            min={0}
                             aria-invalid={!!errors.GracePeriodMinutes}
                             onChange={(e) =>
-                                setData(
-                                    'GracePeriodMinutes',
-                                    Number(e.target.value) || 0,
-                                )
+                                setData('GracePeriodMinutes', e.target.value)
                             }
                         />
                         {errors.GracePeriodMinutes && (
-                            <FieldError>
-                                {errors.GracePeriodMinutes}
-                            </FieldError>
+                            <FieldError>{errors.GracePeriodMinutes}</FieldError>
                         )}
                     </Field>
                     <Field data-invalid={!!errors.TotalHours}>
@@ -445,7 +435,6 @@ export default function ShiftCodeList({ shift_codes }: Props) {
                             id="TotalHours"
                             name="TotalHours"
                             type="number"
-                            min={0}
                             readOnly
                             aria-invalid={!!errors.TotalHours}
                         />

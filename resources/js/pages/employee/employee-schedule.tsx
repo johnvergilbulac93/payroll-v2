@@ -1,9 +1,9 @@
 import { Head, useForm } from '@inertiajs/react';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { useMemo, useState } from 'react';
+import { ConfirmDialog } from '@/components/alert-dialog';
 import { FormDialog } from '@/components/base-modal';
 import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
 import {
     Field,
     FieldGroup,
@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/tooltip';
 
 import { cn } from '@/lib/utils';
+import { scheduleStore, scheduleDestroy } from '@/routes/employee';
 import type { Employee } from '@/types/employee';
 import type { ScheduleTemplate } from '@/types/schedule-template';
 import { DAYS_OF_WEEK } from '@/types/schedule-template';
@@ -49,27 +50,48 @@ const DAY_LABEL_MAP: Record<number, string> = Object.fromEntries(
     DAYS_OF_WEEK.map((day) => [day.value, day.label]),
 );
 
+function formatTime(time: any) {
+    if (!time) {
+        return '';
+    }
+
+    const [h, m] = time.split(':').map(Number);
+
+    const period = h >= 12 ? 'PM' : 'AM';
+    const hour12 = h % 12 || 12;
+
+    return `${hour12}:${m.toString().padStart(2, '0')} ${period}`;
+}
+
 export default function EmployeeSchedule({
     employee,
     templates,
     shiftCodes,
 }: Props) {
     const [visible, setVisible] = useState(false);
-    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [confirmOpen, setConfirmOpen] = useState(false);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
 
     const empId = Number(employee?.id);
 
-    const { data, setData, post, processing, errors, reset, clearErrors } =
-        useForm({
-            id: 0,
-            EmpID: 0,
-            DayOfWeek: 0,
-            ShiftCodeID: '',
-            EffectiveFrom: '',
-            EffectiveTo: '',
-        });
+    const {
+        data,
+        setData,
+        post,
+        processing,
+        errors,
+        reset,
+        clearErrors,
+        delete: destroy,
+    } = useForm({
+        id: 0,
+        EmpID: 0,
+        DayOfWeek: 0,
+        ShiftCodeID: '',
+        EffectiveFrom: '',
+        EffectiveTo: '',
+    });
     const templateGrid = useMemo(() => {
         const grid: Record<number, Record<number, ScheduleTemplate>> = {};
         const today = new Date().toISOString().slice(0, 10);
@@ -95,10 +117,11 @@ export default function EmployeeSchedule({
             setData('id', existing.id);
             setData('EmpID', employeeId);
             setData('DayOfWeek', dayOfWeek);
-            setShowConfirmDialog(true);
+            setConfirmOpen(true);
         } else {
             clearErrors();
             reset();
+            setData('ShiftCodeID', '');
             setData('EmpID', employeeId);
             setData('DayOfWeek', dayOfWeek);
             setTitle(`Assign shift - ${DAY_LABEL_MAP[dayOfWeek]}`);
@@ -108,7 +131,15 @@ export default function EmployeeSchedule({
     };
 
     const onSubmit = () => {
-        console.log('Submitting form data:', data);
+        post(scheduleStore.url(), {
+            preserveScroll: true,
+            onSuccess: () => setVisible(false),
+        });
+    };
+    const onDelete = () => {
+        destroy(scheduleDestroy.url(data.id), {
+            preserveScroll: true,
+        });
     };
 
     return (
@@ -146,16 +177,16 @@ export default function EmployeeSchedule({
                                         >
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
+                                                    <button
+                                                        type="button"
                                                         className={cn(
-                                                            'group flex h-20 w-full items-center justify-center rounded-md border',
+                                                            'group flex h-24 w-full items-center justify-center rounded-md border px-2',
                                                             cell
                                                                 ? cell
                                                                       .shift_code
                                                                       ?.IsWorkingDay
-                                                                    ? 'border-transparent bg-primary/90 text-primary-foreground hover:bg-primary'
-                                                                    : 'border-transparent bg-secondary text-foreground'
+                                                                    ? 'border-transparent bg-primary text-primary-foreground hover:bg-primary/90'
+                                                                    : 'border-transparent bg-secondary'
                                                                 : 'border-dashed hover:border-border hover:bg-muted/50',
                                                         )}
                                                         onClick={() =>
@@ -166,11 +197,41 @@ export default function EmployeeSchedule({
                                                         }
                                                     >
                                                         {cell ? (
-                                                            <IconTrash className="h-4 w-4" />
+                                                            <div className="relative flex h-full w-full items-center justify-center">
+                                                                <div className="flex flex-col items-center transition group-hover:opacity-30 group-hover:blur-[1px]">
+                                                                    {cell
+                                                                        .shift_code
+                                                                        ?.IsWorkingDay ? (
+                                                                        <>
+                                                                            <p>
+                                                                                {formatTime(
+                                                                                    cell
+                                                                                        .shift_code
+                                                                                        ?.TimeIn,
+                                                                                )}
+                                                                            </p>
+                                                                            to
+                                                                            <p>
+                                                                                {formatTime(
+                                                                                    cell
+                                                                                        .shift_code
+                                                                                        ?.TimeOut,
+                                                                                )}
+                                                                            </p>
+                                                                        </>
+                                                                    ) : (
+                                                                        <span>
+                                                                            Rest
+                                                                            Day
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <IconTrash className="absolute h-6 w-6 opacity-0 transition group-hover:opacity-100" />
+                                                            </div>
                                                         ) : (
                                                             <IconPlus className="h-4 w-4 text-muted-foreground" />
                                                         )}
-                                                    </Button>
+                                                    </button>
                                                 </TooltipTrigger>
                                                 <TooltipContent>
                                                     {cell?.shift_code?.Name ??
@@ -234,6 +295,19 @@ export default function EmployeeSchedule({
                     </Field>
                 </FieldGroup>
             </FormDialog>
+            <ConfirmDialog
+                size="sm"
+                open={confirmOpen}
+                icon={<IconTrash />}
+                onOpenChange={setConfirmOpen}
+                title="Delete schedule?"
+                description="This will permanently delete this schedule record. This action cannot be undone."
+                confirmText="Delete"
+                onConfirm={async () => {
+                    onDelete();
+                    setConfirmOpen(false);
+                }}
+            />
         </div>
     );
 }

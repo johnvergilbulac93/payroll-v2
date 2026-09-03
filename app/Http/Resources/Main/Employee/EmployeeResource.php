@@ -46,7 +46,9 @@ class EmployeeResource extends JsonResource
             'Group' => $this->Group,
             'BiometricID' => trim($this->BiometricID),
             'ImageUrl' => $this->imageUrl,
-            'GroupName' => $this->group?->name
+            'GroupName' => $this->group?->name,
+            'AreaName' => $this->areas?->name,
+            'PositionName' => $this->position?->name,
             // 'Schedule' =>  EmployeeScheduleResource::collection($this->schedule),
             // 'ScheduleTemplate' =>  $this->scheduleTemplate
 

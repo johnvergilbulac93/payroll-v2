@@ -46,9 +46,16 @@ import type { Option } from '@/types/option';
 type Props = {
     employee?: Employee | null;
     groups: Option[];
+    areas: Option[];
+    positions: Option[];
 };
 
-export default function EmployeeForm({ employee, groups }: Props) {
+export default function EmployeeForm({
+    employee,
+    groups,
+    positions,
+    areas,
+}: Props) {
     const isEditMode = !!employee && Object.keys(employee).length > 0;
     const [open, setOpen] = useState(false);
     const {
@@ -62,6 +69,7 @@ export default function EmployeeForm({ employee, groups }: Props) {
     } = useForm({
         name: '',
     });
+
     const { data, setData, processing, post, errors } = useForm({
         id: employee?.id ?? '',
         Image: null as File | null,
@@ -99,6 +107,14 @@ export default function EmployeeForm({ employee, groups }: Props) {
         ImageUrl: employee?.ImageUrl ?? '',
         BiometricID: employee?.BiometricID ?? '',
     });
+
+    const filteredAreas = !data.Group
+        ? areas
+        : areas.filter((area) => String(area.type) === data.Group);
+
+    const filteredPositions = !data.Group
+        ? positions
+        : positions.filter((position) => String(position.type) === data.Group);
 
     const onSubmit = () => {
         post(store.url(), {
@@ -377,38 +393,110 @@ export default function EmployeeForm({ employee, groups }: Props) {
                         <FieldLabel htmlFor="employee.Position">
                             Position
                         </FieldLabel>
-                        <Input
-                            value={data.Position}
-                            onChange={(e) =>
-                                setData('Position', e.target.value)
-                            }
-                            type="text"
-                            id="employee.Position"
-                            placeholder="Position"
-                            aria-invalid={!!errors.Position}
-                            tabIndex={10}
-                        />
-                        {errors.Position && (
-                            <FieldError>{errors.Position}</FieldError>
+                        <div className="flex items-center gap-2">
+                            <Select
+                                value={data.Position}
+                                onValueChange={(value) =>
+                                    setData('Position', value)
+                                }
+                            >
+                                <SelectTrigger
+                                    id="employee.Position"
+                                    className="w-full"
+                                    tabIndex={10}
+                                    aria-invalid={!!errors.Position}
+                                >
+                                    <SelectValue placeholder="Select a Position" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Positions</SelectLabel>
+                                        {filteredPositions.map((position) => (
+                                            <SelectItem
+                                                key={position.value}
+                                                value={position.value}
+                                            >
+                                                {position.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="icon"
+                                        className="text-primary hover:text-chart-5"
+                                        onClick={onAddGroup}
+                                    >
+                                        <IconHelp />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    Add new position
+                                </TooltipContent>
+                            </Tooltip>
+                        </div>
+
+                        {errors.Group && (
+                            <FieldError>{errors.Group}</FieldError>
                         )}
                     </Field>
                     <Field data-invalid={!!errors.Assignment} className="gap-2">
                         <FieldLabel htmlFor="employee.Assignment">
                             Area of assignment
                         </FieldLabel>
-                        <Input
-                            value={data.Assignment}
-                            onChange={(e) =>
-                                setData('Assignment', e.target.value)
-                            }
-                            type="text"
-                            id="employee.Assignment"
-                            placeholder="Area of assignment"
-                            aria-invalid={!!errors.Assignment}
-                            tabIndex={11}
-                        />
-                        {errors.Assignment && (
-                            <FieldError>{errors.Assignment}</FieldError>
+                        <div className="flex items-center gap-2">
+                            <Select
+                                value={data.Assignment}
+                                onValueChange={(value) =>
+                                    setData('Assignment', value)
+                                }
+                            >
+                                <SelectTrigger
+                                    id="employee.Assignment"
+                                    className="w-full"
+                                    tabIndex={11}
+                                    aria-invalid={!!errors.Assignment}
+                                >
+                                    <SelectValue placeholder="Select a area" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Areas</SelectLabel>
+                                        {filteredAreas.map((area) => (
+                                            <SelectItem
+                                                key={area.value}
+                                                value={area.value}
+                                            >
+                                                {area.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="icon"
+                                        className="text-primary hover:text-chart-5"
+                                        onClick={onAddGroup}
+                                    >
+                                        <IconHelp />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Add new area</TooltipContent>
+                            </Tooltip>
+                        </div>
+
+                        {errors.Group && (
+                            <FieldError>{errors.Group}</FieldError>
                         )}
                     </Field>
                     <Field

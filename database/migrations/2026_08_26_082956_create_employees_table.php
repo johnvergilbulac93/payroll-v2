@@ -16,6 +16,18 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->timestamps();
         });
+        Schema::create('positions', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->nullable();
+            $table->smallInteger('type')->nullable();
+            $table->timestamps();
+        });
+        Schema::create('areas', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->nullable();
+            $table->smallInteger('type')->nullable();
+            $table->timestamps();
+        });
 
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
@@ -31,8 +43,8 @@ return new class extends Migration
             $table->date(column: 'BirthDate')->nullable();
             $table->date(column: 'EmployDate')->nullable();
             $table->date(column: 'RegularDate')->nullable();
-            $table->string(column: 'Position')->nullable();
-            $table->string(column: 'Assignment')->nullable();
+            $table->foreignId('Position')->constrained('positions')->onDelete('cascade');
+            $table->foreignId('Assignment')->constrained('areas')->onDelete('cascade');
             $table->string(column: 'SalaryGrade')->nullable();
             $table->decimal('BasicPay', 10, 2)->nullable();
             $table->decimal('DailyRate', 10, 2)->nullable();

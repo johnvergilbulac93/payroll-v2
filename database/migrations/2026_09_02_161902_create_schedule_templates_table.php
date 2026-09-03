@@ -16,8 +16,6 @@ return new class extends Migration
             $table->foreignId('EmpID')->constrained('employees')->cascadeOnDelete();
             $table->unsignedTinyInteger('DayOfWeek');
             $table->foreignId('ShiftCodeID')->constrained('shift_codes')->cascadeOnDelete();
-            $table->date('EffectiveFrom')->nullable();
-            $table->date('EffectiveTo')->nullable();
             $table->timestamps();
             $table->index(['EmpID', 'DayOfWeek']);
         });

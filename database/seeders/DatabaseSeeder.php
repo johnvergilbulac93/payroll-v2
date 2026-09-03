@@ -24,6 +24,9 @@ class DatabaseSeeder extends Seeder
             GroupSeeder::class,
             LoanTypeSeeder::class,
             ShiftSeeder::class,
+            PositionSeeder::class,
+            AreaAssignmentSeeder::class,
+            CutOffDateSeeder::class,
         ]);
     }
 }

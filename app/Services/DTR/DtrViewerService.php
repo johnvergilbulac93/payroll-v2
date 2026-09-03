@@ -32,7 +32,9 @@ class DtrViewerService
             })
             ->select(
                 'employees.id',
-                'employees.FirstName',
+                'employees.FullName',
+                'employees.Image',
+                'employees.EmpNbr',
                 'employees.LastName',
                 DB::raw("'" . $periodLabel . "' as period"),
                 DB::raw('MAX(dtr_records.Remarks) as last_remarks'),
@@ -48,12 +50,13 @@ class DtrViewerService
             )
             ->groupBy(
                 'employees.id',
-                'employees.FirstName',
+                'employees.FullName',
+                'employees.Image',
+                'employees.EmpNbr',
                 'employees.LastName'
             )
             ->orderBy('employees.LastName')
-            ->paginate(20)
-            ->withQueryString();
+            ->paginate();
     }
     public function attachDtrRecords(
         LengthAwarePaginator $employees,
@@ -94,7 +97,6 @@ class DtrViewerService
         // NEW: schedule templates covering this period
         $schedules = DB::table('employee_schedule_templates')
             ->join('shift_codes', 'shift_codes.id', '=', 'employee_schedule_templates.ShiftCodeID')
-            ->whereNull('employee_schedule_templates.deleted_at')
             ->whereIn('employee_schedule_templates.EmpID', $empIds)
             ->where('employee_schedule_templates.EffectiveFrom', '<=', $period->PeriodEnd)
             ->where(function ($q) use ($period) {

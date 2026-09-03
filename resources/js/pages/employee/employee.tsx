@@ -25,7 +25,7 @@ export default function EmployeeList({ employees }: Props) {
         defaults: { page: 1, search: '', limit: 10 },
     });
 
-    const onConfirm = (value: number) => {
+const onConfirm = (value: number) => {
         setPendingDeleteId(value);
         setConfirmOpen(true);
     };

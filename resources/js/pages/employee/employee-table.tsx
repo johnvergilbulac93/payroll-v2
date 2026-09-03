@@ -117,7 +117,7 @@ export function EmployeeTable({
                 </div>
             ),
         }),
-        columnHelper.accessor('Position', { header: 'Position' }),
+        columnHelper.accessor('PositionName', { header: 'Position' }),
         columnHelper.accessor('GroupName', { header: 'Group' }),
 
         columnHelper.display({

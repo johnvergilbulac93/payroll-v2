@@ -34,6 +34,8 @@ export type Employee = {
     Image?: string | null;
     ImageUrl: string | null;
     GroupName?: string;
+    AreaName?: string;
+    PositionName?: string;
     // Schedule?: Schedule[];
     // ScheduleTemplate?: ScheduleTemplate[];
 };

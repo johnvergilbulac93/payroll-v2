@@ -18,7 +18,7 @@ class ScheduleController extends Controller
 
         return Inertia::render('employee/employee-schedule', [
             'employee' => $employee->only('id', 'FullName', 'EmpNbr'),
-            'templates' => $employee->load('scheduleTemplate.shiftCode:id,Name,TimeIn,TimeOut')
+            'templates' => $employee->load('scheduleTemplate.shiftCode:id,Name,TimeIn,TimeOut,IsWorkingDay')
                 ->scheduleTemplate,
             'shiftCodes' => ShiftResource::collection(ShiftCode::get())->resolve()
 
@@ -27,11 +27,15 @@ class ScheduleController extends Controller
 
     public function storeSchedule(ScheduleEmployeeRequest $request)
     {
-        dd($request->validated());
-        // Validate and store the schedule for the employee
-        // You can implement your logic here
+        ScheduleTemplate::create($request->validated());
 
-        // return redirect()->route('employee.scheduleIndex', ['employee' => $employee])
-        //     ->with('success', 'Schedule updated successfully.');
+        return redirect()->back()
+            ->with('success', 'Success: schedule added.');
+    }
+    public function destroySchedule(ScheduleTemplate $scheduleTemplate)
+    {
+        $scheduleTemplate->delete();
+        return redirect()->back()
+            ->with('success', 'Success: schedule deleted.');
     }
 }

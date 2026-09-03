@@ -19,7 +19,6 @@ return new class extends Migration
             $table->unsignedTinyInteger('Cutoff2StartDay');
             $table->unsignedTinyInteger('Cutoff2EndDay');
             $table->boolean('IsActive')->default(true);
-            $table->softDeletes();
             $table->timestamps();
         });
         Schema::create('payroll_periods', function (Blueprint $table) {
@@ -46,13 +45,12 @@ return new class extends Migration
             $table->string('Name');
             $table->time('TimeIn')->nullable();
             $table->time('TimeOut')->nullable();
-            $table->unsignedSmallInteger('BreakMinutes')->default(60);
-            $table->unsignedSmallInteger('GracePeriodMinutes')->default(0);
+            $table->unsignedSmallInteger('BreakMinutes')->default(0)->nullable();
+            $table->unsignedSmallInteger('GracePeriodMinutes')->default(0)->nullable();
             $table->boolean('CrossesMidNight')->default(false);
             $table->boolean('IsWorkingDay')->default(true);
             $table->decimal('TotalHours', 4, 2)->nullable();
             $table->boolean('IsActive')->default(true);
-            $table->softDeletes();
             $table->timestamps();
         });
         Schema::create('dtr_records', function (Blueprint $table) {
