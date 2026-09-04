@@ -22,15 +22,15 @@ export default function AuthSimpleLayout({
                         'radial-gradient(ellipse at center, transparent 20%, black 70%)',
                 }}
             ></div>
-            <div className="relative z-10 w-full max-w-sm rounded-md border bg-primary-foreground p-6 shadow">
+            <div className="relative z-10 w-full max-w-md rounded-md border bg-primary-foreground p-6 shadow">
                 <div className="flex flex-col gap-8">
                     <div className="flex flex-col items-center gap-4">
                         <Link
                             href={home()}
                             className="flex flex-col items-center gap-2 font-medium"
                         >
-                            <div className="mb-1 flex h-9 w-9 items-center justify-center rounded-md">
-                                <AppLogoIcon className="size-14 text-primary dark:text-white" />
+                            <div className="mb-1 flex h-20 w-20 items-center justify-center rounded-md bg-primary p-1">
+                                <AppLogoIcon className="size-20 text-primary dark:text-white" />
                             </div>
                             <span className="sr-only">{title}</span>
                         </Link>

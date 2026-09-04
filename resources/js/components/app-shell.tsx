@@ -23,7 +23,6 @@ export function AppShell({ children, variant = 'sidebar' }: Props) {
             style={
                 {
                     '--sidebar-width': '20rem',
-                    '--sidebar-width-icon': '4rem',
                 } as React.CSSProperties
             }
         >

@@ -99,7 +99,7 @@ export default function Login({ status, canResetPassword }: Props) {
                             <div className="grid gap-2">
                                 <div className="flex items-center">
                                     <Label htmlFor="password">Password</Label>
-                                    {canResetPassword && (
+                                    {/* {canResetPassword && (
                                         <TextLink
                                             href={request()}
                                             className="ml-auto text-sm"
@@ -107,7 +107,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                         >
                                             Forgot your password?
                                         </TextLink>
-                                    )}
+                                    )} */}
                                 </div>
                                 <PasswordInput
                                     id="password"
@@ -162,5 +162,5 @@ export default function Login({ status, canResetPassword }: Props) {
 
 Login.layout = {
     title: 'Log in to your account',
-    description: 'Enter your email and password below to log in',
+    description: 'Enter your username and password below to log in',
 };
