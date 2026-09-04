@@ -53,7 +53,6 @@ type EmployeeTableProps = {
     onPerPage?: (value: number) => void;
     onEdit?: (employee: Employee) => void;
     onDelete?: (value: number) => void;
-    onSetupSchedule?: (value: string) => void;
 };
 export function EmployeeTable({
     data,
@@ -63,7 +62,6 @@ export function EmployeeTable({
     onPerPage,
     onEdit,
     onDelete,
-    onSetupSchedule,
 }: EmployeeTableProps) {
     const { can } = usePermissions();
     const getInitials = useInitials();
@@ -145,7 +143,6 @@ export function EmployeeTable({
             cell: ({ row }) => {
                 const canEdit = can('employee-update');
                 const canDelete = can('employee-delete');
-                const canSetupSchedule = can('employee-setup-schedule');
 
                 if (!canEdit && !canDelete) {
                     return null;
@@ -169,23 +166,7 @@ export function EmployeeTable({
                                 </TooltipContent>
                             </Tooltip>
                         )}
-                        {canSetupSchedule && (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        onClick={() =>
-                                            onSetupSchedule?.(row.original.id)
-                                        }
-                                        size="icon-sm"
-                                    >
-                                        <IconCalendarTime />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Setup Schedule</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        )}
+
                         {canDelete && (
                             <Tooltip>
                                 <TooltipTrigger asChild>
@@ -222,7 +203,6 @@ export function EmployeeTable({
             onSearch={onSearch}
             onAdd={onAdd}
             onPerPage={onPerPage}
-            onSetupSchedule={onSetupSchedule}
         />
     );
 }

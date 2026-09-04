@@ -11,19 +11,13 @@ class ScheduleResolverService
 {
     public function preload(Collection $employeeIds, Carbon $startDate, Carbon $endDate): ScheduleContext
     {
-        // Future: per-date / date-range / default overrides table.
-        // $schedules = DB::table('employee_schedules')
-        //     ->whereIn('EmpID', $employeeIds)
-        //     ->where('IsActive', true)
-        //     ->whereNull('deleted_at')
-        //     ->where(function ($q) use ($startDate, $endDate) {
-        //         $q->where('EffectiveFrom', '<=', $endDate)
-        //             ->where(function ($q2) use ($startDate) {
-        //                 $q2->whereNull('EffectiveTo')->orWhere('EffectiveTo', '>=', $startDate);
-        //             });
-        //     })
-        //     ->get()
-        //     ->groupBy('EmpID');
+        $schedules = DB::table('employee_schedules')
+            ->whereIn('EmpID', $employeeIds)
+            ->where('IsActive', true)
+            ->where('ScheduleType', 'per_date')
+            ->whereBetween('EffectiveFrom', [$startDate->toDateString(), $endDate->toDateString()])
+            ->get()
+            ->groupBy('EmpID');
 
         $templates = DB::table('employee_schedule_templates')
             ->whereIn('EmpID', $employeeIds)
@@ -32,7 +26,7 @@ class ScheduleResolverService
 
         $shiftCodes = ShiftCode::where('IsActive', true)->get()->keyBy('id');
 
-        return new ScheduleContext($templates, $shiftCodes);
+        return new ScheduleContext($templates, $shiftCodes, $schedules);
     }
 
     public function resolveFor(int $employeeId, Carbon $date, ScheduleContext $ctx): ?ShiftCode
@@ -40,11 +34,12 @@ class ScheduleResolverService
         $dateStr = $date->toDateString();
 
         // Future: 1. per_date override
-        // $rows = $ctx->schedulesByEmployee->get($employeeId, collect());
-        // $perDate = $rows->first(fn($s) => $s->ScheduleType === 'per_date' && $s->EffectiveFrom === $dateStr);
-        // if ($perDate) {
-        //     return $perDate->ShiftCodeID ? $ctx->shiftCodes->get($perDate->ShiftCodeID) : null;
-        // }
+        $rows = $ctx->schedules->get($employeeId, collect());
+
+        $perDate = $rows->first(fn($s) => $s->ScheduleType === 'per_date' && $s->EffectiveFrom === $dateStr);
+        if ($perDate) {
+            return $perDate->ShiftCodeID ? $ctx->shiftCodes->get($perDate->ShiftCodeID) : null;
+        }
 
         // Future: 2. date_range override
         // $dateRange = $rows->first(

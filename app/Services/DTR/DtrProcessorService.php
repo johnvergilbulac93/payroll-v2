@@ -197,8 +197,8 @@ class DtrProcessorService
         );
 
         [
-            $lateHours,
-            $undertimeHours,
+            $lateMinutes,
+            $undertimeMinutes,
             $renderedHours,
             $overtimeHours,
             $daysWorked
@@ -210,8 +210,8 @@ class DtrProcessorService
             'ShiftCodeID' => $shiftCode?->id,
             'IN' => $in,
             'OUT' => $out,
-            'LateMinutes' => (float)$lateHours,
-            'UndertimeMinutes' => (int) round($undertimeHours * 60),
+            'LateMinutes' => $lateMinutes,
+            'UndertimeMinutes' => $undertimeMinutes,
             'RenderedHours' => (float) $renderedHours,
             'OvertimeHours' => (float) $overtimeHours,
             'DaysWorked' => (float) $daysWorked,
@@ -241,15 +241,15 @@ class DtrProcessorService
     protected function buildDtrRecord(int $employeeId, string $date, Carbon $in, Carbon $out, int $punchCount, ShiftCode $shiftCode, ?int $periodId): array
     {
         [
-            $lateHours,
-            $undertimeHours,
+            $lateMinutes,
+            $undertimeMinutes,
             $renderedHours,
             $overtimeHours,
             $daysWorked
         ] = $this->computeHours($in, $out, $shiftCode);
 
         $remark = (!$shiftCode->TimeIn || !$shiftCode->TimeOut)
-            ? "Punch recorded on {$date} for shift '{$shiftCode->Name}' — no shift window assigned, flagged for review"
+            ? "Punch recorded on {$date} for shift '{$shiftCode->Name}' — no active schedule assigned, flagged for review"
             : null;
 
         return [
@@ -258,8 +258,8 @@ class DtrProcessorService
             'ShiftCodeID' => $shiftCode?->id,
             'IN' => $in,
             'OUT' => $out,
-            'LateMinutes' => (float)$lateHours,
-            'UndertimeMinutes' => (int) round($undertimeHours * 60),
+            'LateMinutes' => $lateMinutes,
+            'UndertimeMinutes' => $undertimeMinutes,
             'RenderedHours' => (float) $renderedHours,
             'OvertimeHours' => (float) $overtimeHours,
             'DaysWorked' => (float) $daysWorked,
@@ -286,11 +286,14 @@ class DtrProcessorService
         $isHalfDay = $shiftCode->TotalHours <= 4;
 
         // Late — unchanged, based on raw punches.
-        $lateHours = (int) max(0, floor(($in->getTimestamp() - $expectedStart->getTimestamp()) / 60));
+        $lateMinutes = (int) max(0, floor(($in->getTimestamp() - $expectedStart->getTimestamp()) / 60));
         // Undertime: shortfall vs. scheduled end time, rounded UP to the
         // nearest half hour. E.g. 1 minute short → 0.5, 2hr11min short → 2.5.
-        $undertimeMinutesRaw = (int) max(0, round(($expectedEnd->getTimestamp() - $out->getTimestamp()) / 60));
-        $undertimeHours = ceil($undertimeMinutesRaw / 30) * 0.5;
+        
+        // $undertimeMinutesRaw = (int) max(0, round(($expectedEnd->getTimestamp() - $out->getTimestamp()) / 60));
+        // $undertimeHours = ceil($undertimeMinutesRaw / 30) * 0.5;
+
+        $undertimeMinutes = (int) max(0, round(($expectedEnd->getTimestamp() - $out->getTimestamp()) / 60));
 
         // --- Rendered hours: only count time actually inside the shift window ---
         // Clamp punches to the scheduled boundaries before measuring duration.
@@ -324,7 +327,7 @@ class DtrProcessorService
             ? round($renderedHours / $shiftCode->TotalHours, 4)
             : 0.0;
 
-        return [$lateHours, $undertimeHours, $renderedHours, $overtimeHours, $daysWorked];
+        return [$lateMinutes, $undertimeMinutes, $renderedHours, $overtimeHours, $daysWorked];
     }
 
     protected function floorToHalfHour(int $minutes): float

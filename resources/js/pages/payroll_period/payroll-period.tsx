@@ -1,6 +1,7 @@
-import { Head, useForm, InfiniteScroll } from '@inertiajs/react';
+import { Head, useForm, InfiniteScroll, router } from '@inertiajs/react';
 import {
     IconCalendarMonth,
+    IconEye,
     IconLoader2,
     IconPlus,
     IconRefresh,
@@ -40,11 +41,11 @@ import {
 } from '@/components/ui/tooltip';
 import { usePaginationIndexFilters } from '@/hooks/use-pagination-filter';
 import { cn } from '@/lib/utils';
+import { index, store, processIndex } from '@/routes/payroll_period';
 import type { Option } from '@/types/option';
 import type { PaginatedData } from '@/types/paginated';
 import type { PayrollPeriod } from '@/types/payroll-period';
 import { FormDialog } from '../../components/base-modal';
-import { index, store } from '@/routes/payroll_period';
 type Props = {
     payroll_periods: PaginatedData<PayrollPeriod>;
     cutoff_dates: Option[];
@@ -97,9 +98,6 @@ export default function PayrollPeriodPage({
             },
         });
     };
-    const onEdit = (row: PayrollPeriod) => {
-        console.log(row);
-    };
 
     const onConfirm = (id: string) => {
         console.log(id);
@@ -128,7 +126,7 @@ export default function PayrollPeriodPage({
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectGroup>
-                                        <SelectLabel>Year</SelectLabel>
+                                        <SelectItem value=""></SelectItem>
                                         {years.map((year) => (
                                             <SelectItem
                                                 key={year.value}
@@ -222,11 +220,17 @@ export default function PayrollPeriodPage({
                                     <Tooltip>
                                         <TooltipTrigger>
                                             <Button
-                                                onClick={() => onEdit(row)}
+                                                onClick={() =>
+                                                    router.visit(
+                                                        processIndex.url(
+                                                            Number(row.id),
+                                                        ),
+                                                    )
+                                                }
                                                 size="icon-sm"
                                                 aria-label="edit"
                                             >
-                                                <IconRefresh />
+                                                <IconEye />
                                             </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>

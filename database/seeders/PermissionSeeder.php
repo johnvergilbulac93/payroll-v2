@@ -16,6 +16,7 @@ class PermissionSeeder extends Seeder
         'Biometric Uploading',
         'Process DTR',
         'Payroll Periods',
+        'Employee Shift Schedule',
         'Shift Code',
         'Cutoff Scheme',
         'Reports',

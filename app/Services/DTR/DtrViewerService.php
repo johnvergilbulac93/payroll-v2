@@ -98,11 +98,11 @@ class DtrViewerService
         $schedules = DB::table('employee_schedule_templates')
             ->join('shift_codes', 'shift_codes.id', '=', 'employee_schedule_templates.ShiftCodeID')
             ->whereIn('employee_schedule_templates.EmpID', $empIds)
-            ->where('employee_schedule_templates.EffectiveFrom', '<=', $period->PeriodEnd)
-            ->where(function ($q) use ($period) {
-                $q->whereNull('employee_schedule_templates.EffectiveTo')
-                    ->orWhere('employee_schedule_templates.EffectiveTo', '>=', $period->PeriodStart);
-            })
+            // ->where('employee_schedule_templates.EffectiveFrom', '<=', $period->PeriodEnd)
+            // ->where(function ($q) use ($period) {
+            //     $q->whereNull('employee_schedule_templates.EffectiveTo')
+            //         ->orWhere('employee_schedule_templates.EffectiveTo', '>=', $period->PeriodStart);
+            // })
             ->select(
                 'employee_schedule_templates.EmpID',
                 'employee_schedule_templates.DayOfWeek',
@@ -113,18 +113,35 @@ class DtrViewerService
             )
             ->get()
             ->groupBy('EmpID');
+
+        $perDateOverrides = DB::table('employee_schedules')
+            ->leftJoin('shift_codes', 'shift_codes.id', '=', 'employee_schedules.ShiftCodeID')
+            ->whereIn('employee_schedules.EmpID', $empIds)
+            ->where('employee_schedules.ScheduleType', 'per_date')
+            ->where('employee_schedules.IsActive', true)
+            ->whereBetween('employee_schedules.EffectiveFrom', [$period->PeriodStart, $period->PeriodEnd])
+            ->select(
+                'employee_schedules.EmpID',
+                'employee_schedules.EffectiveFrom as Date',
+                'shift_codes.Name as ShiftName',
+                'shift_codes.IsWorkingDay'
+            )
+            ->get()
+            ->groupBy('EmpID');
+
         return DB::table('dtr_records')
             ->whereIn('EmpID', $empIds)
             ->whereBetween('DTRDate', [$period->PeriodStart, $period->PeriodEnd])
             ->orderBy('DTRDate')
             ->get()
             ->groupBy('EmpID')
-            ->map(function ($records, $empId) use ($dates, $biometricLogs, $schedules) {
+            ->map(function ($records, $empId) use ($dates, $biometricLogs, $schedules, $perDateOverrides) {
                 return $this->buildEmployeeDtr(
                     $records,
                     $dates,
                     $biometricLogs->get($empId, collect()),
-                    $schedules->get($empId, collect())
+                    $schedules->get($empId, collect()),
+                    $perDateOverrides->get($empId, collect())
                 );
             });
     }
@@ -166,12 +183,18 @@ class DtrViewerService
         Collection $records,
         Collection $dates,
         Collection $biometricLogs,
-        Collection $schedules
+        Collection $schedules,
+        Collection $perDateOverrides
     ): Collection {
         $indexed = $records->keyBy(
             fn($record) => Carbon::parse($record->DTRDate)->toDateString()
         );
-        $dtr = $dates->map(function (Carbon $date) use ($indexed, $biometricLogs, $schedules) {
+
+        $overridesByDate = $perDateOverrides->keyBy(
+            fn($o) => Carbon::parse($o->Date)->toDateString()
+        );
+
+        $dtr = $dates->map(function (Carbon $date) use ($indexed, $biometricLogs, $schedules, $overridesByDate) {
 
             $record = $indexed->get($date->toDateString());
 
@@ -183,7 +206,9 @@ class DtrViewerService
                     'IOState' => $log->io_state,
                 ])
                 ->values();
-            $schedule = $this->resolveSchedule($schedules, $date);
+            $schedule = $overridesByDate->get($date->toDateString())
+                ?? $this->resolveSchedule($schedules, $date);
+
             return [
                 'DTRDate' => $date->format('M d, Y'),
                 'Day' => $date->format('D'),
@@ -193,6 +218,8 @@ class DtrViewerService
                 'OT' => $this->decimal($record?->OvertimeHours),
                 'DW' => $this->decimal($record?->DaysWorked),
                 'LATE' => $this->decimal($record?->LateMinutes),
+                'UT' => $this->decimal($record?->UndertimeMinutes),
+
                 'Remarks' => $record?->Remarks,
 
                 // Attach biometric logs for this date
@@ -213,6 +240,7 @@ class DtrViewerService
             'OT' => "{$this->decimal($records->sum('OvertimeHours'))} hr(s)",
             'DW' =>  "{$this->decimal($records->sum('DaysWorked'))} days",
             'LATE' => "",
+            'UT' => '',
             'Remarks' => '',
             'Punches' => collect(),
             'ShiftName' => '',
@@ -226,12 +254,11 @@ class DtrViewerService
         return $schedules
             ->filter(fn($s) => (int) $s->DayOfWeek === $date->dayOfWeek)
             ->filter(function ($s) use ($date) {
-                $from = Carbon::parse($s->EffectiveFrom);
+                $from = $s->EffectiveFrom ? Carbon::parse($s->EffectiveFrom) : null;
                 $to = $s->EffectiveTo ? Carbon::parse($s->EffectiveTo) : null;
 
-                return $date->gte($from) && (! $to || $date->lte($to));
+                return (! $from || $date->gte($from)) && (! $to || $date->lte($to));
             })
-            // if multiple versions overlap, keep the most recently effective one
             ->sortByDesc('EffectiveFrom')
             ->first();
     }

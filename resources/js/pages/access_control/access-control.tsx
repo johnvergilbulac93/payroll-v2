@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import Heading from '@/components/heading';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePaginationIndexFilters } from '@/hooks/use-pagination-filter';
 import UserPermission from '@/pages/access_control/user-permission';
@@ -7,7 +8,6 @@ import type { Option } from '@/types/option';
 import type { Permission } from '@/types/permission';
 import type { Role } from '@/types/role';
 import RolePermission from './role-permission';
-import Heading from '@/components/heading';
 
 export type PermissionGrant = {
     granted: boolean;

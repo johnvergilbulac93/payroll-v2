@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Main;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Main\PayrollPeriod\PayrollPeriodResource;
 use App\Http\Resources\Main\ProcessDtr\ProcessDtrResourceCollection;
+use App\Models\Employee;
 use App\Models\PayrollPeriod;
 use App\Services\DTR\DtrProcessorService;
 use App\Services\DTR\DtrViewerService;
@@ -25,22 +26,19 @@ class ProcessDtrController extends Controller
     {
         $search = $request->input('search');
         $periodId =  $request->input('period');
-        $periods =  PayrollPeriodResource::collection(PayrollPeriod::where('Status', 'open')->where('Month', 6)->get())->resolve();
+        $periods =  PayrollPeriodResource::collection(PayrollPeriod::where('Status', 'open')->get())->resolve();
 
         if (!$periodId) {
-            return Inertia::render('process_dtr/process-dtr', [
-                'employees' => Inertia::scroll(fn() => ProcessDtrResourceCollection::make(
-                    new LengthAwarePaginator([], 0, 15)
-                )),
-                'periods' =>  $periods,
-                'employee_details' =>
-                $employee_details = [
-                    ['label' => 'Employees', 'value' => (int) 0],
-                    ['label' => 'Processed', 'value' => (int) 0],
-                    ['label' => 'Flagged', 'value' => (int) 0],
-                    ['label' => 'Pending', 'value' => (int) 0],
-                ],
-            ]);
+            return Inertia::render(
+                'process_dtr/process-dtr',
+                [
+                    'employees' => Inertia::scroll(fn() => ProcessDtrResourceCollection::make(
+                        new LengthAwarePaginator([], 0, 15)
+                    )),
+                    'periods' =>  $periods,
+
+                ]
+            );
         }
         $period = PayrollPeriod::findOrFail($periodId);
         $employees = $this->dtrViewerService->employees(
@@ -52,14 +50,13 @@ class ProcessDtrController extends Controller
             $period
         );
 
-        $employee_details = $this->dtrViewerService->summary($period);
+        // $employee_details = $this->dtrViewerService->summary($period);
 
         return Inertia::render(
             'process_dtr/process-dtr',
             [
                 'employees' => Inertia::scroll(fn() => ProcessDtrResourceCollection::make($employees)),
                 'periods' =>  $periods,
-                'employee_details' => $employee_details,
 
             ]
         );
@@ -71,10 +68,21 @@ class ProcessDtrController extends Controller
             $end = Carbon::parse($payrollPeriod->PeriodEnd)->format('M d, Y');
             $this->dtrProcessor->processPayrollPeriod($payrollPeriod);
         } catch (\RuntimeException $e) {
-            return back()->with('error', $e->getMessage());
+            return back()->with('error', 'Server error');
         }
         return redirect()
             ->route('dtr.index', ['period' => $payrollPeriod->id])
             ->with('success', "DTR process for period {$start} - {$end} completed.");
+    }
+    public function processDTREmployee(PayrollPeriod $payrollPeriod, Employee $employee)
+    {
+        try {
+            $this->dtrProcessor->processEmployeeForPeriod($employee, $payrollPeriod);
+        } catch (\RuntimeException $e) {
+            return back()->with('error', 'Server Error');
+        }
+        return redirect()
+            ->route('dtr.index', ['period' => $payrollPeriod->id])
+            ->with('success', "DTR reprocessed for {$employee->FullName} completed.");
     }
 }

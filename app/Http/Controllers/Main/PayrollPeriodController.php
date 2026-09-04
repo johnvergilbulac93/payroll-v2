@@ -7,11 +7,16 @@ use App\Http\Requests\Main\PayrollPeriod\PayrollPeriodFormRequest;
 use App\Http\Resources\Main\PayrollPeriod\PayrollPeriodResourceCollection;
 use App\Models\CutOffDate;
 use App\Models\PayrollPeriod;
+use App\Services\DTR\DtrViewerService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class PayrollPeriodController extends Controller
 {
+    public function __construct(
+        protected DtrViewerService $dtrViewerService
+
+    ) {}
     public function index(Request $request)
     {
         $limit = $request->input("limit");
@@ -39,5 +44,17 @@ class PayrollPeriodController extends Controller
         PayrollPeriod::generateForYear((int) $validated['Year'], $scheme);
 
         return to_route('payroll_period.index')->with('success', "Periods for year {$validated['Year']} successfully generated.");
+    }
+    public function processIndex(PayrollPeriod $payrollPeriod)
+    {
+        $employee_details = $this->dtrViewerService->summary($payrollPeriod);
+        return Inertia::render(
+            'payroll_period/process-period',
+            [
+                'period' =>  $payrollPeriod,
+                'employee_details' => $employee_details,
+
+            ]
+        );
     }
 }

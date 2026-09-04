@@ -35,7 +35,6 @@ import {
 } from '@/components/ui/tooltip';
 
 import { cn } from '@/lib/utils';
-import { scheduleStore, scheduleDestroy } from '@/routes/employee';
 import type { Employee } from '@/types/employee';
 import type { ScheduleTemplate } from '@/types/schedule-template';
 import { DAYS_OF_WEEK } from '@/types/schedule-template';
@@ -131,15 +130,15 @@ export default function EmployeeSchedule({
     };
 
     const onSubmit = () => {
-        post(scheduleStore.url(), {
-            preserveScroll: true,
-            onSuccess: () => setVisible(false),
-        });
+        // post(scheduleStore.url(), {
+        //     preserveScroll: true,
+        //     onSuccess: () => setVisible(false),
+        // });
     };
     const onDelete = () => {
-        destroy(scheduleDestroy.url(data.id), {
-            preserveScroll: true,
-        });
+        // destroy(scheduleDestroy.url(data.id), {
+        //     preserveScroll: true,
+        // });
     };
 
     return (

@@ -38,8 +38,7 @@ import { usePaginationIndexFilters } from '@/hooks/use-pagination-filter';
 import { cn } from '@/lib/utils';
 import { EmployeeDtr } from '@/pages/process_dtr/employee-dtr';
 import { index } from '@/routes/dtr';
-import { processDTRPeriod } from '@/routes/dtr';
-import type { Option } from '@/types/option';
+import { processDTRPeriod, processPerEmployee } from '@/routes/dtr';
 import type { PaginatedData } from '@/types/paginated';
 import type {
     DTRRecordsDetails,
@@ -49,14 +48,9 @@ import type {
 type Props = {
     employees: PaginatedData<EmployeeDtrPeriod>;
     periods: PayrollPeriod[];
-    employee_details?: Option;
 };
 
-export default function ProcessDtrPage({
-    employees,
-    periods,
-    employee_details,
-}: Props) {
+export default function ProcessDtrPage({ employees, periods }: Props) {
     const [processing, setProcessing] = useState(false);
     const [openDialogDtr, setOpenDialogDtr] = useState(false);
     const [description, setDescription] = useState('');
@@ -65,11 +59,10 @@ export default function ProcessDtrPage({
     const [search, setSearch] = useState('');
     const debouncedSearch = useDebounce(search, 500);
     const getInitials = useInitials();
-    const { filters, updateFilters, getData } =
-        usePaginationIndexFilters({
-            route: index.url(),
-            defaults: { period: '', search: '', page: 1 },
-        });
+    const { filters, updateFilters, getData } = usePaginationIndexFilters({
+        route: index.url(),
+        defaults: { period: '', search: '', page: 1 },
+    });
 
     useEffect(() => {
         getData({ search: debouncedSearch, page: 1, period: filters.period });
@@ -86,10 +79,21 @@ export default function ProcessDtrPage({
             },
         );
     };
+    const onProcessEmployee = (employee: EmployeeDtrPeriod) => {
+        router.post(
+            processPerEmployee.url([Number(filters.period), employee.id]),
+            {},
+            {
+                onStart: () => setProcessing(true),
+                onSuccess: () => setProcessing(false),
+                onHttpException: () => setProcessing(false),
+            },
+        );
+    };
 
     const onViewDTR = (employee: EmployeeDtrPeriod) => {
         setEmployeeDtr(employee.DTRRecords ?? []);
-        setDescription(`${employee.FullName} - ${employee.Period}`)
+        setDescription(`${employee.FullName} - ${employee.Period}`);
         setOpenDialogDtr(true);
     };
 
@@ -167,7 +171,7 @@ export default function ProcessDtrPage({
                                 }
                             >
                                 {processing ? <Spinner /> : <IconRefresh />}
-                                Process dtr employees
+                                Process All
                             </Button>
                         </Field>
                     </FieldGroup>
@@ -175,7 +179,11 @@ export default function ProcessDtrPage({
                 <div className="space-y-2">
                     <InfiniteScroll data="employees" className="space-y-2">
                         {employees.data.map((employee) => (
-                            <Item variant="outline" className="bg-accent">
+                            <Item
+                                variant="outline"
+                                className="bg-accent"
+                                key={employee.id}
+                            >
                                 <ItemMedia>
                                     <Avatar className="size-10">
                                         <AvatarImage src={employee.Image} />
@@ -188,23 +196,52 @@ export default function ProcessDtrPage({
                                     <ItemTitle>
                                         <div className="flex items-center justify-between gap-4">
                                             <span>{employee.FullName}</span>
-                                            <Badge
-                                                variant="outline"
-                                                className={cn(
-                                                    'capitalize',
-                                                    employee.Status ===
-                                                        'flagged' &&
-                                                        'bg-amber-600 text-primary-foreground',
-                                                    employee.Status ===
-                                                        'processed' &&
-                                                        'bg-primary text-primary-foreground',
-                                                    employee.Status ===
-                                                        'closed' &&
-                                                        'bg-destructive text-destructive-foreground',
-                                                )}
-                                            >
-                                                {employee.Status}
-                                            </Badge>
+                                            {employee.Remarks ? (
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Badge
+                                                            variant="outline"
+                                                            className={cn(
+                                                                'capitalize',
+                                                                employee.Status ===
+                                                                    'flagged' &&
+                                                                    'bg-amber-600 text-primary-foreground',
+                                                                employee.Status ===
+                                                                    'processed' &&
+                                                                    'bg-primary text-primary-foreground',
+                                                                employee.Status ===
+                                                                    'closed' &&
+                                                                    'bg-destructive text-destructive-foreground',
+                                                            )}
+                                                        >
+                                                            {employee.Status}
+                                                        </Badge>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>
+                                                            {employee.Remarks}
+                                                        </p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            ) : (
+                                                <Badge
+                                                    variant="outline"
+                                                    className={cn(
+                                                        'capitalize',
+                                                        employee.Status ===
+                                                            'flagged' &&
+                                                            'bg-amber-600 text-primary-foreground',
+                                                        employee.Status ===
+                                                            'processed' &&
+                                                            'bg-primary text-primary-foreground',
+                                                        employee.Status ===
+                                                            'closed' &&
+                                                            'bg-destructive text-destructive-foreground',
+                                                    )}
+                                                >
+                                                    {employee.Status}
+                                                </Badge>
+                                            )}
                                             <small>
                                                 {employee.ProcessAt
                                                     ? `Last processed: ${employee.ProcessAt} `
@@ -242,8 +279,16 @@ export default function ProcessDtrPage({
                                             <Button
                                                 size="icon-sm"
                                                 aria-label="Process"
+                                                onClick={() =>
+                                                    onProcessEmployee(employee)
+                                                }
+                                                disabled={processing}
                                             >
-                                                <IconRefresh />
+                                                {processing ? (
+                                                    <Spinner />
+                                                ) : (
+                                                    <IconRefresh />
+                                                )}
                                             </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>

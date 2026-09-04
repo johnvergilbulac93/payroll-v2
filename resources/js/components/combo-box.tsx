@@ -1,4 +1,9 @@
-import { Avatar, AvatarBadge, AvatarFallback } from '@/components/ui/avatar';
+import {
+    Avatar,
+    AvatarBadge,
+    AvatarFallback,
+    AvatarImage,
+} from '@/components/ui/avatar';
 import {
     Combobox,
     ComboboxContent,
@@ -15,12 +20,16 @@ type ComboBoxProps = {
     items: Option[];
     value?: Option | null;
     onValueChange?: (value: Option | null) => void;
+    resultEmpty?: string;
+    placeholder?: string;
 };
 
 export default function ComboBox({
     items,
     value,
     onValueChange,
+    resultEmpty = 'No user found.',
+    placeholder = 'Select a user',
 }: ComboBoxProps) {
     const getInitials = useInitials();
 
@@ -32,15 +41,19 @@ export default function ComboBox({
             itemToStringLabel={(item: Option) => item.label}
             itemToStringValue={(item: Option) => item.value}
         >
-            <ComboboxInput placeholder="Select a user" showClear />
+            <ComboboxInput placeholder={placeholder} />
             <ComboboxContent>
-                <ComboboxEmpty>No user found.</ComboboxEmpty>
+                <ComboboxEmpty>{resultEmpty}</ComboboxEmpty>
                 <ComboboxList>
                     {(item) => (
                         <ComboboxItem key={item.value} value={item}>
                             <Item size="xs" className="p-0">
                                 <ItemMedia>
                                     <Avatar>
+                                        <AvatarImage
+                                            src={item.image_url}
+                                            alt="avatar-image"
+                                        />
                                         <AvatarFallback>
                                             {getInitials(item.label)}
                                         </AvatarFallback>

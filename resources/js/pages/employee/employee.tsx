@@ -8,7 +8,7 @@ import Heading from '@/components/heading';
 import { usePaginationIndexFilters } from '@/hooks/use-pagination-filter';
 import { useUndoableAction } from '@/hooks/use-undoable';
 import { EmployeeTable } from '@/pages/employee/employee-table';
-import { index, create, show, destroy, scheduleIndex } from '@/routes/employee';
+import { index, create, show, destroy } from '@/routes/employee';
 import type { Employee } from '@/types/employee';
 import type { PaginatedData } from '@/types/paginated';
 
@@ -25,7 +25,7 @@ export default function EmployeeList({ employees }: Props) {
         defaults: { page: 1, search: '', limit: 10 },
     });
 
-const onConfirm = (value: number) => {
+    const onConfirm = (value: number) => {
         setPendingDeleteId(value);
         setConfirmOpen(true);
     };
@@ -52,9 +52,6 @@ const onConfirm = (value: number) => {
                 onPerPage={(value) => updateFilters({ limit: value, page: 1 })}
                 onEdit={(employee) => router.visit(show(employee.id))}
                 onDelete={(value) => onConfirm(value)}
-                onSetupSchedule={(value) =>
-                    router.visit(scheduleIndex.url(Number(value)))
-                }
             />
             <ConfirmDialog
                 size="sm"

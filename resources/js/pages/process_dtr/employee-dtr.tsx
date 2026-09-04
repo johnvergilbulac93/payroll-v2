@@ -30,6 +30,7 @@ export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
                         <TableHead>OT</TableHead>
                         <TableHead>HW</TableHead>
                         <TableHead>LATE</TableHead>
+                        <TableHead>UT</TableHead>
                         <TableHead>DW</TableHead>
                         <TableHead>
                             <span className="sr-only">Punches logs</span>
@@ -37,42 +38,56 @@ export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
                     </TableRow>
                 </TableHeader>
                 <TableBody className="**:data-[slot=table-cell]:first:w-8">
-                    {dailyTimeRecords.map((dtr) => (
-                        <TableRow key={dtr.DTRDate}>
-                            <TableCell>{dtr.DTRDate}</TableCell>
-                            <TableCell>{dtr.Day}</TableCell>
-                            <TableCell>{dtr.IN}</TableCell>
-                            <TableCell>{dtr.OUT}</TableCell>
-                            <TableCell>{dtr.OT}</TableCell>
-                            <TableCell>{dtr.HW}</TableCell>
-                            <TableCell>{dtr.LATE}</TableCell>
-                            <TableCell>{dtr.DW}</TableCell>
-                            {dtr.DTRDate !== 'TOTAL' && (
-                                <TableCell className="text-2xl">
-                                    {dtr.Punches.length > 0 && (
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <IconInfoCircleFilled className="h-5 cursor-pointer text-muted-foreground" />
-                                            </TooltipTrigger>
-                                            <TooltipContent side='right'>
-                                                <div className="flex flex-col gap-1">
-                                                    {dtr.Punches.map(
-                                                        (punch, i) => (
-                                                            <span key={i}>
-                                                                {
-                                                                    punch.PunchTime
-                                                                }
-                                                            </span>
-                                                        ),
-                                                    )}
-                                                </div>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    )}
+                    {dailyTimeRecords.map((dtr) =>
+                        dtr.DTRDate !== 'TOTAL' && dtr.IsDayOff ? (
+                            <TableRow key={dtr.DTRDate}>
+                                <TableCell>{dtr.DTRDate}</TableCell>
+                                <TableCell>{dtr.Day}</TableCell>
+                                <TableCell
+                                    colSpan={8}
+                                    className="text-center text-muted-foreground"
+                                >
+                                    Day Off
                                 </TableCell>
-                            )}
-                        </TableRow>
-                    ))}
+                            </TableRow>
+                        ) : (
+                            <TableRow key={dtr.DTRDate}>
+                                <TableCell>{dtr.DTRDate}</TableCell>
+                                <TableCell>{dtr.Day}</TableCell>
+                                <TableCell>{dtr.IN}</TableCell>
+                                <TableCell>{dtr.OUT}</TableCell>
+                                <TableCell>{dtr.OT}</TableCell>
+                                <TableCell>{dtr.HW}</TableCell>
+                                <TableCell>{dtr.LATE}</TableCell>
+                                <TableCell>{dtr.UT}</TableCell>
+                                <TableCell>{dtr.DW}</TableCell>
+                                {dtr.DTRDate !== 'TOTAL' && (
+                                    <TableCell className="text-2xl">
+                                        {dtr.Punches.length > 0 && (
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <IconInfoCircleFilled className="h-5 cursor-pointer text-muted-foreground" />
+                                                </TooltipTrigger>
+                                                <TooltipContent side="right">
+                                                    <div className="flex flex-col gap-1">
+                                                        {dtr.Punches.map(
+                                                            (punch, i) => (
+                                                                <span key={i}>
+                                                                    {
+                                                                        punch.PunchTime
+                                                                    }
+                                                                </span>
+                                                            ),
+                                                        )}
+                                                    </div>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        )}
+                                    </TableCell>
+                                )}
+                            </TableRow>
+                        ),
+                    )}
                 </TableBody>
             </Table>
         </div>

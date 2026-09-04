@@ -25,6 +25,7 @@ export type DTRRecordsDetails = {
     DW: string;
     OT: string;
     LATE: string;
+    UT: string;
     Remarks: string;
     Punches: PunchesLogs[];
     ShiftName: string;

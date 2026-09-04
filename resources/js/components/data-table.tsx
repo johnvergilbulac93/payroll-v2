@@ -246,6 +246,7 @@ export function DataTable<T extends RowData>({
         const { active, over } = event;
 
         if (active && over && active.id !== over.id) {
+            
             setData((current) => {
                 const oldIndex = dataIds.indexOf(active.id);
                 const newIndex = dataIds.indexOf(over.id);

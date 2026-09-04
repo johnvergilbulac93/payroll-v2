@@ -16,7 +16,7 @@ Route::middleware(['auth'])->prefix('employee')->name('employee.')->group(functi
     Route::post('/{employee}', [EmployeeController::class, 'update'])->name('update');
     Route::delete('/{employee}', [EmployeeController::class, 'destroy'])->name('destroy');
 
-    Route::get('/schedule/{employee}/setup', [ScheduleController::class, 'indexSchedule'])->name('scheduleIndex');
-    Route::post('/schedule/store', [ScheduleController::class, 'storeSchedule'])->name('scheduleStore');
-    Route::delete('/schedule/{scheduleTemplate}/destroy', [ScheduleController::class, 'destroySchedule'])->name('scheduleDestroy');
+    // Route::get('/schedule/{employee}/setup', [ScheduleController::class, 'indexSchedule'])->name('scheduleIndex');
+    // Route::post('/schedule/store', [ScheduleController::class, 'storeSchedule'])->name('scheduleStore');
+    // Route::delete('/schedule/{scheduleTemplate}/destroy', [ScheduleController::class, 'destroySchedule'])->name('scheduleDestroy');
 });

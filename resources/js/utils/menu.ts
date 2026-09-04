@@ -2,6 +2,9 @@ import type { InertiaLinkProps } from '@inertiajs/react';
 import {
     IconArchive,
     IconCalendar,
+    IconCalendarClock,
+    IconCalendarDollar,
+    IconCalendarPlus,
     IconCalendarUser,
     IconCircleMinus,
     IconCirclePlus,
@@ -19,14 +22,16 @@ import type { LucideIcon } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { index as accessControlIndex } from '@/routes/access_control';
 import { index as cutoffDateIndex } from '@/routes/cutoff';
+import { index as processDtrIndex } from '@/routes/dtr';
 import { index as employeeIndex } from '@/routes/employee';
+import { index as employeeScheduleIndex } from '@/routes/employee_schedule';
 import { index as loanIndex } from '@/routes/loan';
+import { index as payrollPeriodIndex } from '@/routes/payroll_period';
 import { index as roleIndex } from '@/routes/role';
 import { index as shiftIndex } from '@/routes/shift';
 import { index as uploadingIndex } from '@/routes/uploading';
 import { index as userIndex } from '@/routes/user';
-import { index as payrollPeriodIndex } from '@/routes/payroll_period';
-import { index as processDtrIndex } from '@/routes/dtr';
+
 
 interface NavChild {
     Label: string;
@@ -90,27 +95,33 @@ export const navItems: NavGroup[] = [
             {
                 Label: 'Payroll Periods',
                 Url: payrollPeriodIndex.url(),
-                Icon: IconCalendarUser,
+                Icon: IconCalendarDollar,
                 Permission: 'payroll-periods-view',
+            },
+            {
+                Label: 'Employee Shift Schedule',
+                Url: employeeScheduleIndex.url(),
+                Icon: IconCalendarUser,
+                Permission: 'shift-code-view',
             },
             {
                 Label: 'Shift Code',
                 Url: shiftIndex.url(),
-                Icon: IconCirclePlus,
+                Icon: IconCalendarClock,
                 Permission: 'shift-code-view',
             },
             {
                 Label: 'Cutoff Dates',
                 Url: cutoffDateIndex.url(),
-                Icon: IconCirclePlus,
+                Icon: IconCalendarPlus,
                 Permission: 'cutoff-scheme-view',
             },
-            {
-                Label: 'Reports',
-                Url: '#',
-                Icon: IconReport,
-                Permission: 'reports-view',
-            },
+            // {
+            //     Label: 'Reports',
+            //     Url: '#',
+            //     Icon: IconReport,
+            //     Permission: 'reports-view',
+            // },
         ],
     },
     {
@@ -134,24 +145,24 @@ export const navItems: NavGroup[] = [
                 Icon: IconLockCheck,
                 Permission: 'access-control-view',
             },
-            {
-                Label: 'Archives',
-                Url: '#',
-                Icon: IconArchive,
-                Permission: 'archives-view',
-            },
-            {
-                Label: 'Deductions',
-                Url: '#',
-                Icon: IconCircleMinus,
-                Permission: 'deductions-view',
-            },
-            {
-                Label: 'Holidays',
-                Url: '#',
-                Icon: IconCalendar,
-                Permission: 'holidays-view',
-            },
+            // {
+            //     Label: 'Archives',
+            //     Url: '#',
+            //     Icon: IconArchive,
+            //     Permission: 'archives-view',
+            // },
+            // {
+            //     Label: 'Deductions',
+            //     Url: '#',
+            //     Icon: IconCircleMinus,
+            //     Permission: 'deductions-view',
+            // },
+            // {
+            //     Label: 'Holidays',
+            //     Url: '#',
+            //     Icon: IconCalendar,
+            //     Permission: 'holidays-view',
+            // },
         ],
     },
 ];
