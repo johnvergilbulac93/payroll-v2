@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('EmpID')->constrained('employees')->cascadeOnDelete();
             $table->enum('ScheduleType', ['default', 'per_date', 'date_range']);
             $table->foreignId('ShiftCodeID')->nullable()->constrained('shift_codes'); // null = day off
-            $table->date('EffectiveFrom'); // for per_date, this IS the date
+            $table->date('EffectiveFrom')->nullable(); // for per_date, this IS the date
             $table->date('EffectiveTo')->nullable(); // null for default/per_date; required for date_range
             $table->string('Remarks')->nullable();
             $table->boolean('IsActive')->default(true);

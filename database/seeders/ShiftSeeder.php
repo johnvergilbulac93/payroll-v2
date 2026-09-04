@@ -55,7 +55,7 @@ class ShiftSeeder extends Seeder
                 'TotalHours' => 8.00,
             ],
             [
-                'Name' => 'Day off',
+                'Name' => 'Rest Day',
                 'TimeIn' => null,
                 'TimeOut' => null,
                 'BreakMinutes' => 0,

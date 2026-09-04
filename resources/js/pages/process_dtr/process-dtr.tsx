@@ -309,8 +309,9 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
                     description={description}
                     disabled
                     onCancel={() => setOpenDialogDtr(false)}
-                    size="5xl"
+                    size="full"
                     canAdd={false}
+                    cancelText='Close'
                 >
                     <ScrollArea className="min-100 max-h-[70vh] overflow-y-auto px-3">
                         <EmployeeDtr dailyTimeRecords={employeeDtr} />

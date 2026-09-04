@@ -23,7 +23,7 @@ export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
             <Table>
                 <TableHeader className="sticky top-0 z-10 bg-muted">
                     <TableRow>
-                        <TableHead className="w-28"> DATE </TableHead>
+                        <TableHead className="w-32"> DATE </TableHead>
                         <TableHead className="w-20">DAY</TableHead>
                         <TableHead>IN</TableHead>
                         <TableHead>OUT</TableHead>
@@ -31,8 +31,8 @@ export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
                         <TableHead>HW</TableHead>
                         <TableHead>LATE</TableHead>
                         <TableHead>UT</TableHead>
-                        <TableHead>DW</TableHead>
-                        <TableHead>
+                        <TableHead className='w-10'>DW</TableHead>
+                        <TableHead className='w-10' >
                             <span className="sr-only">Punches logs</span>
                         </TableHead>
                     </TableRow>
@@ -41,7 +41,7 @@ export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
                     {dailyTimeRecords.map((dtr) =>
                         dtr.DTRDate !== 'TOTAL' && dtr.IsDayOff ? (
                             <TableRow key={dtr.DTRDate}>
-                                <TableCell>{dtr.DTRDate}</TableCell>
+                                <TableCell className='font-medium '>{dtr.DTRDate}</TableCell>
                                 <TableCell>{dtr.Day}</TableCell>
                                 <TableCell
                                     colSpan={8}
@@ -52,7 +52,7 @@ export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
                             </TableRow>
                         ) : (
                             <TableRow key={dtr.DTRDate}>
-                                <TableCell>{dtr.DTRDate}</TableCell>
+                                <TableCell className='font-medium'>{dtr.DTRDate}</TableCell>
                                 <TableCell>{dtr.Day}</TableCell>
                                 <TableCell>{dtr.IN}</TableCell>
                                 <TableCell>{dtr.OUT}</TableCell>
