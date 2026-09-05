@@ -145,6 +145,14 @@ export default function EmployeeForm({
         });
     };
 
+    const onAddPosition = () => {
+        alert('under maintenance');
+    };
+
+    const onAddAssignment = () => {
+        alert('under maintenance');
+    };
+
     return (
         <div className="space-y-4 p-4">
             <Head title={isEditMode ? 'Edit Employee' : 'Add Employee'} />
@@ -430,7 +438,7 @@ export default function EmployeeForm({
                                         variant="outline"
                                         size="icon"
                                         className="text-primary hover:text-chart-5"
-                                        onClick={onAddGroup}
+                                        onClick={onAddPosition}
                                     >
                                         <IconHelp />
                                     </Button>
@@ -486,7 +494,7 @@ export default function EmployeeForm({
                                         variant="outline"
                                         size="icon"
                                         className="text-primary hover:text-chart-5"
-                                        onClick={onAddGroup}
+                                        onClick={onAddAssignment}
                                     >
                                         <IconHelp />
                                     </Button>
