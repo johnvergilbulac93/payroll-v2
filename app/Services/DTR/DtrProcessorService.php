@@ -134,7 +134,6 @@ class DtrProcessorService
             'PayrollPeriodID' => $periodId
         ];
     }
-
     protected function fetchGroupedPunches(Carbon $startDate, Carbon $endDate, Collection $employeeIds): Collection
     {
         $placeholders = implode(',', array_fill(0, $employeeIds->count(), '?'));
@@ -145,22 +144,41 @@ class DtrProcessorService
                 employee_id,
                 punch_time,
                 CAST(punch_time AS DATE) AS dtr_date,
-                DATEDIFF(SECOND,
-                    LAG(punch_time) OVER (
-                        PARTITION BY employee_id, CAST(punch_time AS DATE)
-                        ORDER BY punch_time
-                    ),
-                    punch_time
-                ) AS gap_seconds
+                ROW_NUMBER() OVER (
+                    PARTITION BY employee_id, CAST(punch_time AS DATE)
+                    ORDER BY punch_time
+                ) AS rn
             FROM biometric_logs
             WHERE employee_id IN ($placeholders)
-              AND punch_time BETWEEN ? AND ?
+            AND punch_time BETWEEN ? AND ?
+        ),
+        punches_gap AS (
+            SELECT
+                p.employee_id,
+                p.punch_time,
+                p.dtr_date,
+                p.rn,
+                DATEDIFF(SECOND, prev.punch_time, p.punch_time) AS gap_seconds
+            FROM punches p
+            LEFT JOIN punches prev
+                ON prev.employee_id = p.employee_id
+            AND prev.dtr_date = p.dtr_date
+            AND prev.rn = p.rn - 1
         ),
         clustered_punches AS (
-            SELECT *,
-                SUM(CASE WHEN gap_seconds IS NULL OR gap_seconds > ? THEN 1 ELSE 0 END)
-                    OVER (PARTITION BY employee_id, dtr_date ORDER BY punch_time ROWS UNBOUNDED PRECEDING) AS cluster_id
-            FROM punches
+            SELECT
+                pg.employee_id,
+                pg.punch_time,
+                pg.dtr_date,
+                pg.rn,
+                (
+                    SELECT SUM(CASE WHEN pg2.gap_seconds IS NULL OR pg2.gap_seconds > ? THEN 1 ELSE 0 END)
+                    FROM punches_gap pg2
+                    WHERE pg2.employee_id = pg.employee_id
+                    AND pg2.dtr_date = pg.dtr_date
+                    AND pg2.rn <= pg.rn
+                ) AS cluster_id
+            FROM punches_gap pg
         ),
         first_cluster AS (
             SELECT employee_id, dtr_date, MIN(cluster_id) AS first_cluster_id
@@ -175,9 +193,9 @@ class DtrProcessorService
             COUNT(*) AS punch_count
         FROM clustered_punches c
         JOIN first_cluster fc
-          ON fc.employee_id = c.employee_id AND fc.dtr_date = c.dtr_date
+        ON fc.employee_id = c.employee_id AND fc.dtr_date = c.dtr_date
         GROUP BY c.employee_id, c.dtr_date
-    ";
+        ";
 
         $bindings = array_merge(
             $employeeIds->all(),
@@ -187,6 +205,59 @@ class DtrProcessorService
 
         return collect(DB::select($sql, $bindings));
     }
+
+    // protected function fetchGroupedPunches(Carbon $startDate, Carbon $endDate, Collection $employeeIds): Collection
+    // {
+    //     $placeholders = implode(',', array_fill(0, $employeeIds->count(), '?'));
+
+    //     $sql = "
+    //     WITH punches AS (
+    //         SELECT
+    //             employee_id,
+    //             punch_time,
+    //             CAST(punch_time AS DATE) AS dtr_date,
+    //             DATEDIFF(SECOND,
+    //                 LAG(punch_time) OVER (
+    //                     PARTITION BY employee_id, CAST(punch_time AS DATE)
+    //                     ORDER BY punch_time
+    //                 ),
+    //                 punch_time
+    //             ) AS gap_seconds
+    //         FROM biometric_logs
+    //         WHERE employee_id IN ($placeholders)
+    //           AND punch_time BETWEEN ? AND ?
+    //     ),
+    //     clustered_punches AS (
+    //         SELECT *,
+    //             SUM(CASE WHEN gap_seconds IS NULL OR gap_seconds > ? THEN 1 ELSE 0 END)
+    //                 OVER (PARTITION BY employee_id, dtr_date ORDER BY punch_time ROWS UNBOUNDED PRECEDING) AS cluster_id
+    //         FROM punches
+    //     ),
+    //     first_cluster AS (
+    //         SELECT employee_id, dtr_date, MIN(cluster_id) AS first_cluster_id
+    //         FROM clustered_punches
+    //         GROUP BY employee_id, dtr_date
+    //     )
+    //     SELECT
+    //         c.employee_id,
+    //         c.dtr_date,
+    //         MAX(CASE WHEN c.cluster_id = fc.first_cluster_id THEN c.punch_time END) AS time_in,
+    //         MAX(c.punch_time) AS time_out,
+    //         COUNT(*) AS punch_count
+    //     FROM clustered_punches c
+    //     JOIN first_cluster fc
+    //       ON fc.employee_id = c.employee_id AND fc.dtr_date = c.dtr_date
+    //     GROUP BY c.employee_id, c.dtr_date
+    // ";
+
+    //     $bindings = array_merge(
+    //         $employeeIds->all(),
+    //         [$startDate->copy()->startOfDay(), $endDate->copy()->endOfDay()],
+    //         [$this->clusterGapSeconds]
+    //     );
+
+    //     return collect(DB::select($sql, $bindings));
+    // }
 
     protected function buildSinglePunchRecord(Carbon $punchTime, object $row, ShiftCode $shiftCode, int $periodId): array
     {
