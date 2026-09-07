@@ -71,4 +71,27 @@ class ScheduleResolverService
 
         return $template ? $ctx->shiftCodes->get($template->ShiftCodeID) : null;
     }
+    /**
+     * Counts scheduled work days for an employee within a date range —
+     * any date that resolves to a non-null ShiftCode counts as a work day.
+     * Add this method inside ScheduleResolverService, alongside resolveFor().
+     */
+    public function countWorkDaysInPeriod(int $employeeId, Carbon $startDate, Carbon $endDate): int
+    {
+
+        $ctx = $this->preload(collect([$employeeId]), $startDate, $endDate);
+
+        $count = 0;
+        $cursor = $startDate->copy();
+
+        while ($cursor->lte($endDate)) {
+            if ($this->resolveFor($employeeId, $cursor, $ctx) !== null) {
+                $count++;
+            }
+
+            $cursor->addDay();
+        }
+
+        return $count;
+    }
 }

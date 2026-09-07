@@ -27,6 +27,10 @@ class DatabaseSeeder extends Seeder
             PositionSeeder::class,
             AreaAssignmentSeeder::class,
             CutOffDateSeeder::class,
+            WTaxTableSeeder::class,
+            SSSContributionBracketSeeder::class,
+            PhilHealthContributionSeeder::class,
+
         ]);
     }
 }

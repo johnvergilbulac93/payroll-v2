@@ -57,7 +57,12 @@ class EmployeeRequest extends FormRequest
             'BPIEmpCode' => ['nullable', 'string'],
             'PIN' => ['nullable', 'string'],
             'PERAAID' => ['nullable', 'string'],
-            'BiometricID' => ['nullable']
+            'BiometricID' => ['nullable'],
+            'EmploymentStatus' => ['nullable'],
+            'TenureStatus' => ['nullable'],
+            'IsLETPasser' => ['nullable', 'boolean'],
+            'DailyRateDivisor' => ['nullable',],
+
         ];
     }
 

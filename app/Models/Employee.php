@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
-#[Fillable(['EmpNbr', 'Group', 'FirstName', 'MidName', 'LastName', 'Suffix', 'FullName', 'Address', 'CityProv', 'BirthDate', 'EmployDate', 'RegularDate', 'Position', 'Assignment', 'SalaryGrade', 'BasicPay', 'DailyRate', 'HourlyRate', 'Status', 'SSSNbr', 'PHICNbr', 'HDMFNbr', 'TIN', 'Degree', 'AllowReg', 'ResignDate', 'BPIATM', 'BPIEmpCode', 'PIN', 'PERAAID', 'BiometricID', 'DeductionStatus', 'Image'])]
+#[Fillable(['EmpNbr', 'Group', 'FirstName', 'MidName', 'LastName', 'Suffix', 'FullName', 'Address', 'CityProv', 'BirthDate', 'EmployDate', 'RegularDate', 'Position', 'Assignment', 'SalaryGrade', 'BasicPay', 'DailyRate', 'HourlyRate', 'Status', 'SSSNbr', 'PHICNbr', 'HDMFNbr', 'TIN', 'Degree', 'AllowReg', 'ResignDate', 'BPIATM', 'BPIEmpCode', 'PIN', 'PERAAID', 'BiometricID', 'DeductionStatus', 'Image', 'EmploymentStatus', 'TenureStatus', 'IsLETPasser', 'DailyRateDivisor'])]
 
 class Employee extends Model
 {
@@ -26,6 +26,7 @@ class Employee extends Model
     {
         return [
             'Status' => 'boolean',
+            'IsLETPasser' => 'boolean',
             'BasicPay' => 'float',
             'DailyRate' => 'float',
             'HourlyRate' => 'float',

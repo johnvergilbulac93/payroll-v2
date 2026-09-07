@@ -1,10 +1,9 @@
-import { Head, useForm, InfiniteScroll, router } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import {
     IconCalendarMonth,
     IconEye,
     IconLoader2,
     IconPlus,
-    IconRefresh,
     IconTrash,
 } from '@tabler/icons-react';
 import { useState } from 'react';
@@ -84,7 +83,7 @@ export default function PayrollPeriodPage({
 
     const { filters, updateFilters, isLoading } = usePaginationIndexFilters({
         route: index.url(),
-        defaults: { Year: '', Month: '' },
+        defaults: { Year: '', Month: '', page: 1 },
     });
 
     const onAdd = () => {
@@ -118,7 +117,7 @@ export default function PayrollPeriodPage({
                             <Select
                                 value={filters.Year}
                                 onValueChange={(value) =>
-                                    updateFilters({ Year: value })
+                                    updateFilters({ Year: value, page: 1 })
                                 }
                             >
                                 <SelectTrigger id="filter.year">
@@ -147,7 +146,7 @@ export default function PayrollPeriodPage({
                             <Select
                                 value={filters.Month}
                                 onValueChange={(value) =>
-                                    updateFilters({ Month: value })
+                                    updateFilters({ Month: value, page: 1 })
                                 }
                             >
                                 <SelectTrigger id="filter.month">
@@ -173,7 +172,7 @@ export default function PayrollPeriodPage({
                         <IconPlus /> Generate Yearly Period
                     </Button>
                 </div>
-                <InfiniteScroll data="payroll_periods" className="space-y-2">
+                <div className="space-y-2">
                     {isLoading ? (
                         <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
                             <IconLoader2 className="size-4 animate-spin" />
@@ -258,7 +257,7 @@ export default function PayrollPeriodPage({
                             </Item>
                         ))
                     )}
-                </InfiniteScroll>
+                </div>
             </div>
 
             <FormDialog

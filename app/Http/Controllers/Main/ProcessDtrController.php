@@ -68,7 +68,7 @@ class ProcessDtrController extends Controller
             $end = Carbon::parse($payrollPeriod->PeriodEnd)->format('M d, Y');
             $this->dtrProcessor->processPayrollPeriod($payrollPeriod);
         } catch (\RuntimeException $e) {
-             return back()->with('error', $e->getMessage());
+            return back()->with('error', $e->getMessage());
         }
         return redirect()
             ->route('dtr.index', ['period' => $payrollPeriod->id])

@@ -71,8 +71,11 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
     const onProcessDTR = () => {
         router.post(
             processDTRPeriod.url(Number(filters.period)),
+
             {},
+
             {
+                preserveScroll: true,
                 onStart: () => setProcessing(true),
                 onSuccess: () => setProcessing(false),
                 onHttpException: () => setProcessing(false),
@@ -84,6 +87,7 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
             processPerEmployee.url([Number(filters.period), employee.id]),
             {},
             {
+                preserveScroll: true,
                 onStart: () => setProcessing(true),
                 onSuccess: () => setProcessing(false),
                 onHttpException: () => setProcessing(false),
@@ -311,7 +315,7 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
                     onCancel={() => setOpenDialogDtr(false)}
                     size="full"
                     canAdd={false}
-                    cancelText='Close'
+                    cancelText="Close"
                 >
                     <ScrollArea className="min-100 max-h-[70vh] overflow-y-auto px-3">
                         <EmployeeDtr dailyTimeRecords={employeeDtr} />

@@ -10,4 +10,8 @@ Route::middleware(['auth'])->prefix('payroll_period')->name('payroll_period.')->
     Route::delete('/{payrollPeriod}', [PayrollPeriodController::class, 'destroy'])->name('destroy');
 
     Route::get('/process/{payrollPeriod}', [PayrollPeriodController::class, 'processIndex'])->name('processIndex');
+    Route::post('/process/{payrollPeriod}', [PayrollPeriodController::class, 'lockPeriod'])->name('lockPeriod');
+    Route::post('/compute_payroll/{payrollPeriod}', [PayrollPeriodController::class, 'computePayroll'])->name('computePayroll');
+
+
 });

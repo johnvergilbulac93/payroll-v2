@@ -1,10 +1,17 @@
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import {
+    IconCalendarMonth,
     IconCircleCheck,
     IconClock,
     IconShield,
     IconUser,
 } from '@tabler/icons-react';
+import { useMemo, useState } from 'react';
+import {
+    lockPeriod,
+    computePayroll,
+} from '@/actions/App/Http/Controllers/Main/PayrollPeriodController';
+import Stepper from '@/components/stepper';
 import { Button } from '@/components/ui/button';
 import {
     Item,
@@ -14,8 +21,11 @@ import {
     ItemTitle,
     ItemActions,
 } from '@/components/ui/item';
+import { Spinner } from '@/components/ui/spinner';
 import { index as dtrProcessIndex } from '@/routes/dtr';
 import type { PayrollPeriod } from '@/types/payroll-period';
+import type { StepperStep } from '@/types/stepper';
+
 type SummaryItem = {
     label: string;
     value: number;
@@ -33,9 +43,86 @@ const iconMap: Record<string, { icon: typeof IconUser; className: string }> = {
     Pending: { icon: IconClock, className: 'text-primary h-5' },
 };
 
+const workflowSteps: StepperStep[] = [
+    {
+        step: 1,
+        title: 'DTR collection',
+        description: 'Attendance being gathered and verified',
+    },
+    {
+        step: 2,
+        title: 'Lock & compute',
+        description: 'DTR locked, payroll being calculated',
+    },
+    {
+        step: 3,
+        title: 'Review & release',
+        description: 'Payslips finalized and released',
+    },
+];
+
 export default function ProcessPeriodPage({ employee_details, period }: Props) {
+    const [processing, setProcessing] = useState(false);
+    const currentStep = useMemo<number>(() => {
+        switch (period.Status) {
+            case 'open':
+                return 1;
+            case 'processing':
+                return 2;
+            case 'closed':
+                return 3;
+            default:
+                return 1;
+        }
+    }, [period.Status]);
+
+    const buttonLabel = useMemo(() => {
+        switch (currentStep) {
+            case 1:
+                return 'Lock DTR';
+            case 2:
+                return 'Compute Payroll';
+            case 3:
+                return 'Release Payslips';
+            default:
+                return 'Lock DTR';
+        }
+    }, [currentStep]);
+
+    const onNextStep = () => {
+        switch (currentStep) {
+            case 1:
+                router.post(
+                    lockPeriod(Number(period.id)).url,
+                    {},
+                    {
+                        preserveScroll: true,
+                        onStart: () => setProcessing(true),
+                        onFinish: () => setProcessing(false),
+                        onHttpException: () => setProcessing(false),
+                    },
+                );
+                break;
+            case 2:
+                router.post(
+                    computePayroll(Number(period.id)).url,
+                    {},
+                    {
+                        preserveScroll: true,
+                        onStart: () => setProcessing(true),
+                        onFinish: () => setProcessing(false),
+                        onHttpException: () => setProcessing(false),
+                    },
+                );
+                break;
+            case 3:
+                alert('3');
+                break;
+        }
+    };
+
     return (
-        <div className="p-4">
+        <div className="space-y-4 p-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {employee_details.map((item) => {
                     const config = iconMap[item.label];
@@ -68,6 +155,29 @@ export default function ProcessPeriodPage({ employee_details, period }: Props) {
                         </Item>
                     );
                 })}
+            </div>
+            <div className="space-y-4">
+                <Stepper steps={workflowSteps} modelValue={currentStep} />
+                <div className="flex w-full justify-center">
+                    <Item variant="outline">
+                        <ItemMedia variant="icon">
+                            <IconCalendarMonth className="text-muted-foreground" />
+                        </ItemMedia>
+                        <ItemContent>
+                            <ItemTitle>{period.Label}</ItemTitle>
+                            <ItemDescription>
+                                {period.Cutoff} | {period.PeriodStart} -{' '}
+                                {period.PeriodEnd} | Pay Date: {period.PayDate}
+                            </ItemDescription>
+                        </ItemContent>
+                        <ItemActions>
+                            <Button className="w-40" onClick={onNextStep}>
+                                {processing && <Spinner />}
+                                {buttonLabel}
+                            </Button>
+                        </ItemActions>
+                    </Item>
+                </div>
             </div>
         </div>
     );
