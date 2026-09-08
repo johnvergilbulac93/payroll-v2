@@ -209,6 +209,8 @@ export default function PayrollPeriodPage({
                                                     'text-blue-500',
                                                 row.Status === 'closed' &&
                                                     'text-destructive',
+                                                row.Status === 'released' &&
+                                                    'text-emerald-600',
                                             )}
                                         >
                                             {row.Status}

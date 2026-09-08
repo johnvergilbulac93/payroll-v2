@@ -11,5 +11,5 @@ export type Loan = {
     BalanceAmt: number;
     BalanceasofDate: number;
     ImageUrl?: string;
-    DeductionDateStart?: string;
+    StartDateLabel?: string;
 };

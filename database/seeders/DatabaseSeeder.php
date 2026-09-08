@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             WTaxTableSeeder::class,
             SSSContributionBracketSeeder::class,
             PhilHealthContributionSeeder::class,
+            HolidaySeeder::class,
 
         ]);
     }

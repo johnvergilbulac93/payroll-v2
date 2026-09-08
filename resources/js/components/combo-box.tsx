@@ -1,9 +1,5 @@
-import {
-    Avatar,
-    AvatarBadge,
-    AvatarFallback,
-    AvatarImage,
-} from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import {
     Combobox,
     ComboboxContent,
@@ -12,7 +8,13 @@ import {
     ComboboxItem,
     ComboboxList,
 } from '@/components/ui/combobox';
-import { Item, ItemContent, ItemTitle, ItemMedia } from '@/components/ui/item';
+import {
+    Item,
+    ItemContent,
+    ItemTitle,
+    ItemMedia,
+    ItemDescription,
+} from '@/components/ui/item';
 import { useInitials } from '@/hooks/use-initials';
 import type { Option } from '@/types/option';
 
@@ -57,19 +59,22 @@ export default function ComboBox({
                                         <AvatarFallback>
                                             {getInitials(item.label)}
                                         </AvatarFallback>
-                                        <AvatarBadge
+                                        {/* <AvatarBadge
                                             className={
                                                 item.status
                                                     ? 'text-primary'
                                                     : 'text-muted-foreground'
                                             }
-                                        />
+                                        /> */}
                                     </Avatar>
                                 </ItemMedia>
                                 <ItemContent>
                                     <ItemTitle className="whitespace-nowrap">
                                         {item.label}{' '}
                                     </ItemTitle>
+                                    <ItemDescription>
+                                        {item.description}
+                                    </ItemDescription>
                                 </ItemContent>
                             </Item>
                         </ComboboxItem>

@@ -10,6 +10,7 @@ use App\Services\Deductions\PhilHealthContributionService;
 use App\Services\Deductions\PagIbigContributionService;
 use App\Services\Deductions\WithholdingTaxService;
 use App\Services\Deductions\LoanDeductionService;
+use App\Services\Holiday\HolidayPayService;
 use InvalidArgumentException;
 
 class PayrollComputationService
@@ -36,6 +37,8 @@ class PayrollComputationService
         protected PagIbigContributionService $pagIbig,
         protected WithholdingTaxService $withholdingTax,
         protected LoanDeductionService $loan,
+        protected HolidayPayService $holiday,
+
     ) {}
 
     /**
@@ -43,13 +46,14 @@ class PayrollComputationService
      * looping employees in computePayroll(), then pass the result into
      * every computeForPeriod() call in that loop.
      */
-    public function preloadLookups(): PayrollLookups
+    public function preloadLookups(PayrollPeriod $period): PayrollLookups
     {
         return new PayrollLookups(
             sssBrackets: $this->sss->preloadBrackets(),
             philHealthRate: $this->philHealth->preloadRate(),
             pagIbigDeduction: $this->pagIbig->preloadDeduction(),
             withholdingTaxBrackets: $this->withholdingTax->preloadBrackets(),
+            holidayPreload: $this->holiday->preload($period),
         );
     }
 
@@ -104,6 +108,7 @@ class PayrollComputationService
 
         $absences = $dtrSummary['absences'] ?? 0.0;
         $absenceDeduction = round($dailyRate * $absences, 2);
+        $holidayPay = $this->holiday->computeForEmployee($employee, $dailyRate, $lookups->holidayPreload);
 
         $lateDeduction = $this->minutesToPesoDeduction($dtrSummary['lateMinutes'] ?? 0, $hourlyRate);
         $undertimeDeduction = $this->minutesToPesoDeduction($dtrSummary['undertimeMinutes'] ?? 0, $hourlyRate);
@@ -187,11 +192,17 @@ class PayrollComputationService
     {
         $semiMonthly = $employee->BasicPay / 2;
         $dailyRate = $employee->BasicPay * 12 / 365;
-
+        $hourlyRate = $employee->HourlyRate > 0
+            ? $employee->HourlyRate
+            : $dailyRate / 8;
 
         $absences = $dtrSummary['absences'] ?? 0.0;
         $absenceDeduction = round($dailyRate * $absences, 2);
+        $holidayPay = $this->holiday->computeForEmployee($employee, $dailyRate, $lookups->holidayPreload);
 
+        $lateDeduction = $this->minutesToPesoDeduction($dtrSummary['lateMinutes'] ?? 0, $hourlyRate);
+        $undertimeDeduction = $this->minutesToPesoDeduction($dtrSummary['undertimeMinutes'] ?? 0, $hourlyRate);
+        $overtimePay = round(($dtrSummary['overtimeHours'] ?? 0) * $hourlyRate * 1.25, 2);
         // $overloadRatePerUnit = $employee->IsLetPasser
         //     ? $employee->BasicPay
         //     : self::OVERLOAD_NO_LET_RATE;
@@ -237,22 +248,19 @@ class PayrollComputationService
         $loanDeduction = $this->loan->calculate($employee, $period);
 
         $netPay = $grossPay - $sss - $philHealth - $pagIbig - $withholdingTax - $loanDeduction;
-        $record =  [
-            'dw' =>  $dtrSummary['daysWorked'] ?? 0,
-            'daily_rate' => $dailyRate,
-            'emp_name' => $employee->FullName,
+        return [
             'grossPay' => $grossPay,
             'netPay' => $netPay,
             // 'overloadPay' => $overloadPay,
-            'absenceDeduction' => $absenceDeduction,
+            'overtimePay' => $overtimePay,
+            'lateDeduction' => $lateDeduction,
+            'undertimeDeduction' => $undertimeDeduction,
             'sss' => $sss,
             'philHealth' => $philHealth,
             'pagIbig' => $pagIbig,
             'withholdingTax' => $withholdingTax,
             'loanDeduction' => $loanDeduction,
         ];
-
-        dd($record);
     }
 
     protected function minutesToPesoDeduction(int $minutes, float $hourlyRate): float

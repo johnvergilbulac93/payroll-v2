@@ -22,7 +22,7 @@ interface DatePickerProps {
     className?: string;
     fromDate?: Date;
     toDate?: Date;
-    tabIndex?: number
+    tabIndex?: number;
 }
 
 export function DatePicker({
@@ -39,7 +39,14 @@ export function DatePicker({
     tabIndex,
 }: DatePickerProps) {
     const [open, setOpen] = useState(false);
-    const selected = value ? new Date(value) : undefined;
+    // const selected = value ? new Date(value) : undefined;
+    const selected = value ? parseLocalDate(value) : undefined;
+
+    function parseLocalDate(value: string): Date {
+        const [year, month, day] = value.split('-').map(Number);
+
+        return new Date(year, month - 1, day); // local midnight, not UTC
+    }
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -70,6 +77,7 @@ export function DatePicker({
                 <Calendar
                     mode="single"
                     selected={selected}
+                    defaultMonth={selected} // ADD — opens on the selected date's month, not today
                     onSelect={(date) => {
                         onChange(date ? format(date, 'yyyy-MM-dd') : '');
                         setOpen(false);

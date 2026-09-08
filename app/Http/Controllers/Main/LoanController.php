@@ -24,7 +24,7 @@ class LoanController extends Controller
             'loan/loan',
             [
                 'loans' => LoanResourceCollection::make($query),
-                'employees' => Employee::select('EmpNbr as value', 'FullName as label')->get(),
+                'employees' => Employee::where('Status', 1)->select('EmpNbr as value', 'FullName as label')->get(),
                 'loanTypes' => LoanType::select('id as value', 'name as label')->get()
             ]
         );

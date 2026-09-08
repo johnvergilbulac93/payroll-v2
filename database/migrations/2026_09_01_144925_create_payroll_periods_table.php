@@ -35,6 +35,7 @@ return new class extends Migration
                 'open',       // DTR still being collected/edited
                 'processing', // DTR locked, payroll being computed
                 'closed',     // payroll finalized/released
+                'released'
             ])->default('open');
             $table->timestamps();
 

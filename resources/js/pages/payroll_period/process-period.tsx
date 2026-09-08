@@ -10,6 +10,8 @@ import { useMemo, useState } from 'react';
 import {
     lockPeriod,
     computePayroll,
+    releasedPayslip,
+    reComputePayroll,
 } from '@/actions/App/Http/Controllers/Main/PayrollPeriodController';
 import Stepper from '@/components/stepper';
 import { Button } from '@/components/ui/button';
@@ -71,6 +73,8 @@ export default function ProcessPeriodPage({ employee_details, period }: Props) {
                 return 2;
             case 'closed':
                 return 3;
+            case 'released':
+                return 4;
             default:
                 return 1;
         }
@@ -84,6 +88,8 @@ export default function ProcessPeriodPage({ employee_details, period }: Props) {
                 return 'Compute Payroll';
             case 3:
                 return 'Release Payslips';
+            case 4:
+                return 'Generate Payslips';
             default:
                 return 'Lock DTR';
         }
@@ -116,9 +122,35 @@ export default function ProcessPeriodPage({ employee_details, period }: Props) {
                 );
                 break;
             case 3:
-                alert('3');
+                router.post(
+                    releasedPayslip(Number(period.id)).url,
+                    {},
+                    {
+                        preserveScroll: true,
+                        onStart: () => setProcessing(true),
+                        onFinish: () => setProcessing(false),
+                        onHttpException: () => setProcessing(false),
+                    },
+                );
+                break;
+
+            case 4:
+                alert('view payslip');
                 break;
         }
+    };
+
+    const onRecomputePayroll = () => {
+        router.post(
+            reComputePayroll(Number(period.id)).url,
+            {},
+            {
+                preserveScroll: true,
+                onStart: () => setProcessing(true),
+                onFinish: () => setProcessing(false),
+                onHttpException: () => setProcessing(false),
+            },
+        );
     };
 
     return (
@@ -171,8 +203,16 @@ export default function ProcessPeriodPage({ employee_details, period }: Props) {
                             </ItemDescription>
                         </ItemContent>
                         <ItemActions>
+                            {currentStep == 4 && (
+                                <Button onClick={onRecomputePayroll}>
+                                    {currentStep == 4 && processing && (
+                                        <Spinner />
+                                    )}
+                                    Recompute payroll
+                                </Button>
+                            )}
                             <Button className="w-40" onClick={onNextStep}>
-                                {processing && <Spinner />}
+                                {currentStep !== 4 && processing && <Spinner />}
                                 {buttonLabel}
                             </Button>
                         </ItemActions>

@@ -29,6 +29,11 @@ class EmployeeRequest extends FormRequest
             'Image' => ['nullable', 'mimes:jpg,jpeg,png', 'max:5120'], // 5MB
             'remove_image' => ['sometimes', 'boolean'],
             'Group' => ['required', 'string'],
+            'EmpNbr' => [
+                'required',
+                'string',
+                Rule::unique('employees', 'EmpNbr')->ignore($this->route('employee')),
+            ],
             'FirstName' => ['required', 'string'],
             'MidName' => ['nullable', 'string'],
             'LastName' => ['required', 'string'],
@@ -58,10 +63,10 @@ class EmployeeRequest extends FormRequest
             'PIN' => ['nullable', 'string'],
             'PERAAID' => ['nullable', 'string'],
             'BiometricID' => ['nullable'],
-            'EmploymentStatus' => ['nullable'],
-            'TenureStatus' => ['nullable'],
+            'EmploymentStatus' => ['required', 'string'],
+            'TenureStatus' => ['required', 'string'],
             'IsLETPasser' => ['nullable', 'boolean'],
-            'DailyRateDivisor' => ['nullable',],
+            'DailyRateDivisor' => ['required', 'string'],
 
         ];
     }
@@ -69,8 +74,8 @@ class EmployeeRequest extends FormRequest
     public function messages()
     {
         return [
-            'EmpNbr.required' => 'The Employee Number field is required.',
-            'EmpNbr.unique' => 'The Employee Number has already been taken.',
+            'EmpNbr.required' => 'The Employee no. field is required.',
+            'EmpNbr.unique' => 'The Employee no. has already been taken.',
             'FirstName.required' => 'The First Name field is required.',
             'LastName.required' => 'The Last Name field is required.',
             'Address.required' => 'The Address field is required.',
@@ -79,6 +84,10 @@ class EmployeeRequest extends FormRequest
             'EmployDate.required' => 'The Employment Date field is required.',
             'CityProv.required' => 'The City/Province field is required.',
             'Group.required' => 'The Group field is required.',
+            'EmploymentStatus.required' => 'The Employment status is required.',
+            'TenureStatus.required' => 'The Tenure status is required.',
+            'DailyRateDivisor.required' => 'The Daily rate basis is required.',
+
         ];
     }
 }

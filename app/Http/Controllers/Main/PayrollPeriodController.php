@@ -16,6 +16,7 @@ use App\Services\Payroll\PayrollComputationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class PayrollPeriodController extends Controller
@@ -68,25 +69,34 @@ class PayrollPeriodController extends Controller
 
     public function lockPeriod(PayrollPeriod $payrollPeriod)
     {
-        if ($payrollPeriod->Status === 'closed') {
-            return back()->with(
-                'error',
-                'This payroll period has already been closed.',
-            );
+        try {
+            if ($payrollPeriod->Status === 'closed') {
+                return back()->with(
+                    'error',
+                    'This payroll period has already been closed.',
+                );
+            }
+
+            $validation = $this->dtrLockService->validate($payrollPeriod);
+
+            if (!$validation['ready_to_lock']) {
+                return back()->with(
+                    'error',
+                    'Cannot lock DTR — some employees are flagged or pending.',
+                );
+            }
+
+            $this->dtrLockService->lock($payrollPeriod);
+
+            $payrollPeriod->update(['Status' => 'processing']);
+
+            return back()->with('success', 'DTR locked. Payroll computation can now proceed.');
+        } catch (\Throwable $e) {
+            Log::error('Failed to payroll computed.', [
+                'exception' => $e,
+            ]);
+            return back()->with('error', 'Something went wrong.');
         }
-
-        $validation = $this->dtrLockService->validate($payrollPeriod);
-
-        if (!$validation['ready_to_lock']) {
-            return back()->with(
-                'error',
-                'Cannot lock DTR — some employees are flagged or pending.',
-            );
-        }
-
-        $this->dtrLockService->lock($payrollPeriod);
-        $payrollPeriod->update(['Status' => 'processing']);
-        return back()->with('success', 'DTR locked. Payroll computation can now proceed.');
     }
 
     public function computePayroll(
@@ -95,11 +105,53 @@ class PayrollPeriodController extends Controller
         DtrSummaryService $dtrSummary,
     ) {
 
-        // try {
+        try {
             $employees = Employee::where('Status', 1)->with('group')->get();
 
-            $lookups = $payrollComputation->preloadLookups();
+            $lookups = $payrollComputation->preloadLookups($payrollPeriod);
 
+            DB::transaction(function () use ($employees, $payrollPeriod, $payrollComputation, $dtrSummary, $lookups) {
+                foreach ($employees as $employee) {
+                    $summary = $dtrSummary->buildFor($employee, $payrollPeriod);
+
+                    $payrollComputation->computeForPeriod($employee, $payrollPeriod, $summary, $lookups);
+                }
+            });
+            $this->dtrLockService->processed($payrollPeriod);
+            $payrollPeriod->update(['Status' => 'closed']);
+
+            return back()->with('success', 'Payroll computed for the period.');
+        } catch (\Throwable $e) {
+            Log::error('Failed to payroll computed.', [
+                'exception' => $e,
+            ]);
+            return back()->with('error', 'Something went wrong.');
+        }
+    }
+
+    public function releasedPayslip(PayrollPeriod $payrollPeriod)
+    {
+
+        try {
+            $this->dtrLockService->paid($payrollPeriod);
+            $payrollPeriod->update(['Status' => 'released']);
+            return back()->with('success', 'Payslip released successfully.');
+        } catch (\Throwable $e) {
+            Log::error('Failed to release payslips.', [
+                'exception' => $e,
+            ]);
+            return back()->with('error', 'Something went wrong.');
+        }
+    }
+    public function reComputePayroll(
+        PayrollPeriod $payrollPeriod,
+        PayrollComputationService $payrollComputation,
+        DtrSummaryService $dtrSummary,
+    ) {
+        try {
+            $employees = Employee::where('Status', 1)->with('group')->get();
+
+            $lookups = $payrollComputation->preloadLookups($payrollPeriod);
 
             DB::transaction(function () use ($employees, $payrollPeriod, $payrollComputation, $dtrSummary, $lookups) {
                 foreach ($employees as $employee) {
@@ -109,14 +161,12 @@ class PayrollPeriodController extends Controller
                 }
             });
 
-            $payrollPeriod->update(['Status' => 'closed']);
-
-            return back()->with('success', 'Payroll computed for the period.');
-        // } catch (\Throwable $e) {
-        //     return back()->with(
-        //         'error',
-        //         'Payroll computation failed: ' . 'server error'
-        //     );
-        // }
+            return back()->with('success', 'Payroll recomputed for the period.');
+        } catch (\Throwable $e) {
+            Log::error('Failed to payroll recomputed.', [
+                'exception' => $e,
+            ]);
+            return back()->with('error', 'Something went wrong.');
+        }
     }
 }

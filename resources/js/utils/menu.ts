@@ -1,19 +1,18 @@
 import type { InertiaLinkProps } from '@inertiajs/react';
 import {
-    IconArchive,
-    IconCalendar,
+
     IconCalendarClock,
     IconCalendarDollar,
     IconCalendarPlus,
     IconCalendarUser,
-    IconCircleMinus,
-    IconCirclePlus,
+
     IconClipboardList,
     IconFileUpload,
     IconHome,
     IconLockCheck,
     IconRefresh,
     IconReport,
+    IconSettings,
     IconUser,
     IconUserKey,
     IconUsers,
@@ -26,12 +25,13 @@ import { index as processDtrIndex } from '@/routes/dtr';
 import { index as employeeIndex } from '@/routes/employee';
 import { index as employeeScheduleIndex } from '@/routes/employee_schedule';
 import { index as loanIndex } from '@/routes/loan';
+import { index as loanTypeIndex } from '@/routes/maintenance/loan_type';
 import { index as payrollPeriodIndex } from '@/routes/payroll_period';
 import { index as roleIndex } from '@/routes/role';
 import { index as shiftIndex } from '@/routes/shift';
 import { index as uploadingIndex } from '@/routes/uploading';
 import { index as userIndex } from '@/routes/user';
-
+import { dashboard } from '@/routes';
 
 interface NavChild {
     Label: string;
@@ -63,7 +63,7 @@ export interface NavGroup {
 
 export const navItems: NavGroup[] = [
     {
-        Items: [{ Label: 'Dashboard', Url: '#', Icon: IconHome }],
+        Items: [{ Label: 'Dashboard', Url: dashboard.url(), Icon: IconHome }],
     },
     {
         Label: 'MAIN',
@@ -125,6 +125,23 @@ export const navItems: NavGroup[] = [
         ],
     },
     {
+        Label: 'REPORTS',
+        Items: [
+            {
+                Label: 'Generate Payslip',
+                Url: '#',
+                Icon: IconReport,
+                Permission: 'users-view',
+            },
+            {
+                Label: 'Generate Dtr',
+                Url: '#',
+                Icon: IconReport,
+                Permission: 'users-view',
+            },
+        ],
+    },
+    {
         Label: 'SETTINGS',
         Items: [
             {
@@ -145,12 +162,12 @@ export const navItems: NavGroup[] = [
                 Icon: IconLockCheck,
                 Permission: 'access-control-view',
             },
-            // {
-            //     Label: 'Archives',
-            //     Url: '#',
-            //     Icon: IconArchive,
-            //     Permission: 'archives-view',
-            // },
+            {
+                Label: 'Maintenance',
+                Url: loanTypeIndex.url(),
+                Icon: IconSettings,
+                Permission: 'archives-view',
+            },
             // {
             //     Label: 'Deductions',
             //     Url: '#',

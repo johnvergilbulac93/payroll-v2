@@ -20,8 +20,7 @@ class UserController extends Controller
         $roles = Role::select('name as label', 'id as value')->get();
         $query = User::filter($request->only(['search']))
             ->orderBy('updated_at', 'desc')
-            ->paginate($limit ?? 10)
-            ->withQueryString();
+            ->paginate($limit ?? 10);
         return Inertia::render('user/user', [
             'users' => UserResourceCollection::make($query),
             'roles' => $roles

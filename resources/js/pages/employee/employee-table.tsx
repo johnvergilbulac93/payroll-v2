@@ -154,7 +154,6 @@ export function EmployeeTable({
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <Button
-                                        variant="outline"
                                         onClick={() => onEdit?.(row.original)}
                                         size="icon-sm"
                                     >

@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -49,6 +50,15 @@ type Props = {
     areas: Option[];
     positions: Option[];
 };
+
+const employmentStatusOptions = [
+    { label: 'Probationary', value: 'probationary' },
+    { label: 'Regular', value: 'regular' },
+];
+const tenuredStatusOptions = [
+    { label: 'Tenured', value: 'tenured' },
+    { label: 'Non-Tenured', value: 'non_tenured' },
+];
 
 export default function EmployeeForm({
     employee,
@@ -106,6 +116,10 @@ export default function EmployeeForm({
         PERAAID: employee?.PERAAID ?? '',
         ImageUrl: employee?.ImageUrl ?? '',
         BiometricID: employee?.BiometricID ?? '',
+        EmploymentStatus: employee?.EmploymentStatus ?? '',
+        TenureStatus: employee?.TenureStatus ?? '',
+        IsLETPasser: employee?.IsLETPasser ?? false,
+        DailyRateDivisor: employee?.DailyRateDivisor ?? '',
     });
 
     const filteredAreas = !data.Group
@@ -193,6 +207,25 @@ export default function EmployeeForm({
                 <FieldDescription>
                     Enter employee information and details here
                 </FieldDescription>
+                <FieldGroup>
+                    <Field data-invalid={!!errors.EmpNbr} className="gap-2">
+                        <FieldLabel htmlFor="employee.EmpNbr">
+                            Employee no.
+                        </FieldLabel>
+                        <Input
+                            value={data.EmpNbr}
+                            onChange={(e) => setData('EmpNbr', e.target.value)}
+                            type="text"
+                            id="employee.EmpNbr"
+                            placeholder="Employee no."
+                            aria-invalid={!!errors.EmpNbr}
+                            tabIndex={1}
+                        />
+                        {errors.EmpNbr && (
+                            <FieldError>{errors.EmpNbr}</FieldError>
+                        )}
+                    </Field>
+                </FieldGroup>
                 <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <Field data-invalid={!!errors.LastName} className="gap-2">
                         <FieldLabel htmlFor="employee.LastName">
@@ -449,8 +482,8 @@ export default function EmployeeForm({
                             </Tooltip>
                         </div>
 
-                        {errors.Group && (
-                            <FieldError>{errors.Group}</FieldError>
+                        {errors.Position && (
+                            <FieldError>{errors.Position}</FieldError>
                         )}
                     </Field>
                     <Field data-invalid={!!errors.Assignment} className="gap-2">
@@ -503,8 +536,8 @@ export default function EmployeeForm({
                             </Tooltip>
                         </div>
 
-                        {errors.Group && (
-                            <FieldError>{errors.Group}</FieldError>
+                        {errors.Assignment && (
+                            <FieldError>{errors.Assignment}</FieldError>
                         )}
                     </Field>
                     <Field
@@ -744,7 +777,7 @@ export default function EmployeeForm({
                             id="employee.PERAAID"
                             placeholder="PERAAID"
                             aria-invalid={!!errors.PERAAID}
-                            tabIndex={24}
+                            tabIndex={25}
                         />
                         {errors.PERAAID && (
                             <FieldError>{errors.PERAAID}</FieldError>
@@ -766,35 +799,163 @@ export default function EmployeeForm({
                             id="employee.BiometricID"
                             placeholder="Biometric ID"
                             aria-invalid={!!errors.BiometricID}
-                            tabIndex={19}
+                            tabIndex={26}
                         />
                         {errors.BiometricID && (
                             <FieldError>{errors.BiometricID}</FieldError>
                         )}
                     </Field>
                 </FieldGroup>
-                <FieldLabel htmlFor="switch-status">
+                <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <Field
-                        orientation="horizontal"
-                        className="flex items-center"
+                        data-invalid={!!errors.DailyRateDivisor}
+                        className="gap-2"
                     >
-                        <FieldContent>
-                            <FieldTitle> Status</FieldTitle>
-                            <FieldDescription>
-                                This indicates whether the employee is still
-                                active.
-                            </FieldDescription>
-                        </FieldContent>
-                        <Switch
-                            id="switch-status"
-                            checked={data.Status}
-                            tabIndex={20}
-                            onCheckedChange={(checked) =>
-                                setData('Status', checked)
+                        <FieldLabel htmlFor="employee.DailyRateDivisor">
+                            Daily rate basis
+                        </FieldLabel>
+                        <Input
+                            value={data.DailyRateDivisor}
+                            onChange={(e) =>
+                                setData('DailyRateDivisor', e.target.value)
                             }
+                            type="text"
+                            id="employee.DailyRateDivisor"
+                            placeholder="Daily rate basis"
+                            aria-invalid={!!errors.DailyRateDivisor}
+                            tabIndex={27}
                         />
+                        {errors.DailyRateDivisor && (
+                            <FieldError>{errors.DailyRateDivisor}</FieldError>
+                        )}
                     </Field>
-                </FieldLabel>
+                    <Field
+                        data-invalid={!!errors.EmploymentStatus}
+                        className="gap-2"
+                    >
+                        <FieldLabel htmlFor="employee.EmploymentStatus">
+                            Employment status
+                        </FieldLabel>
+                        <Select
+                            value={data.EmploymentStatus}
+                            onValueChange={(value) =>
+                                setData('EmploymentStatus', value)
+                            }
+                        >
+                            <SelectTrigger
+                                id="employee.EmploymentStatus"
+                                className="w-full"
+                                tabIndex={28}
+                                aria-invalid={!!errors.EmploymentStatus}
+                            >
+                                <SelectValue placeholder="Select a status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Status</SelectLabel>
+                                    {employmentStatusOptions.map((item) => (
+                                        <SelectItem
+                                            key={item.value}
+                                            value={item.value}
+                                        >
+                                            {item.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                        {errors.EmploymentStatus && (
+                            <FieldError>{errors.EmploymentStatus}</FieldError>
+                        )}
+                    </Field>
+                    <Field
+                        data-invalid={!!errors.TenureStatus}
+                        className="gap-2"
+                    >
+                        <FieldLabel htmlFor="employee.TenureStatus">
+                            Tenured status
+                        </FieldLabel>
+                        <Select
+                            value={data.TenureStatus}
+                            onValueChange={(value) =>
+                                setData('TenureStatus', value)
+                            }
+                        >
+                            <SelectTrigger
+                                id="employee.TenureStatus"
+                                className="w-full"
+                                tabIndex={29}
+                                aria-invalid={!!errors.TenureStatus}
+                            >
+                                <SelectValue placeholder="Select a status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Status</SelectLabel>
+                                    {tenuredStatusOptions.map((item) => (
+                                        <SelectItem
+                                            key={item.value}
+                                            value={item.value}
+                                        >
+                                            {item.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                        {errors.TenureStatus && (
+                            <FieldError>{errors.TenureStatus}</FieldError>
+                        )}
+                    </Field>
+                </FieldGroup>
+                <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FieldLabel htmlFor="switch-status">
+                        <Field
+                            orientation="horizontal"
+                            className="flex items-center"
+                        >
+                            <FieldContent>
+                                <FieldTitle> LET Passer</FieldTitle>
+                                <FieldDescription>
+                                    This indicates whether the employee is a LET
+                                    passer.
+                                    <br/>
+                                    <small className='text-primary'>Note: For Teaching group only</small>
+                                </FieldDescription>
+                            </FieldContent>
+                            <Switch
+                                id="switch-status"
+                                checked={data.IsLETPasser}
+                                tabIndex={30}
+                                onCheckedChange={(checked) =>
+                                    setData('IsLETPasser', checked)
+                                }
+                            />
+                        </Field>
+                    </FieldLabel>{' '}
+                    <FieldLabel htmlFor="switch-status">
+                        <Field
+                            orientation="horizontal"
+                            className="flex items-center"
+                        >
+                            <FieldContent>
+                                <FieldTitle> Status</FieldTitle>
+                                <FieldDescription>
+                                    This indicates whether the employee is still
+                                    active.
+                                </FieldDescription>
+                            </FieldContent>
+                            <Switch
+                                id="switch-status"
+                                checked={data.Status}
+                                tabIndex={31}
+                                onCheckedChange={(checked) =>
+                                    setData('Status', checked)
+                                }
+                            />
+                        </Field>
+                    </FieldLabel>
+                </FieldGroup>
             </FieldSet>
             <ReusableDrawer
                 open={open}
@@ -825,7 +986,11 @@ export default function EmployeeForm({
             <div className="flex items-center justify-end">
                 <div className="flex items-center gap-2">
                     <Button
-                        onClick={() => router.visit(employeeIndex.url())}
+                        onClick={() =>
+                            router.visit(employeeIndex.url(), {
+                                preserveScroll: true,
+                            })
+                        }
                         variant="outline"
                     >
                         Cancel

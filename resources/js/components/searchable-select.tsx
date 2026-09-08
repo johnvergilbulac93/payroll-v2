@@ -2,13 +2,6 @@ import { IconCheck, IconChevronDown } from '@tabler/icons-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import type { Option } from '@/types/option';
-import {
     Command,
     CommandEmpty,
     CommandGroup,
@@ -17,6 +10,13 @@ import {
     CommandList,
     CommandShortcut,
 } from '@/components/ui/command';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import type { Option } from '@/types/option';
 
 type SearchableSelectProps = {
     items: Option[];

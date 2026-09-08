@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Main\Loan;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -23,7 +24,7 @@ class LoanResource extends JsonResource
             'EmpNbr' => $this->EmpNbr,
             'OrigBal' => $this->OrigBal,
             'DedAmt' => $this->DedAmt,
-            'DeductionDateStart' => $this->startDate,
+            'StartDateLabel' =>  Carbon::parse($this->StartDate)->format('F j, Y'),
             'StartDate' => $this->StartDate,
             'Frequency' => $this->Frequency,
             'BalanceAmt' => $this->BalanceAmt,

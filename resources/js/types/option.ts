@@ -4,4 +4,5 @@ export type Option = {
     status?: boolean;
     image_url?: string;
     type?: string;
+    description?: string;
 };

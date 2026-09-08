@@ -25,7 +25,7 @@ class EmployeeScheduleController extends Controller
 
 
         if ($employeeId) {
-            $employee = Employee::select('id', 'FullName', 'EmpNbr', 'Image')
+            $employee = Employee::where('Status', 1)->select('id', 'FullName', 'EmpNbr', 'Image')
                 ->findOrFail($employeeId)
                 ->append('image_url');
 
@@ -35,9 +35,16 @@ class EmployeeScheduleController extends Controller
         }
 
         return Inertia::render('schedule_employee/schedule-employee', [
-            'employees' => Employee::select('id as value', 'FullName as label', 'Image')
+            'employees' => Employee::select('id', 'FullName', 'Image', 'Group')
+                ->where('Status', 1)
+                ->with('group:id,name')
                 ->get()
-                ->append('image_url'),
+                ->map(fn($employee) => [
+                    'value' => (string) $employee->id,
+                    'label' => $employee->FullName,
+                    'description' => $employee->group?->name,
+                    'image_url' => $employee->image_url,
+                ]),
             'employee' => $employee,
             'templates' => $templates,
             'shiftCodes' => ShiftResource::collection(ShiftCode::get())->resolve(),

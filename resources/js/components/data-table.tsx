@@ -246,7 +246,6 @@ export function DataTable<T extends RowData>({
         const { active, over } = event;
 
         if (active && over && active.id !== over.id) {
-            
             setData((current) => {
                 const oldIndex = dataIds.indexOf(active.id);
                 const newIndex = dataIds.indexOf(over.id);
@@ -369,7 +368,13 @@ export function DataTable<T extends RowData>({
                             variant={link.active ? 'default' : 'outline'}
                             size="icon-sm"
                             disabled={!link.url}
-                            onClick={() => link.url && router.visit(link.url)}
+                            onClick={() =>
+                                link.url &&
+                                router.visit(link.url, {
+                                    preserveState: true,
+                                    preserveScroll: true,
+                                })
+                            }
                         >
                             {isPrevious ? (
                                 <IconChevronLeft />

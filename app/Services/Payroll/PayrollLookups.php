@@ -18,5 +18,6 @@ class PayrollLookups
         public readonly ?PhilHealthContribution $philHealthRate,
         public readonly ?Deduction $pagIbigDeduction,
         public readonly Collection $withholdingTaxBrackets,
+        public array $holidayPreload,
     ) {}
 }

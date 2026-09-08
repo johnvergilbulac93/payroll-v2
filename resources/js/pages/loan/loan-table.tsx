@@ -109,7 +109,7 @@ export function LoanTable({
         columnHelper.accessor('LoanType', {
             header: 'Type',
         }),
-        columnHelper.accessor('DeductionDateStart', {
+        columnHelper.accessor('StartDateLabel', {
             header: 'Start deduction',
         }),
         columnHelper.accessor('OrigBal', {

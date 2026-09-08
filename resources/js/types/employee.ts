@@ -36,6 +36,10 @@ export type Employee = {
     GroupName?: string;
     AreaName?: string;
     PositionName?: string;
+    EmploymentStatus: string;
+    TenureStatus: string;
+    IsLETPasser: boolean;
+    DailyRateDivisor: string;
     // Schedule?: Schedule[];
     // ScheduleTemplate?: ScheduleTemplate[];
 };

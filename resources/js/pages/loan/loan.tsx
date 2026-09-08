@@ -7,6 +7,7 @@ import { FormDialog } from '@/components/base-modal';
 import { DatePicker } from '@/components/date-picker';
 import Heading from '@/components/heading';
 import { CurrencyField } from '@/components/number-field';
+import SearchableSelect from '@/components/searchable-select';
 import { Button } from '@/components/ui/button';
 import {
     Field,
@@ -37,12 +38,17 @@ import { store as storeLoanType } from '@/routes/loan_type';
 import type { Loan } from '@/types/loan';
 import type { Option } from '@/types/option';
 import type { PaginatedData } from '@/types/paginated';
-import SearchableSelect from '@/components/searchable-select';
 type Props = {
     loans: PaginatedData<Loan>;
     employees: Option[];
     loanTypes: Option[];
 };
+
+const frequencyOptions = [
+    { label: 'Every Payday', value: '00' },
+    { label: 'Every 15th', value: '15' },
+    { label: 'End of Month', value: '30' },
+];
 
 export default function Loan({ loans, employees, loanTypes }: Props) {
     const [dialogTitle, setDialogTitle] = useState('');
@@ -108,7 +114,7 @@ export default function Loan({ loans, employees, loanTypes }: Props) {
         setDialogTitle('Update loan');
         setDialogDescription('Manage the selected employee loan');
         setData({
-            id: String(loan.id), 
+            id: String(loan.id),
             EmpNbr: loan.EmpNbr,
             LoanTypeID: loan.LoanTypeID,
             OrigBal: loan.OrigBal ?? 0,
@@ -323,17 +329,34 @@ export default function Loan({ loans, employees, loanTypes }: Props) {
                         <FieldLabel htmlFor="loan.Frequency">
                             Frequency
                         </FieldLabel>
-                        <Input
+                        <Select
                             value={data.Frequency}
-                            onChange={(e) =>
-                                setData('Frequency', e.target.value)
+                            onValueChange={(value) =>
+                                setData('Frequency', value)
                             }
-                            type="text"
-                            id="employee.Frequency"
-                            placeholder="Frequency"
-                            aria-invalid={!!errors.Frequency}
-                            tabIndex={6}
-                        />
+                        >
+                            <SelectTrigger
+                                id="loan.Frequency"
+                                className="w-full"
+                                tabIndex={5}
+                                aria-invalid={!!errors.Frequency}
+                            >
+                                <SelectValue placeholder="Select a group" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Groups</SelectLabel>
+                                    {frequencyOptions.map((item) => (
+                                        <SelectItem
+                                            key={item.value}
+                                            value={item.value}
+                                        >
+                                            {item.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                         {errors.Frequency && (
                             <FieldError>{errors.Frequency}</FieldError>
                         )}

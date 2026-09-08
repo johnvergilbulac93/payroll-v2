@@ -49,6 +49,11 @@ class EmployeeResource extends JsonResource
             'GroupName' => $this->group?->name,
             'AreaName' => $this->areas?->name,
             'PositionName' => $this->position?->name,
+            'EmploymentStatus' => $this->EmploymentStatus,
+            'TenureStatus' => $this->TenureStatus,
+            'IsLETPasser' => $this->IsLETPasser,
+            'DailyRateDivisor' => $this->DailyRateDivisor,
+
             // 'Schedule' =>  EmployeeScheduleResource::collection($this->schedule),
             // 'ScheduleTemplate' =>  $this->scheduleTemplate
 

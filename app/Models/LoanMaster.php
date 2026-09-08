@@ -36,12 +36,12 @@ class LoanMaster extends Model
             });
         });
     }
-    protected function startDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn() => $this->attributes['StartDate']
-                ? Carbon::parse($this->attributes['StartDate'])->format('F j, Y')
-                : null,
-        );
-    }
+    // protected function startDate(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: fn() => $this->attributes['StartDate']
+    //             ? Carbon::parse($this->attributes['StartDate'])->format('F j, Y')
+    //             : null,
+    //     );
+    // }
 }

@@ -173,7 +173,7 @@ export default function Role({ roles }: Props) {
                 open={confirmOpen}
                 icon={<IconTrash />}
                 onOpenChange={setConfirmOpen}
-                title="Delete loan?"
+                title="Delete role?"
                 description="This will permanently delete this role record. This action cannot be undone."
                 confirmText="Delete"
                 onConfirm={async () => {

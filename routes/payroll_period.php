@@ -12,6 +12,7 @@ Route::middleware(['auth'])->prefix('payroll_period')->name('payroll_period.')->
     Route::get('/process/{payrollPeriod}', [PayrollPeriodController::class, 'processIndex'])->name('processIndex');
     Route::post('/process/{payrollPeriod}', [PayrollPeriodController::class, 'lockPeriod'])->name('lockPeriod');
     Route::post('/compute_payroll/{payrollPeriod}', [PayrollPeriodController::class, 'computePayroll'])->name('computePayroll');
-
+    Route::post('/released/{payrollPeriod}', [PayrollPeriodController::class, 'releasedPayslip'])->name('releasedPayslip');
+    Route::post('/recompute_payroll/{payrollPeriod}', [PayrollPeriodController::class, 'reComputePayroll'])->name('reComputePayroll');
 
 });

@@ -37,4 +37,22 @@ class DtrLockService
                 ->update(['PayrollStatus' => 'locked']);
         });
     }
+    public function processed(PayrollPeriod $period): void
+    {
+        DB::transaction(function () use ($period) {
+            DB::table('dtr_records')
+                ->where('PayrollPeriodID', $period->id)
+                ->where('PayrollStatus', 'locked')
+                ->update(['PayrollStatus' => 'processed']);
+        });
+    }
+    public function paid(PayrollPeriod $period): void
+    {
+        DB::transaction(function () use ($period) {
+            DB::table('dtr_records')
+                ->where('PayrollPeriodID', $period->id)
+                ->where('PayrollStatus', 'processed')
+                ->update(['PayrollStatus' => 'paid']);
+        });
+    }
 }
