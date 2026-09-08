@@ -20,6 +20,7 @@ class ProcessDtrResource extends JsonResource
             'id' => $this->id,
             'Status' => $this->status,
             'FullName' => $this->FullName,
+            'GroupName' => $this->GroupName,
             'EmpNbr' => $this->EmpNbr,
             'Image' => $this->Image ? Storage::disk('public')->url($this->Image) : null,
             'Period' => $this->period,

@@ -20,6 +20,7 @@ class DtrViewerService
         return DB::table('employees')
             ->where('employees.Status', 1)
             ->whereNull('employees.deleted_at')
+            ->leftJoin('groups', 'groups.id', '=', 'employees.Group')
             ->leftJoin('dtr_records', function ($join) use ($period) {
                 $join->on('dtr_records.EmpID', '=', 'employees.id')
                     ->whereBetween('dtr_records.DTRDate', [
@@ -36,6 +37,7 @@ class DtrViewerService
                 'employees.Image',
                 'employees.EmpNbr',
                 'employees.LastName',
+                'groups.name as GroupName',
                 DB::raw("'" . $periodLabel . "' as period"),
                 DB::raw('MAX(dtr_records.Remarks) as last_remarks'),
                 DB::raw('MAX(dtr_records.updated_at) as last_processed_at'),
@@ -53,10 +55,18 @@ class DtrViewerService
                 'employees.FullName',
                 'employees.Image',
                 'employees.EmpNbr',
-                'employees.LastName'
+                'employees.LastName',
+                'groups.name'
             )
+            // ->havingRaw("
+            //     CASE
+            //         WHEN COUNT(dtr_records.EmpID) = 0 THEN 'pending'
+            //         WHEN MAX(dtr_records.Remarks) IS NULL THEN 'processed'
+            //         ELSE 'flagged'
+            //     END != 'processed'
+            // ")
             ->orderBy('employees.LastName')
-            ->paginate();
+            ->paginate(6);
     }
     public function attachDtrRecords(
         LengthAwarePaginator $employees,

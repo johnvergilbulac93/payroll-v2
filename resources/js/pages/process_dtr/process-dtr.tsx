@@ -76,6 +76,7 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
 
             {
                 preserveScroll: true,
+                preserveState: true,
                 onStart: () => setProcessing(true),
                 onSuccess: () => setProcessing(false),
                 onHttpException: () => setProcessing(false),
@@ -88,6 +89,7 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
             {},
             {
                 preserveScroll: true,
+                preserveState: true,
                 onStart: () => setProcessing(true),
                 onSuccess: () => setProcessing(false),
                 onHttpException: () => setProcessing(false),
@@ -185,13 +187,13 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
                         {employees.data.map((employee) => (
                             <Item
                                 variant="outline"
-                                className="bg-accent"
+                                className=""
                                 key={employee.id}
                             >
                                 <ItemMedia>
                                     <Avatar className="size-10">
                                         <AvatarImage src={employee.Image} />
-                                        <AvatarFallback className="bg-primary text-primary-foreground">
+                                        <AvatarFallback>
                                             {getInitials(employee.FullName)}
                                         </AvatarFallback>
                                     </Avatar>
@@ -237,7 +239,7 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
                                                             'bg-amber-600 text-primary-foreground',
                                                         employee.Status ===
                                                             'processed' &&
-                                                            'bg-primary text-primary-foreground',
+                                                            'bg-emerald-600 text-primary-foreground',
                                                         employee.Status ===
                                                             'closed' &&
                                                             'bg-destructive text-destructive-foreground',
@@ -254,7 +256,7 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
                                         </div>
                                     </ItemTitle>
                                     <ItemDescription>
-                                        {employee.EmpNbr}
+                                        {employee.GroupName}
                                     </ItemDescription>
                                 </ItemContent>
                                 <ItemActions>

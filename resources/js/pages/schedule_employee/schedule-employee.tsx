@@ -11,6 +11,7 @@ import type { SchedulePerDate } from '@/types/per-date-schedule';
 import type { ScheduleTemplate, ShiftCode } from '@/types/schedule-template';
 import SearchableSelect from '@/components/searchable-select';
 import { useState } from 'react';
+
 type Props = {
     employees: Option[];
     employee?: Employee;
@@ -30,13 +31,16 @@ export default function ScheduleEmployeePage({
         ? { value: String(employee.id), label: employee.FullName }
         : null;
 
-    const [selected, setSelected] = useState('');
+    const [selected, setSelected] = useState<string | null>(
+        employee ? String(employee.id) : null,
+    );
 
-    const onChange = (value: Option | null) => {
+    const onChangeEmployee = (value: string) => {
         if (value) {
+            setSelected(value);
             router.get(
                 index.url(),
-                { emp_id: value.value },
+                { emp_id: value },
                 {
                     preserveState: true,
                     preserveScroll: true,
@@ -46,32 +50,21 @@ export default function ScheduleEmployeePage({
         }
     };
 
-    
     return (
-        <div className="p-4">
+        <div className="space-y-4 p-4">
             <Head title="Employee Schedule" />
             <Heading
                 title="Employee Schedule"
                 description="Assign and manage employee schedules."
             />
-            <div className="space-y-4">
-                {/* <ComboBox
-                    items={employees}
-                    value={selectedEmployee}
-                    onValueChange={onChange}
-                    resultEmpty="No employee found."
-                    placeholder="Select a employee"
-                /> */}
-                {selected}
-                <SearchableSelect
-                    id="loan.EmpNbr"
-                    items={employees}
-                    value={selected}
-                    onValueChange={(value) => setSelected(value ?? '')}
-                    tabIndex={1}
-                />
-            </div>
-            <div>
+            <SearchableSelect
+                id="loan.EmpNbr"
+                items={employees}
+                value={selected ?? ''}
+                onValueChange={(value) => onChangeEmployee(value ?? '')}
+                tabIndex={1}
+            />
+            <>
                 {employee && (
                     <Tabs defaultValue="daily-shift" className="w-full">
                         <TabsList>
@@ -99,7 +92,7 @@ export default function ScheduleEmployeePage({
                         </TabsContent>
                     </Tabs>
                 )}
-            </div>
+            </>
         </div>
     );
 }

@@ -1,4 +1,6 @@
-import { IconCheck, IconChevronDown } from '@tabler/icons-react';
+import { IconCheck, IconChevronDown, IconUser } from '@tabler/icons-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,6 +17,9 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
+
+import { useInitials } from '@/hooks/use-initials';
+
 import { cn } from '@/lib/utils';
 import type { Option } from '@/types/option';
 
@@ -43,6 +48,7 @@ export default function SearchableSelect({
     tabIndex,
     id,
 }: SearchableSelectProps) {
+    const getInitials = useInitials();
     const [open, setOpen] = useState(false);
 
     const filteredItems = items.filter((item) => item.value !== '');
@@ -101,9 +107,9 @@ export default function SearchableSelect({
                     }}
                 >
                     <CommandInput placeholder="Search..." />
-                    <CommandList>
+                    <CommandList >
                         <CommandEmpty>{emptyText}</CommandEmpty>
-                        <CommandGroup>
+                        <CommandGroup heading="Employees">
                             {filteredItems.map((item) => (
                                 <CommandItem
                                     key={item.value}
@@ -111,7 +117,28 @@ export default function SearchableSelect({
                                     onSelect={handleSelect}
                                     className="w-full"
                                 >
-                                    <span>{item.label}</span>
+                                    <Avatar>
+                                        <AvatarImage
+                                            src={item.image_url}
+                                            alt="avatar-image"
+                                        />
+                                        <AvatarFallback>
+                                            {getInitials(item.label)}
+                                        </AvatarFallback>
+                                        {/* <AvatarBadge
+                                            className={
+                                                item.status
+                                                    ? 'text-primary'
+                                                    : 'text-muted-foreground'
+                                            }
+                                        /> */}
+                                    </Avatar>
+                                    <div className="flex flex-col gap-1">
+                                        <span>{item.label}</span>
+                                        <small className="text-muted-foreground">
+                                            {item.description}
+                                        </small>
+                                    </div>
                                     {value === item.value && (
                                         <CommandShortcut>
                                             <IconCheck />
