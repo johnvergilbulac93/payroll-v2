@@ -21,6 +21,7 @@ type RolePermissionProps = {
     roles: Role[];
     permissions: Permission[];
     matrix: RolePermissionMatrix;
+    search?: string;
     onSearch?: (value: string) => void;
     isLoading: boolean;
 };
@@ -29,11 +30,12 @@ export default function RolePermission({
     roles,
     permissions,
     matrix: initialMatrix,
+    search: initialSearch = '',
     onSearch,
     isLoading = false,
 }: RolePermissionProps) {
     const [matrix, setMatrix] = useState<RolePermissionMatrix>(initialMatrix);
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useState(initialSearch);
     const onSearchRef = useRef(onSearch);
     const debouncedSearch = useDebounce(search, 500);
 

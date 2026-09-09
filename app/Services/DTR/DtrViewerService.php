@@ -11,13 +11,17 @@ use Illuminate\Support\Facades\DB;
 
 class DtrViewerService
 {
-    public function employees(PayrollPeriod $period, ?string $search = null)
-    {
+    public function employees(
+        PayrollPeriod $period,
+        ?string $search = null,
+        ?int $limit = null,
+        ?int $groupId = null
+    ) {
         $periodLabel = Carbon::parse($period->PeriodStart)->format('M j')
             . ' – ' .
             Carbon::parse($period->PeriodEnd)->format('M j, Y');
 
-        return DB::table('employees')
+        $paginated = DB::table('employees')
             ->where('employees.Status', 1)
             ->whereNull('employees.deleted_at')
             ->leftJoin('groups', 'groups.id', '=', 'employees.Group')
@@ -30,6 +34,9 @@ class DtrViewerService
             })
             ->when($search, function ($query) use ($search) {
                 $query->where('employees.FullName', 'like', "%{$search}%");
+            })
+            ->when($groupId, function ($query, $groupId) {
+                $query->where('employees.Group', $groupId);
             })
             ->select(
                 'employees.id',
@@ -66,7 +73,12 @@ class DtrViewerService
             //     END != 'processed'
             // ")
             ->orderBy('employees.LastName')
-            ->paginate(6);
+            ->paginate($limit ?: 10)
+            ->onEachSide(1)
+            ->withQueryString();
+
+        return $paginated;
+        // dd($paginated->toArray());
     }
     public function attachDtrRecords(
         LengthAwarePaginator $employees,

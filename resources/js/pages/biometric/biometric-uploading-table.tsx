@@ -43,6 +43,7 @@ type UploadingTableProps = {
     onPerPage?: (value: number) => void;
     onEdit?: (file: BiometricUploading) => void;
     onDelete?: (value: number) => void;
+    initialSearch?: string;
 };
 export function BiometricUploadingTable({
     data,
@@ -52,6 +53,7 @@ export function BiometricUploadingTable({
     onPerPage,
     onEdit,
     onDelete,
+    initialSearch,
 }: UploadingTableProps) {
     const { can } = usePermissions();
     const columns = columnHelper.columns([
@@ -155,6 +157,7 @@ export function BiometricUploadingTable({
 
     return (
         <DataTable
+            initialSearch={initialSearch}
             data={data}
             columns={columns}
             getId={(row) => row.id}

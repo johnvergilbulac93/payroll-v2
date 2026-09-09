@@ -61,7 +61,7 @@ export default function AreaOfAssignmentPage({ areas, groups }: Props) {
         type: '',
     });
 
-    const { updateFilters } = usePaginationIndexFilters({
+    const { filters, updateFilters } = usePaginationIndexFilters({
         route: index.url(),
         defaults: { page: 1, search: '', limit: 10 },
     });
@@ -125,6 +125,7 @@ export default function AreaOfAssignmentPage({ areas, groups }: Props) {
                 description="Add, update, and manage area."
             />
             <AreaOfAssignmentTable
+                initialSearch={filters.search}
                 data={areas}
                 // onSelectionChange={setSelectedUserIds}
                 onSearch={(value) => updateFilters({ search: value, page: 1 })}

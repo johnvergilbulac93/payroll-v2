@@ -48,7 +48,7 @@ export default function LoanTypePage({ loan_types }: Props) {
         name: '',
     });
 
-    const { updateFilters } = usePaginationIndexFilters({
+    const { filters, updateFilters } = usePaginationIndexFilters({
         route: index.url(),
         defaults: { page: 1, search: '', limit: 10 },
     });
@@ -111,6 +111,7 @@ export default function LoanTypePage({ loan_types }: Props) {
                 description="Add, update, and manage loan types."
             />
             <LoanTypeTable
+                initialSearch={filters.search}
                 data={loan_types}
                 // onSelectionChange={setSelectedUserIds}
                 onSearch={(value) => updateFilters({ search: value, page: 1 })}

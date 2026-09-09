@@ -22,7 +22,8 @@ class EmployeeController extends Controller
 
         $employees = Employee::with(['group:id,name'])->filter($request->only(['search']))
             ->orderBy('updated_at', 'desc')
-            ->paginate($limit ?? 10);
+            ->paginate($limit ?? 10)
+            ->withQueryString();
 
         return Inertia::render(
             'employee/employee',
@@ -84,7 +85,6 @@ class EmployeeController extends Controller
     }
     public function destroy(Employee $employee)
     {
-        dd($employee);
         $employee->delete();
         return to_route('employee.index');
     }

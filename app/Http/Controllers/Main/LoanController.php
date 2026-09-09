@@ -19,12 +19,23 @@ class LoanController extends Controller
         $query = LoanMaster::with('employee:EmpNbr,FullName,Image', 'loanType:id,name')
             ->filter($request->only(['search']))
             ->orderBy('updated_at', 'desc')
-            ->paginate($limit ?? 10);
+            ->paginate($limit ?? 10)
+            ->withQueryString();
+
         return Inertia::render(
             'loan/loan',
             [
                 'loans' => LoanResourceCollection::make($query),
-                'employees' => Employee::where('Status', 1)->select('EmpNbr as value', 'FullName as label')->get(),
+                'employees' => Employee::select('EmpNbr', 'FullName', 'Image', 'Group')
+                    ->where('Status', 1)
+                    ->with('group:id,name')
+                    ->get()
+                    ->map(fn($employee) => [
+                        'value' => (string) $employee->EmpNbr,
+                        'label' => $employee->FullName,
+                        'description' => $employee->group?->name,
+                        'image_url' => $employee->image_url,
+                    ]),
                 'loanTypes' => LoanType::select('id as value', 'name as label')->get()
             ]
         );

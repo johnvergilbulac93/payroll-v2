@@ -49,6 +49,7 @@ type UsersTableProps = {
     onPerPage?: (value: number) => void;
     onEdit?: (user: User) => void;
     onDelete?: (value: number) => void;
+    initialSearch?: string;
 };
 export function UsersTable({
     data,
@@ -58,6 +59,7 @@ export function UsersTable({
     onPerPage,
     onEdit,
     onDelete,
+    initialSearch,
 }: UsersTableProps) {
     const getInitials = useInitials();
     const { can } = usePermissions();
@@ -169,6 +171,7 @@ export function UsersTable({
 
     return (
         <DataTable
+            initialSearch={initialSearch}
             data={data}
             columns={columns}
             getId={(row) => row.id}

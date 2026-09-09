@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { usePermissions } from '@/hooks/use-permission';
 import type { Maintenance } from '@/types/maintenance';
 import type { PaginatedData } from '@/types/paginated';
+import type { EmployeeDtrPeriod } from '@/types/payroll-period';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const features = tableFeatures({
@@ -31,19 +32,19 @@ const features = tableFeatures({
     sortedRowModel: createSortedRowModel(),
 });
 
-const columnHelper = createColumnHelper<typeof features, Maintenance>();
+const columnHelper = createColumnHelper<typeof features, EmployeeDtrPeriod>();
 
-type AreaOfAssignmentProps = {
-    data: PaginatedData<Maintenance>;
+type EmployeeDtrProps = {
+    data: PaginatedData<EmployeeDtrPeriod>;
     onSelectionChange?: (selectedIds: string[]) => void;
     onSearch?: (value: string) => void;
     onAdd?: () => void;
     onPerPage?: (value: number) => void;
-    onEdit?: (record: Maintenance) => void;
+    onEdit?: (record: EmployeeDtrPeriod) => void;
     onDelete?: (value: number) => void;
     initialSearch?: string;
 };
-export function AreaOfAssignmentTable({
+export function ReportEmployeeDtrTable({
     data,
     onSelectionChange,
     onSearch,
@@ -52,13 +53,13 @@ export function AreaOfAssignmentTable({
     onEdit,
     onDelete,
     initialSearch,
-}: AreaOfAssignmentProps) {
+}: EmployeeDtrProps) {
     const { can } = usePermissions();
     const columns = columnHelper.columns([
-        columnHelper.accessor('name', {
+        columnHelper.accessor('FullName', {
             header: 'Name',
         }),
-        columnHelper.accessor('type_name', {
+        columnHelper.accessor('GroupName', {
             header: 'Group',
         }),
         columnHelper.display({
@@ -105,7 +106,7 @@ export function AreaOfAssignmentTable({
             getId={(row) => row.id}
             enableRowSelection
             onRowSelectionChange={onSelectionChange}
-            buttonText="Add Area"
+            buttonText="Add Position"
             onSearch={onSearch}
             onAdd={onAdd}
             onPerPage={onPerPage}

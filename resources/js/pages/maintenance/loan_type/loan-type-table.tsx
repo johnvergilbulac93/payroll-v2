@@ -41,6 +41,7 @@ type LoanTypeProps = {
     onPerPage?: (value: number) => void;
     onEdit?: (record: Maintenance) => void;
     onDelete?: (value: number) => void;
+    initialSearch?: string;
 };
 export function LoanTypeTable({
     data,
@@ -50,6 +51,7 @@ export function LoanTypeTable({
     onPerPage,
     onEdit,
     onDelete,
+    initialSearch,
 }: LoanTypeProps) {
     const { can } = usePermissions();
     const columns = columnHelper.columns([
@@ -95,6 +97,7 @@ export function LoanTypeTable({
 
     return (
         <DataTable
+            initialSearch={initialSearch}
             data={data}
             columns={columns}
             getId={(row) => row.id}

@@ -29,12 +29,10 @@ class PayrollPeriodController extends Controller
     public function index(Request $request)
     {
         $limit = $request->input("limit");
-        $query = PayrollPeriod::filter($request->only(['Year', 'Month']))
+        $query = PayrollPeriod::filter($request->only(['year', 'month', 'status', 'search']))
             ->with('cutoffDates')
-            // ->where('month', Carbon::now()->month)
-            // ->where('year', Carbon::now()->year)
             ->orderBy('id', 'asc')
-            ->paginate($limit ?? 10)
+            ->paginate($limit ?: 10)
             ->withQueryString(); // keep query string during pagination
 
         return Inertia::render(

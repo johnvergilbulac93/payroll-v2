@@ -1,29 +1,16 @@
 import { Head, useForm, router } from '@inertiajs/react';
-import {
-    IconCalendarMonth,
-    IconEye,
-    IconLoader2,
-    IconPlus,
-    IconTrash,
-} from '@tabler/icons-react';
+
 import { useState } from 'react';
+import { FormDialog } from '@/components/base-modal';
 import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+
 import {
     Field,
     FieldGroup,
     FieldLabel,
     FieldError,
 } from '@/components/ui/field';
-import {
-    Item,
-    ItemActions,
-    ItemContent,
-    ItemDescription,
-    ItemMedia,
-    ItemTitle,
-} from '@/components/ui/item';
+
 import {
     Select,
     SelectContent,
@@ -33,18 +20,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
+
 import { usePaginationIndexFilters } from '@/hooks/use-pagination-filter';
-import { cn } from '@/lib/utils';
+import { PayrollPeriodTable } from '@/pages/payroll_period/payroll-period-table';
 import { index, store, processIndex } from '@/routes/payroll_period';
 import type { Option } from '@/types/option';
 import type { PaginatedData } from '@/types/paginated';
 import type { PayrollPeriod } from '@/types/payroll-period';
-import { FormDialog } from '../../components/base-modal';
 type Props = {
     payroll_periods: PaginatedData<PayrollPeriod>;
     cutoff_dates: Option[];
@@ -58,16 +40,6 @@ const years: Option[] = Array.from({ length: 6 }, (_, index) => {
         value: String(year),
     };
 });
-
-const months: Option[] = Array.from({ length: 12 }, (_, index) => {
-    const date = new Date(2000, index, 1);
-
-    return {
-        label: date.toLocaleString('default', { month: 'long' }),
-        value: String(index + 1),
-    };
-});
-
 export default function PayrollPeriodPage({
     payroll_periods,
     cutoff_dates,
@@ -81,9 +53,16 @@ export default function PayrollPeriodPage({
             CutoffDateID: '',
         });
 
-    const { filters, updateFilters, isLoading } = usePaginationIndexFilters({
+    const { filters, updateFilters } = usePaginationIndexFilters({
         route: index.url(),
-        defaults: { Year: '', Month: '', page: 1 },
+        defaults: {
+            year: '',
+            page: 1,
+            limit: 10,
+            search: '',
+            month: '',
+            status: '',
+        },
     });
 
     const onAdd = () => {
@@ -98,10 +77,6 @@ export default function PayrollPeriodPage({
         });
     };
 
-    const onConfirm = (id: string) => {
-        console.log(id);
-    };
-
     return (
         <div className="p-4">
             <Head title="Payroll Periods" />
@@ -109,158 +84,30 @@ export default function PayrollPeriodPage({
                 title="Payroll Periods"
                 description="Manage payroll periods, dates, and processing status."
             />
-            <div className="space-y-4">
-                <div className="flex items-end justify-between gap-8">
-                    <FieldGroup className="grid grid-cols-2 gap-4">
-                        <Field>
-                            <FieldLabel htmlFor="filter.year">Year</FieldLabel>
-                            <Select
-                                value={filters.Year}
-                                onValueChange={(value) =>
-                                    updateFilters({ Year: value, page: 1 })
-                                }
-                            >
-                                <SelectTrigger id="filter.year">
-                                    <SelectValue placeholder="Select a year" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectItem value=""></SelectItem>
-                                        {years.map((year) => (
-                                            <SelectItem
-                                                key={year.value}
-                                                value={year.value}
-                                            >
-                                                {year.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                        </Field>
-
-                        <Field>
-                            <FieldLabel htmlFor="filter.month">
-                                Month
-                            </FieldLabel>
-                            <Select
-                                value={filters.Month}
-                                onValueChange={(value) =>
-                                    updateFilters({ Month: value, page: 1 })
-                                }
-                            >
-                                <SelectTrigger id="filter.month">
-                                    <SelectValue placeholder="Select a month" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectLabel>Month</SelectLabel>
-                                        {months.map((month) => (
-                                            <SelectItem
-                                                key={month.value}
-                                                value={month.value}
-                                            >
-                                                {month.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                        </Field>
-                    </FieldGroup>
-                    <Button onClick={onAdd}>
-                        <IconPlus /> Generate Yearly Period
-                    </Button>
-                </div>
-                <div className="space-y-2">
-                    {isLoading ? (
-                        <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
-                            <IconLoader2 className="size-4 animate-spin" />
-                            Searching payroll period...
-                        </div>
-                    ) : payroll_periods.data.length === 0 ? (
-                        <div className="py-8 text-center text-sm text-muted-foreground">
-                            No results found.
-                        </div>
-                    ) : (
-                        payroll_periods.data.map((row) => (
-                            <Item
-                                variant="outline"
-                                key={row.id}
-                                className="bg-accent"
-                            >
-                                <ItemMedia>
-                                    <IconCalendarMonth className="text-muted-foreground" />
-                                </ItemMedia>
-                                <ItemContent>
-                                    <ItemTitle>{row.Label} </ItemTitle>
-                                    <ItemDescription>
-                                        {row.Cutoff} | {row.PeriodStart} -{' '}
-                                        {row.PeriodEnd} | Pay Date:{' '}
-                                        {row.PayDate}
-                                        <br />
-                                        <Badge
-                                            variant="outline"
-                                            className={cn(
-                                                'capitalize',
-                                                row.Status === 'open' &&
-                                                    'text-primary',
-                                                row.Status === 'processing' &&
-                                                    'text-blue-500',
-                                                row.Status === 'closed' &&
-                                                    'text-destructive',
-                                                row.Status === 'released' &&
-                                                    'text-emerald-600',
-                                            )}
-                                        >
-                                            {row.Status}
-                                        </Badge>
-                                    </ItemDescription>
-                                </ItemContent>
-                                <ItemActions>
-                                    <Tooltip>
-                                        <TooltipTrigger>
-                                            <Button
-                                                onClick={() =>
-                                                    router.visit(
-                                                        processIndex.url(
-                                                            Number(row.id),
-                                                        ),
-                                                    )
-                                                }
-                                                size="icon-sm"
-                                                aria-label="edit"
-                                            >
-                                                <IconEye />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            Process payroll period
-                                        </TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip>
-                                        <TooltipTrigger>
-                                            <Button
-                                                onClick={() =>
-                                                    onConfirm(row.id)
-                                                }
-                                                size="icon-sm"
-                                                variant="destructive"
-                                                aria-label="trash"
-                                            >
-                                                <IconTrash />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            Delete payroll period
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </ItemActions>
-                            </Item>
-                        ))
-                    )}
-                </div>
-            </div>
+            <PayrollPeriodTable
+                data={payroll_periods}
+                initialSearch={filters.search}
+                initialYear={filters.year}
+                initialMonth={filters.month}
+                initialStatus={filters.status}
+                onSearch={(value) => updateFilters({ search: value, page: 1 })}
+                onPerPage={(value) => updateFilters({ limit: value, page: 1 })}
+                onYearChange={(value) =>
+                    updateFilters({ year: value, page: 1 })
+                }
+                onMonthChange={(value) =>
+                    updateFilters({ month: value, page: 1 })
+                }
+                onStatusChange={(value) =>
+                    updateFilters({ status: value, page: 1 })
+                }
+                onAdd={onAdd}
+                onEdit={(record) =>
+                    router.visit(processIndex.url(Number(record.id)), {
+                        preserveScroll: true,
+                    })
+                }
+            />
 
             <FormDialog
                 key="generate-yearly-payroll-period"

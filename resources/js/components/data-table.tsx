@@ -57,6 +57,8 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
+    SelectGroup,
+    SelectLabel,
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import {
@@ -69,6 +71,7 @@ import {
 } from '@/components/ui/table';
 import { useDebounce } from '@/hooks/use-debounce';
 import { usePermissions } from '@/hooks/use-permission';
+import type { Option } from '@/types/option';
 import type { PaginatedData } from '@/types/paginated';
 
 const features = tableFeatures({
@@ -160,7 +163,39 @@ export interface DataTableProps<T> {
     onPerPage?: (value: number) => void;
     loading?: boolean;
     permissionKey?: string;
+    controlType?: string;
+    onYearChange?: (year: string) => void;
+    onMonthChange?: (month: string) => void;
+    onStatusChange?: (status: string) => void;
+    initialSearch?: string;
+    initialYear?: string;
+    initialMonth?: string;
+    initialStatus?: string;
 }
+
+const years: Option[] = Array.from({ length: 6 }, (_, index) => {
+    const year = new Date().getFullYear() + index;
+
+    return {
+        label: String(year),
+        value: String(year),
+    };
+});
+const months: Option[] = Array.from({ length: 12 }, (_, index) => {
+    const date = new Date(2000, index, 1);
+
+    return {
+        label: date.toLocaleString('default', { month: 'long' }),
+        value: String(index + 1),
+    };
+});
+
+const periodStatusOption = [
+    { label: 'Open', value: 'open' },
+    { label: 'Processing', value: 'processing' },
+    { label: 'Closed', value: 'closed' },
+    { label: 'Released', value: 'released' },
+];
 
 export function DataTable<T extends RowData>({
     data: PaginatedData,
@@ -172,17 +207,29 @@ export function DataTable<T extends RowData>({
     onRowSelectionChange,
     buttonText = 'New',
     onSearch,
+    onYearChange,
+    onMonthChange,
+    onStatusChange,
     onAdd,
     onPerPage,
     emptyMessage = 'No result found.',
     loading = false,
     permissionKey = '',
+    controlType = 'default',
+    initialSearch,
+    initialYear,
+    initialMonth,
+    initialStatus,
 }: DataTableProps<T>) {
+    const [year, setYear] = useState<string>(initialYear ?? '');
+    const [month, setMonth] = useState<string>(initialMonth ?? '');
+    const [status, setStatus] = useState<string>(initialStatus ?? '');
+
     const data = PaginatedData.data;
     const metaPagination = PaginatedData.meta;
     const dataPagination = PaginatedData.pagination;
     const [pageSize, setPageSize] = useState(Number(dataPagination.limit));
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useState(initialSearch);
     const debouncedSearch = useDebounce(search, 500);
     const onSearchRef = useRef(onSearch);
     const [rowSelection, setRowSelection] = useState({});
@@ -414,18 +461,6 @@ export function DataTable<T extends RowData>({
                     </Button>
                 )}
             </div>
-            {/* <ButtonGroup className="w-1/2">
-                <Input
-                    type="search"
-                    id="input-button-group"
-                    placeholder="Type to search..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
-                <Button onClick={() => onSearch?.(search)} variant="outline">
-                    Search
-                </Button>
-            </ButtonGroup> */}
 
             {can(permissionKey) && (
                 <Button onClick={onAdd} variant={'outline'}>
@@ -436,9 +471,115 @@ export function DataTable<T extends RowData>({
         </div>
     );
 
+    const tableControls2 = (
+        <div className="relative w-full">
+            <IconSearch className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+                type="text"
+                id="input-button-group"
+                placeholder="Type to search..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pr-9 pl-9"
+            />
+            {search && (
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSearch('')}
+                    className="absolute top-1/2 right-1 size-7 -translate-y-1/2 text-muted-foreground hover:bg-transparent hover:text-foreground"
+                >
+                    <IconX className="size-4" />
+                    <span className="sr-only">Clear search</span>
+                </Button>
+            )}
+        </div>
+    );
+    const tableControls3 = (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Select
+                value={status}
+                onValueChange={(value) => {
+                    const resolved = value === 'all' ? '' : value;
+                    setStatus(resolved);
+                    onStatusChange?.(resolved);
+                }}
+            >
+                <SelectTrigger id="month" className="w-full">
+                    <SelectValue placeholder="Select a status" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectGroup>
+                        <SelectLabel>Status</SelectLabel>
+                        <SelectItem value="all">All statuses</SelectItem>
+                        {periodStatusOption.map((item) => (
+                            <SelectItem key={item.value} value={item.value}>
+                                {item.label}
+                            </SelectItem>
+                        ))}
+                    </SelectGroup>
+                </SelectContent>
+            </Select>
+            <Select
+                value={year}
+                onValueChange={(value) => {
+                    const resolved = value === 'all' ? '' : value;
+                    setYear(resolved);
+                    onYearChange?.(resolved);
+                }}
+            >
+                <SelectTrigger id="year" className="w-full">
+                    <SelectValue placeholder="Select a year" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectGroup>
+                        <SelectLabel>Year</SelectLabel>
+                        <SelectItem value="all">All year</SelectItem>
+                        {years.map((year) => (
+                            <SelectItem key={year.value} value={year.value}>
+                                {year.label}
+                            </SelectItem>
+                        ))}
+                    </SelectGroup>
+                </SelectContent>
+            </Select>
+            <Select
+                value={month}
+                onValueChange={(value) => {
+                    const resolved = value === 'all' ? '' : value;
+                    setMonth(resolved);
+                    onMonthChange?.(resolved);
+                }}
+            >
+                <SelectTrigger id="month" className="w-full">
+                    <SelectValue placeholder="Select a month" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectGroup>
+                        <SelectLabel>Month</SelectLabel>
+                        <SelectItem value="all">All month</SelectItem>
+                        {months.map((month) => (
+                            <SelectItem key={month.value} value={month.value}>
+                                {month.label}
+                            </SelectItem>
+                        ))}
+                    </SelectGroup>
+                </SelectContent>
+            </Select>
+            <Button onClick={onAdd} variant={'outline'} className="w-full">
+                <IconPlus data-icon="inline-start" />
+                {buttonText}
+            </Button>
+        </div>
+    );
+
     return (
         <div className="space-y-2">
-            {tableControls}
+            {controlType === 'default' && tableControls}
+            {controlType === 'process-dtr' && tableControls2}
+            {controlType === 'payroll-period' && tableControls3}
+
             <div className="overflow-hidden rounded-lg border">
                 <Table>
                     <TableHeader className="sticky top-0 z-10 bg-muted">

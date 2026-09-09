@@ -53,6 +53,7 @@ type EmployeeTableProps = {
     onPerPage?: (value: number) => void;
     onEdit?: (employee: Employee) => void;
     onDelete?: (value: number) => void;
+    initialSearch?: string
 };
 export function EmployeeTable({
     data,
@@ -62,6 +63,7 @@ export function EmployeeTable({
     onPerPage,
     onEdit,
     onDelete,
+    initialSearch
 }: EmployeeTableProps) {
     const { can } = usePermissions();
     const getInitials = useInitials();
@@ -193,6 +195,7 @@ export function EmployeeTable({
     return (
         <DataTable
             data={data}
+            initialSearch={initialSearch}
             columns={columns}
             getId={(row) => row.id}
             enableRowSelection

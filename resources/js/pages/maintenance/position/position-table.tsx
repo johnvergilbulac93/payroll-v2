@@ -41,6 +41,7 @@ type PositionProps = {
     onPerPage?: (value: number) => void;
     onEdit?: (record: Maintenance) => void;
     onDelete?: (value: number) => void;
+    initialSearch?: string;
 };
 export function PositionTable({
     data,
@@ -50,6 +51,7 @@ export function PositionTable({
     onPerPage,
     onEdit,
     onDelete,
+    initialSearch,
 }: PositionProps) {
     const { can } = usePermissions();
     const columns = columnHelper.columns([
@@ -97,6 +99,7 @@ export function PositionTable({
 
     return (
         <DataTable
+            initialSearch={initialSearch}
             data={data}
             columns={columns}
             getId={(row) => row.id}

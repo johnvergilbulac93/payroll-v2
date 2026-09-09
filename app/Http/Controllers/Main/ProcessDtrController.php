@@ -25,16 +25,15 @@ class ProcessDtrController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $limit = $request->input('limit');
         $periodId =  $request->input('period');
-        $periods =  PayrollPeriodResource::collection(PayrollPeriod::where('Status', 'open')->get())->resolve();
+        $periods =  PayrollPeriodResource::collection(PayrollPeriod::get())->resolve();
 
         if (!$periodId) {
             return Inertia::render(
                 'process_dtr/process-dtr',
                 [
-                    'employees' => Inertia::scroll(fn() => ProcessDtrResourceCollection::make(
-                        new LengthAwarePaginator([], 0, 15)
-                    )),
+                    'employees' =>  ProcessDtrResourceCollection::make(new LengthAwarePaginator([], 0, 10)),
                     'periods' =>  $periods,
 
                 ]
@@ -43,19 +42,19 @@ class ProcessDtrController extends Controller
         $period = PayrollPeriod::findOrFail($periodId);
         $employees = $this->dtrViewerService->employees(
             $period,
-            $search
+            $search,
+            $limit
         );
         $this->dtrViewerService->attachDtrRecords(
             $employees,
             $period
         );
 
-        // $employee_details = $this->dtrViewerService->summary($period);
 
         return Inertia::render(
             'process_dtr/process-dtr',
             [
-                'employees' => Inertia::scroll(fn() => ProcessDtrResourceCollection::make($employees)),
+                'employees' => ProcessDtrResourceCollection::make($employees),
                 'periods' =>  $periods,
 
             ]
@@ -67,22 +66,20 @@ class ProcessDtrController extends Controller
             $start = Carbon::parse($payrollPeriod->PeriodStart)->format('M d, Y');
             $end = Carbon::parse($payrollPeriod->PeriodEnd)->format('M d, Y');
             $this->dtrProcessor->processPayrollPeriod($payrollPeriod);
+            return to_route('dtr.index', ['period' => $payrollPeriod->id])
+                ->with('success', "DTR process for period {$start} - {$end} completed.");
         } catch (\RuntimeException $e) {
             return back()->with('error', $e->getMessage());
         }
-        return redirect()
-            ->route('dtr.index', ['period' => $payrollPeriod->id])
-            ->with('success', "DTR process for period {$start} - {$end} completed.");
     }
     public function processDTREmployee(PayrollPeriod $payrollPeriod, Employee $employee)
     {
         try {
             $this->dtrProcessor->processEmployeeForPeriod($employee, $payrollPeriod);
+            return to_route('dtr.index', ['period' => $payrollPeriod->id])
+                ->with('success', "DTR reprocessed for {$employee->FullName} completed.");
         } catch (\RuntimeException $e) {
             return back()->with('error', $e->getMessage());
         }
-        return redirect()
-            ->route('dtr.index', ['period' => $payrollPeriod->id])
-            ->with('success', "DTR reprocessed for {$employee->FullName} completed.");
     }
 }

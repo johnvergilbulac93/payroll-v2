@@ -43,6 +43,7 @@ type LoanTableProps = {
     onPerPage?: (value: number) => void;
     onEdit?: (loan: Loan) => void;
     onDelete?: (value: number) => void;
+    initialSearch?: string;
 };
 export function LoanTable({
     data,
@@ -52,6 +53,7 @@ export function LoanTable({
     onPerPage,
     onEdit,
     onDelete,
+    initialSearch,
 }: LoanTableProps) {
     const { can } = usePermissions();
     const getInitials = useInitials();
@@ -163,6 +165,7 @@ export function LoanTable({
     return (
         <DataTable
             data={data}
+            initialSearch={initialSearch}
             columns={columns}
             getId={(row) => row.id}
             enableRowSelection

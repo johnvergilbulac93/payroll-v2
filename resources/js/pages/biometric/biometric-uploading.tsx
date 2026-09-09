@@ -53,7 +53,7 @@ export default function UploadBiometric({ UploadedFiles }: Props) {
         uploaded_at: '',
     });
     const { trigger: triggerUndoable } = useUndoableAction<number>();
-    const { updateFilters } = usePaginationIndexFilters({
+    const { filters, updateFilters } = usePaginationIndexFilters({
         route: index.url(),
         defaults: { page: 1, search: '', limit: 10 },
     });
@@ -111,6 +111,7 @@ export default function UploadBiometric({ UploadedFiles }: Props) {
                 description="Upload biometric .dat files for processing."
             />
             <BiometricUploadingTable
+                initialSearch={filters.search}
                 data={UploadedFiles}
                 onSearch={(value) => updateFilters({ search: value, page: 1 })}
                 onAdd={onAdd}

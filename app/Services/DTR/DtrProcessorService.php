@@ -20,7 +20,7 @@ class DtrProcessorService
     public function processPayrollPeriod(PayrollPeriod $period, ?int $employeeId = null): void
     {
         if ($period->Status === 'closed') {
-            throw new \RuntimeException("Cannot process DTR — payroll period #{$period->id} is closed.");
+            throw new \RuntimeException("Cannot process DTR — payroll period is closed.");
         }
 
         $this->processForEmployees(
@@ -70,6 +70,16 @@ class DtrProcessorService
             ->get(['EmpID', 'DTRDate'])
             ->map(fn($r) => $r->EmpID . '|' . $r->DTRDate)
             ->flip();
+
+        $rawPunches = $this->fetchGroupedPunches($startDate, $endDate, $employeeIds);
+
+        if ($rawPunches->isEmpty()) {
+            throw new \RuntimeException(sprintf(
+                "No biometric punch data found for employee(s) between %s and %s.",
+                $startDate->toDateString(),
+                $endDate->toDateString()
+            ));
+        }
 
         $groupedPunches = $this->fetchGroupedPunches($startDate, $endDate, $employeeIds)
             ->reject(fn($row) => isset($lockedKeys[$row->employee_id . '|' . $row->dtr_date]));
@@ -360,7 +370,7 @@ class DtrProcessorService
         $lateMinutes = (int) max(0, floor(($in->getTimestamp() - $expectedStart->getTimestamp()) / 60));
         // Undertime: shortfall vs. scheduled end time, rounded UP to the
         // nearest half hour. E.g. 1 minute short → 0.5, 2hr11min short → 2.5.
-        
+
         // $undertimeMinutesRaw = (int) max(0, round(($expectedEnd->getTimestamp() - $out->getTimestamp()) / 60));
         // $undertimeHours = ceil($undertimeMinutesRaw / 30) * 0.5;
 

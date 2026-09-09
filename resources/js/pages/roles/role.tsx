@@ -50,7 +50,7 @@ export default function Role({ roles }: Props) {
         id: '',
         IsActive: true,
     });
-    const { updateFilters } = usePaginationIndexFilters({
+    const { filters, updateFilters } = usePaginationIndexFilters({
         route: index.url(),
         defaults: { page: 1, search: '', limit: 10 },
     });
@@ -114,6 +114,7 @@ export default function Role({ roles }: Props) {
                 description="View, add, edit, and manage role details."
             />
             <RolesTable
+                initialSearch={filters.search}
                 data={roles}
                 // onSelectionChange={setSelectedUserIds}
                 onSearch={(value) => updateFilters({ search: value, page: 1 })}

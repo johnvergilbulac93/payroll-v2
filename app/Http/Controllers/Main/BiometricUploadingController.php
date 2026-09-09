@@ -22,7 +22,9 @@ class BiometricUploadingController extends Controller
         $query = BiometricImportBatch::filter($request->only(['search']))
             ->with('uploadedBy:id,name')
             ->latest()
-            ->paginate($limit ?? 10);
+            ->paginate($limit ?? 10)
+            ->withQueryString();
+
         return Inertia::render(
             'biometric/biometric-uploading',
             [

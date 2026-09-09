@@ -106,4 +106,21 @@ class Employee extends Model
     {
         return $this->belongsTo(Group::class, 'Group');
     }
+    public function dtrRecords(): HasMany
+    {
+        return $this->hasMany(DTRRecord::class, 'EmpID');
+    }
+
+    public function scopeFilterGenerateDtr(Builder $query, PayrollPeriod $period, ?int $groupId = null): Builder
+    {
+        return $query
+            ->where('Status', 1)
+            ->when($groupId, fn($q) => $q->where('Group', $groupId))
+            ->with([
+                'group',
+                'dtrRecords' => fn($q) => $q
+                    ->whereBetween('DTRDate', [$period->PeriodStart, $period->PeriodEnd])
+                    ->orderBy('DTRDate'),
+            ]);
+    }
 }

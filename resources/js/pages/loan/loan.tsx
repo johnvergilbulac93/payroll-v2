@@ -96,7 +96,7 @@ export default function Loan({ loans, employees, loanTypes }: Props) {
     });
     const { trigger: triggerUndoable } = useUndoableAction<number>();
 
-    const { updateFilters } = usePaginationIndexFilters({
+    const { filters, updateFilters } = usePaginationIndexFilters({
         route: index.url(),
         defaults: { page: 1, search: '', limit: 10 },
     });
@@ -181,7 +181,7 @@ export default function Loan({ loans, employees, loanTypes }: Props) {
             />
             <LoanTable
                 data={loans}
-                // onSelectionChange={setSelectedUserIds}
+                initialSearch={filters.search}
                 onSearch={(value) => updateFilters({ search: value, page: 1 })}
                 onAdd={onAdd}
                 onPerPage={(value) => updateFilters({ limit: value, page: 1 })}
@@ -341,11 +341,11 @@ export default function Loan({ loans, employees, loanTypes }: Props) {
                                 tabIndex={5}
                                 aria-invalid={!!errors.Frequency}
                             >
-                                <SelectValue placeholder="Select a group" />
+                                <SelectValue placeholder="Select a frequency" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                    <SelectLabel>Groups</SelectLabel>
+                                    <SelectLabel>Frequency</SelectLabel>
                                     {frequencyOptions.map((item) => (
                                         <SelectItem
                                             key={item.value}

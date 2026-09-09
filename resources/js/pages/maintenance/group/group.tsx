@@ -48,7 +48,7 @@ export default function GroupPage({ groups }: Props) {
         name: '',
     });
 
-    const { updateFilters } = usePaginationIndexFilters({
+    const { filters, updateFilters } = usePaginationIndexFilters({
         route: index.url(),
         defaults: { page: 1, search: '', limit: 10 },
     });
@@ -111,6 +111,7 @@ export default function GroupPage({ groups }: Props) {
                 description="Add, update, and manage group."
             />
             <GroupTable
+                initialSearch={filters.search}
                 data={groups}
                 // onSelectionChange={setSelectedUserIds}
                 onSearch={(value) => updateFilters({ search: value, page: 1 })}

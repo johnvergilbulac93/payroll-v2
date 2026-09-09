@@ -41,6 +41,7 @@ type GroupProps = {
     onPerPage?: (value: number) => void;
     onEdit?: (record: Maintenance) => void;
     onDelete?: (value: number) => void;
+    initialSearch?: string;
 };
 export function GroupTable({
     data,
@@ -50,6 +51,7 @@ export function GroupTable({
     onPerPage,
     onEdit,
     onDelete,
+    initialSearch,
 }: GroupProps) {
     const { can } = usePermissions();
     const columns = columnHelper.columns([
@@ -95,6 +97,7 @@ export function GroupTable({
 
     return (
         <DataTable
+            initialSearch={initialSearch}
             data={data}
             columns={columns}
             getId={(row) => row.id}

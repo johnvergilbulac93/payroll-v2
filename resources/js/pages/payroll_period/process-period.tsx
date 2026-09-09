@@ -24,7 +24,9 @@ import {
     ItemActions,
 } from '@/components/ui/item';
 import { Spinner } from '@/components/ui/spinner';
+
 import { index as dtrProcessIndex } from '@/routes/dtr';
+import { index as payrollPeriodIndex } from '@/routes/payroll_period';
 import type { PayrollPeriod } from '@/types/payroll-period';
 import type { StepperStep } from '@/types/stepper';
 
@@ -203,6 +205,18 @@ export default function ProcessPeriodPage({ employee_details, period }: Props) {
                             </ItemDescription>
                         </ItemContent>
                         <ItemActions>
+                            <Button
+                                variant="outline"
+                                onClick={() =>
+                                    router.visit(payrollPeriodIndex.url(), {
+                                        preserveScroll: true,
+                                        preserveState: true,
+                                    })
+                                }
+                            >
+                                Cancel
+                            </Button>
+
                             {currentStep == 4 && (
                                 <Button onClick={onRecomputePayroll}>
                                     {currentStep == 4 && processing && (

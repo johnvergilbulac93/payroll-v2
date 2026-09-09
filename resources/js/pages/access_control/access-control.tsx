@@ -30,7 +30,7 @@ export default function AccessControl({
     permissions,
     matrix,
 }: Props) {
-    const { updateFilters, isLoading } = usePaginationIndexFilters({
+    const { filters, updateFilters, isLoading } = usePaginationIndexFilters({
         route: index.url(),
         defaults: { page: 1, search: '', limit: 10 },
     });
@@ -61,6 +61,7 @@ export default function AccessControl({
                         matrix={matrix}
                         permissions={permissions}
                         roles={roles}
+                        search={filters.search}
                         onSearch={(value) => updateFilters({ search: value })}
                         isLoading={isLoading}
                     />

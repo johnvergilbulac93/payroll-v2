@@ -71,7 +71,7 @@ export default function HolidayPage({ holidays }: Props) {
         IsRecurring: false,
     });
 
-    const { updateFilters } = usePaginationIndexFilters({
+    const { filters, updateFilters } = usePaginationIndexFilters({
         route: index.url(),
         defaults: { page: 1, search: '', limit: 10 },
     });
@@ -137,6 +137,7 @@ export default function HolidayPage({ holidays }: Props) {
                 description="Add, update, and manage holiday."
             />
             <HolidayTable
+                initialSearch={filters.search}
                 data={holidays}
                 // onSelectionChange={setSelectedUserIds}
                 onSearch={(value) => updateFilters({ search: value, page: 1 })}

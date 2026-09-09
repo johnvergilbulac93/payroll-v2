@@ -27,6 +27,7 @@ class DtrRecord extends Model
     {
         return $this->belongsTo(Employee::class, 'EmpID');
     }
+    
 
     // public function employeeSchedule(): BelongsTo
     // {

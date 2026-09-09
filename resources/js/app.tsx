@@ -36,8 +36,10 @@ createInertiaApp({
             <TooltipProvider delayDuration={0}>
                 {app}
                 <Toaster
-                    position="top-center"
+                    position="top-right"
                     duration={2000}
+                    closeButton
+                    swipeDirections={['right']}
                     icons={{
                         success: (
                             <IconCircleCheckFilled className="h-5 w-5 text-primary" />

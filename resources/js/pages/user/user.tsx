@@ -69,7 +69,7 @@ export default function UserList({ users, roles }: Props) {
         IsActive: true,
     });
 
-    const { updateFilters } = usePaginationIndexFilters({
+    const { filters, updateFilters } = usePaginationIndexFilters({
         route: index.url(),
         defaults: { page: 1, search: '', limit: 10 },
     });
@@ -141,6 +141,7 @@ export default function UserList({ users, roles }: Props) {
                 description="View, add, edit, and manage user accounts."
             />
             <UsersTable
+                initialSearch={filters.search}
                 data={users}
                 // onSelectionChange={setSelectedUserIds}
                 onSearch={(value) => updateFilters({ search: value, page: 1 })}
@@ -243,7 +244,6 @@ export default function UserList({ users, roles }: Props) {
                         </Field>
                     </FieldLabel>
                 </FieldGroup>
-
             </FormDialog>
 
             <ConfirmDialog

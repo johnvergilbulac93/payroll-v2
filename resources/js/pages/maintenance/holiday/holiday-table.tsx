@@ -41,6 +41,7 @@ type HolidayProps = {
     onPerPage?: (value: number) => void;
     onEdit?: (record: Holiday) => void;
     onDelete?: (value: number) => void;
+    initialSearch?: string;
 };
 export function HolidayTable({
     data,
@@ -50,6 +51,7 @@ export function HolidayTable({
     onPerPage,
     onEdit,
     onDelete,
+    initialSearch,
 }: HolidayProps) {
     const { can } = usePermissions();
     const columns = columnHelper.columns([
@@ -97,6 +99,7 @@ export function HolidayTable({
 
     return (
         <DataTable
+            initialSearch={initialSearch}
             data={data}
             columns={columns}
             getId={(row) => row.id}

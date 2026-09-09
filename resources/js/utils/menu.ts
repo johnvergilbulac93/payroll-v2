@@ -1,11 +1,9 @@
 import type { InertiaLinkProps } from '@inertiajs/react';
 import {
-
     IconCalendarClock,
     IconCalendarDollar,
     IconCalendarPlus,
     IconCalendarUser,
-
     IconClipboardList,
     IconFileUpload,
     IconHome,
@@ -19,6 +17,7 @@ import {
 } from '@tabler/icons-react';
 import type { LucideIcon } from 'lucide-react';
 import type { ComponentType } from 'react';
+import { dashboard } from '@/routes';
 import { index as accessControlIndex } from '@/routes/access_control';
 import { index as cutoffDateIndex } from '@/routes/cutoff';
 import { index as processDtrIndex } from '@/routes/dtr';
@@ -27,11 +26,11 @@ import { index as employeeScheduleIndex } from '@/routes/employee_schedule';
 import { index as loanIndex } from '@/routes/loan';
 import { index as loanTypeIndex } from '@/routes/maintenance/loan_type';
 import { index as payrollPeriodIndex } from '@/routes/payroll_period';
+import { generateDtr } from '@/routes/report';
 import { index as roleIndex } from '@/routes/role';
 import { index as shiftIndex } from '@/routes/shift';
 import { index as uploadingIndex } from '@/routes/uploading';
 import { index as userIndex } from '@/routes/user';
-import { dashboard } from '@/routes';
 
 interface NavChild {
     Label: string;
@@ -135,7 +134,7 @@ export const navItems: NavGroup[] = [
             },
             {
                 Label: 'Generate Dtr',
-                Url: '#',
+                Url: generateDtr.url(),
                 Icon: IconReport,
                 Permission: 'users-view',
             },

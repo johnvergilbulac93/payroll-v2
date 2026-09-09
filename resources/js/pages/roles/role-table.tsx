@@ -47,6 +47,7 @@ type RolesTableProps = {
     onPerPage?: (value: number) => void;
     onEdit?: (role: Role) => void;
     onDelete?: (value: number) => void;
+    initialSearch?: string;
 };
 export function RolesTable({
     data,
@@ -56,6 +57,7 @@ export function RolesTable({
     onPerPage,
     onEdit,
     onDelete,
+    initialSearch,
 }: RolesTableProps) {
     const { can } = usePermissions();
     const columns = columnHelper.columns([
@@ -144,6 +146,7 @@ export function RolesTable({
 
     return (
         <DataTable
+            initialSearch={initialSearch}
             data={data}
             columns={columns}
             getId={(row) => row.id}

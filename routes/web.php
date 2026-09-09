@@ -25,3 +25,4 @@ require __DIR__ . '/payroll_period.php';
 require __DIR__ . '/dtr.php';
 require __DIR__ . '/schedule_employee.php';
 require __DIR__ . '/maintenance.php';
+require __DIR__ . '/report.php';

@@ -40,6 +40,7 @@ type FormDialogProps = {
     size?: DialogSize;
     disabled?: boolean;
     canAdd?: boolean
+    
 };
 
 export function FormDialog({

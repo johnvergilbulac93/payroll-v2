@@ -85,19 +85,16 @@ class PayrollPeriod extends Model
     }
     public function scopeFilter(Builder $query, array $filters)
     {
-
-        // $query->when($filters['search'] ?? null, function ($query, $search) {
-        //     $query->where(function ($q) use ($search) {
-        //         $q->orWhere('Year', 'like', "%{$search}%")
-        //             ->orWhere('Month', 'like', "%{$search}%");
-        //     });
-        // });
-        $query->when($filters['Year'] ?? null, function ($query, $year) {
+        $query->when($filters['status'] ?? null, function ($query, $status) {
+            $query->where('Status', $status);
+        });
+        $query->when($filters['year'] ?? null, function ($query, $year) {
             $query->where('Year', $year);
         });
-
-        $query->when($filters['Month'] ?? null, function ($query, $month) {
+        $query->when($filters['month'] ?? null, function ($query, $month) {
             $query->where('Month', $month);
         });
+
+        return $query;
     }
 }

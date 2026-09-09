@@ -20,7 +20,7 @@ export default function EmployeeList({ employees }: Props) {
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
-    const { updateFilters } = usePaginationIndexFilters({
+    const { filters, updateFilters } = usePaginationIndexFilters({
         route: index.url(),
         defaults: { page: 1, search: '', limit: 10 },
     });
@@ -47,6 +47,7 @@ export default function EmployeeList({ employees }: Props) {
             <EmployeeTable
                 data={employees}
                 // onSelectionChange={setSelectedUserIds}
+                initialSearch={filters.search}
                 onSearch={(value) => updateFilters({ search: value, page: 1 })}
                 onAdd={() => router.visit(create.url())}
                 onPerPage={(value) => updateFilters({ limit: value, page: 1 })}
@@ -58,14 +59,14 @@ export default function EmployeeList({ employees }: Props) {
                 open={confirmOpen}
                 icon={<IconTrash />}
                 onOpenChange={setConfirmOpen}
-                title="Delete loan?"
-                description="This will permanently delete this loan record. This action cannot be undone."
+                title="Delete employee?"
+                description="This will permanently delete this employee record. This action cannot be undone."
                 confirmText="Delete"
                 onConfirm={async () => {
                     if (pendingDeleteId !== null) {
                         triggerUndoable(pendingDeleteId, {
                             action: onDelete,
-                            message: 'Loan record will be deleted',
+                            message: 'Employee record will be deleted',
                             toastId: `delete-${pendingDeleteId}`,
                         });
                     }

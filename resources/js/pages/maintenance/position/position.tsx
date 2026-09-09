@@ -24,15 +24,15 @@ import { usePaginationIndexFilters } from '@/hooks/use-pagination-filter';
 import { useUndoableAction } from '@/hooks/use-undoable';
 import { PositionTable } from '@/pages/maintenance/position/position-table';
 
-import type { Maintenance } from '@/types/maintenance';
-import type { Option } from '@/types/option';
-import type { PaginatedData } from '@/types/paginated';
 import {
     index,
     store,
     update,
     destroy as remove,
 } from '@/routes/maintenance/position';
+import type { Maintenance } from '@/types/maintenance';
+import type { Option } from '@/types/option';
+import type { PaginatedData } from '@/types/paginated';
 
 type Props = {
     positions: PaginatedData<Maintenance>;
@@ -61,7 +61,7 @@ export default function PositionPage({ positions, groups }: Props) {
         type: '',
     });
 
-    const { updateFilters } = usePaginationIndexFilters({
+    const { filters, updateFilters } = usePaginationIndexFilters({
         route: index.url(),
         defaults: { page: 1, search: '', limit: 10 },
     });
@@ -125,6 +125,7 @@ export default function PositionPage({ positions, groups }: Props) {
                 description="Add, update, and manage position."
             />
             <PositionTable
+                initialSearch={filters.search}
                 data={positions}
                 // onSelectionChange={setSelectedUserIds}
                 onSearch={(value) => updateFilters({ search: value, page: 1 })}
