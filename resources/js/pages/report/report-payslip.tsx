@@ -74,7 +74,7 @@ export default function ReportPaySlipPage({ periods, payslips }: Props) {
                 description="Generate payslip for employees."
             />
             <div className="space-y-4">
-                <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-4 sm:items-end">
+                <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-4 items-end">
                     <Field className="col-span-2 min-w-0 gap-2">
                         <FieldLabel>Periods</FieldLabel>
                         <Button
