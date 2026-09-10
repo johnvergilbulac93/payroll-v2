@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
-import ComboBox from '@/components/combo-box';
+import { useState } from 'react';
 import Heading from '@/components/heading';
+import SearchableSelect from '@/components/searchable-select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DailySchedule } from '@/pages/schedule_employee/daily-schedule';
 import { PerDateSchedule } from '@/pages/schedule_employee/per-date-schedule';
@@ -9,8 +10,6 @@ import type { Employee } from '@/types/employee';
 import type { Option } from '@/types/option';
 import type { SchedulePerDate } from '@/types/per-date-schedule';
 import type { ScheduleTemplate, ShiftCode } from '@/types/schedule-template';
-import SearchableSelect from '@/components/searchable-select';
-import { useState } from 'react';
 
 type Props = {
     employees: Option[];
@@ -27,9 +26,7 @@ export default function ScheduleEmployeePage({
     shiftCodes,
     perDateSchedules,
 }: Props) {
-    const selectedEmployee: Option | null = employee
-        ? { value: String(employee.id), label: employee.FullName }
-        : null;
+
 
     const [selected, setSelected] = useState<string | null>(
         employee ? String(employee.id) : null,

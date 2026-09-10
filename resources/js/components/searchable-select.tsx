@@ -1,7 +1,7 @@
-import { IconCheck, IconChevronDown, IconUser } from '@tabler/icons-react';
+import { IconCheck, IconChevronDown } from '@tabler/icons-react';
+import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Command,

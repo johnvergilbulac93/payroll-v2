@@ -16,7 +16,6 @@ import type { DTRRecordsDetails } from '@/types/payroll-period';
 type DTRProps = {
     dailyTimeRecords: DTRRecordsDetails[];
 };
-
 export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
     return (
         <div className="overflow-hidden rounded-lg border">
@@ -31,8 +30,8 @@ export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
                         <TableHead>HW</TableHead>
                         <TableHead>LATE</TableHead>
                         <TableHead>UT</TableHead>
-                        <TableHead className='w-10'>DW</TableHead>
-                        <TableHead className='w-10' >
+                        <TableHead className="w-10">DW</TableHead>
+                        <TableHead className="w-10">
                             <span className="sr-only">Punches logs</span>
                         </TableHead>
                     </TableRow>
@@ -41,7 +40,9 @@ export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
                     {dailyTimeRecords.map((dtr) =>
                         dtr.DTRDate !== 'TOTAL' && dtr.IsDayOff ? (
                             <TableRow key={dtr.DTRDate}>
-                                <TableCell className='font-medium '>{dtr.DTRDate}</TableCell>
+                                <TableCell className="font-medium">
+                                    {dtr.DTRDate}
+                                </TableCell>
                                 <TableCell>{dtr.Day}</TableCell>
                                 <TableCell
                                     colSpan={8}
@@ -52,7 +53,9 @@ export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
                             </TableRow>
                         ) : (
                             <TableRow key={dtr.DTRDate}>
-                                <TableCell className='font-medium'>{dtr.DTRDate}</TableCell>
+                                <TableCell className="font-medium">
+                                    {dtr.DTRDate}
+                                </TableCell>
                                 <TableCell>{dtr.Day}</TableCell>
                                 <TableCell>{dtr.IN}</TableCell>
                                 <TableCell>{dtr.OUT}</TableCell>

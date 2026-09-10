@@ -13,8 +13,6 @@ import {
     useRef,
 } from 'react';
 import type { ChangeEvent, ReactNode } from 'react';
-import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
 import {
     Attachment,
     AttachmentAction,
@@ -24,6 +22,8 @@ import {
     AttachmentMedia,
     AttachmentTitle,
 } from '@/components/ui/attachment';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 
 export interface FileUploaderHandle {
     browse: () => void;

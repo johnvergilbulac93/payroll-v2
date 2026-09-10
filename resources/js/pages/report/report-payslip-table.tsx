@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { useInitials } from '@/hooks/use-initials';
 import { usePermissions } from '@/hooks/use-permission';
 import type { PaginatedData } from '@/types/paginated';
-import type { EmployeeDtrPeriod } from '@/types/payroll-period';
+import type { Payslip } from '@/types/payslip';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const features = tableFeatures({
@@ -33,30 +33,29 @@ const features = tableFeatures({
     sortedRowModel: createSortedRowModel(),
 });
 
-const columnHelper = createColumnHelper<typeof features, EmployeeDtrPeriod>();
+const columnHelper = createColumnHelper<typeof features, Payslip>();
 
-type ReportDtrProps = {
-    data: PaginatedData<EmployeeDtrPeriod>;
+type ReportPayslipProps = {
+    data: PaginatedData<Payslip>;
     onSelectionChange?: (selectedIds: string[]) => void;
     onSearch?: (value: string) => void;
     onAdd?: () => void;
     onPerPage?: (value: number) => void;
-    onEdit?: (record: EmployeeDtrPeriod) => void;
-    onPrint?: (record: EmployeeDtrPeriod) => void;
+    onEdit?: (record: Payslip) => void;
+    onPrint?: (record: Payslip) => void;
     initialSearch?: string;
     processMode?: string;
 };
-export function ReportEmployeeDtrTable({
+export function ReportEmployeePayslipTable({
     data,
     onSelectionChange,
     onSearch,
     onAdd,
     onPerPage,
-    onEdit,
     onPrint,
     initialSearch,
     processMode,
-}: ReportDtrProps) {
+}: ReportPayslipProps) {
     const getInitials = useInitials();
     const { can } = usePermissions();
     const columns = columnHelper.columns([
@@ -85,15 +84,13 @@ export function ReportEmployeeDtrTable({
                 </div>
             ),
         }),
-        columnHelper.accessor('GroupName', {
-            header: 'Group',
+        columnHelper.accessor('PayDate', {
+            header: 'Pay Date',
         }),
-        columnHelper.accessor('Period', {
-            header: 'Period',
+        columnHelper.accessor('Cutoff', {
+            header: 'Period Start/End',
         }),
-        columnHelper.accessor('ProcessedAt', {
-            header: 'Time/Date Processed',
-        }),
+
         columnHelper.display({
             id: 'actions',
             size: 20,
@@ -106,15 +103,7 @@ export function ReportEmployeeDtrTable({
                 }
 
                 return (
-                    <div className="flex w-full justify-end gap-1">
-                        <Button
-                            onClick={() => onEdit?.(row.original)}
-                            size="icon-sm"
-                            variant="outline"
-                        >
-                            <IconEye />
-                        </Button>
-
+                    <>
                         {processMode === 'per-employee' && (
                             <Button
                                 onClick={() => onPrint?.(row.original)}
@@ -123,7 +112,7 @@ export function ReportEmployeeDtrTable({
                                 <IconPrinter />
                             </Button>
                         )}
-                    </div>
+                    </>
                 );
             },
         }),

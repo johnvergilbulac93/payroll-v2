@@ -18,9 +18,7 @@ import {
     FieldGroup,
     FieldLabel,
     Field,
-    FieldContent,
     FieldError,
-    FieldTitle,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
@@ -31,7 +29,6 @@ import {
     ItemMedia,
     ItemTitle,
 } from '@/components/ui/item';
-import { Label } from '@/components/ui/label';
 import { useDebounce } from '@/hooks/use-debounce';
 import { usePaginationIndexFilters } from '@/hooks/use-pagination-filter';
 import { useUndoableAction } from '@/hooks/use-undoable';
@@ -391,7 +388,7 @@ export default function CutoffDatePage({ cutoff_dates }: Props) {
                     }
                 }}
             />
-            ``{' '}
+
         </div>
     );
 }

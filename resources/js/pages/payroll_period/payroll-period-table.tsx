@@ -73,11 +73,15 @@ export function PayrollPeriodTable({
     const { can } = usePermissions();
     const columns = columnHelper.columns([
         columnHelper.accessor('Label', {
-            header: 'Name',
+            header: 'Description',
+        }),
+
+        columnHelper.accessor('Cutoff', {
+            header: 'Period Start/End',
         }),
 
         columnHelper.accessor('PayDate', {
-            header: 'Group',
+            header: 'Pay Date',
         }),
         columnHelper.accessor('Status', {
             header: 'Status',

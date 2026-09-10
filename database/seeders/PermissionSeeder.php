@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 class PermissionSeeder extends Seeder
 {
     protected array $modules = [
-        'Access Control',
+
         'Employee',
         'Loan',
         'Biometric Uploading',
@@ -18,13 +18,14 @@ class PermissionSeeder extends Seeder
         'Payroll Periods',
         'Employee Shift Schedule',
         'Shift Code',
-        'Cutoff Scheme',
-        'Reports',
+        'Cutoff Dates',
+        'Generate Payslip',
+        'Generate Dtr',
         'Users',
         'Roles',
-        'Archives',
+        'Access Control',
         'Deductions',
-        'Holidays',
+        'Maintenance',
     ];
 
     protected array $actions = [
@@ -39,6 +40,15 @@ class PermissionSeeder extends Seeder
         'Access Control' => [
             'view',
         ],
+        'Generate Payslip' => [
+            'view'
+        ],
+        'Generate Dtr' => [
+            'view'
+        ],
+        'Maintenance' => [
+            'view'
+        ]
     ];
 
     // Extra actions per module, on top of the default $actions above.
@@ -76,7 +86,7 @@ class PermissionSeeder extends Seeder
             $actionsForModule = $this->moduleOverrideActions[$module]
                 ?? array_merge(
                     $this->actions,
-                    $this->moduleExtraActions[$module] ?? []
+                    // $this->moduleExtraActions[$module] ?? []
                 );
 
             foreach ($actionsForModule as $action) {

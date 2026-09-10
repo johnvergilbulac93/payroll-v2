@@ -39,7 +39,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { index as employeeIndex, store, update } from '@/routes/employee';
-import { store as groupStore } from '@/routes/group';
+import { storeGroup, storeArea, storePosition } from '@/routes/maintenance';
 import type { Employee } from '@/types/employee';
 import type { Option } from '@/types/option';
 
@@ -67,16 +67,46 @@ export default function EmployeeForm({
 }: Props) {
     const isEditMode = !!employee && Object.keys(employee).length > 0;
     const [open, setOpen] = useState(false);
+    const [open2, setOpen2] = useState(false);
+    const [open3, setOpen3] = useState(false);
+
     const {
         data: group,
         setData: setGroup,
         processing: groupProcessing,
         post: postGroup,
-        reset,
+        reset: resetGroup,
         clearErrors,
+        resetAndClearErrors: resetAndClearErrorsGroup,
         errors: groupErrors,
     } = useForm({
         name: '',
+    });
+
+    const {
+        data: position,
+        setData: setPosition,
+        processing: positionProcessing,
+        post: postPosition,
+        reset: resetPosition,
+        resetAndClearErrors: resetAndClearErrorsPosition,
+        errors: positionError,
+    } = useForm({
+        name: '',
+        type: '',
+    });
+
+    const {
+        data: area,
+        setData: setArea,
+        processing: areaProcessing,
+        post: postArea,
+        reset: resetArea,
+        resetAndClearErrors: resetAndClearErrorsArea,
+        errors: areaError,
+    } = useForm({
+        name: '',
+        type: '',
     });
 
     const { data, setData, processing, post, errors } = useForm({
@@ -144,26 +174,46 @@ export default function EmployeeForm({
             },
         });
     };
-    const onAddGroup = () => {
-        reset();
-        clearErrors();
-        setOpen(true);
-    };
-    const handleConfirm = () => {
-        postGroup(groupStore.url(), {
+
+    const onSubmitGroup = () => {
+        postGroup(storeGroup.url(), {
             onSuccess: () => {
-                toast.success('Successfully saved.');
                 setOpen(false);
+                resetGroup();
             },
+            preserveScroll: true,
         });
     };
-
+    const onSubmitPosition = () => {
+        postPosition(storePosition.url(), {
+            onSuccess: () => {
+                setOpen2(false);
+                resetPosition();
+            },
+            preserveScroll: true,
+        });
+    };
+    const onSubmitArea = () => {
+        postArea(storeArea.url(), {
+            onSuccess: () => {
+                setOpen3(false);
+                resetArea();
+            },
+            preserveScroll: true,
+        });
+    };
+    const onAddGroup = () => {
+        resetAndClearErrorsGroup();
+        setOpen(true);
+    };
     const onAddPosition = () => {
-        alert('under maintenance');
+        resetAndClearErrorsPosition();
+        setOpen2(true);
     };
 
     const onAddAssignment = () => {
-        alert('under maintenance');
+        resetAndClearErrorsArea();
+        setOpen3(true);
     };
 
     return (
@@ -918,8 +968,10 @@ export default function EmployeeForm({
                                 <FieldDescription>
                                     This indicates whether the employee is a LET
                                     passer.
-                                    <br/>
-                                    <small className='text-primary'>Note: For Teaching group only</small>
+                                    <br />
+                                    <small className="text-primary">
+                                        Note: For Teaching group only
+                                    </small>
                                 </FieldDescription>
                             </FieldContent>
                             <Switch
@@ -956,32 +1008,7 @@ export default function EmployeeForm({
                     </FieldLabel>
                 </FieldGroup>
             </FieldSet>
-            <ReusableDrawer
-                open={open}
-                onOpenChange={setOpen}
-                title="Add new group"
-                description="Manage you new group"
-                onSubmit={handleConfirm}
-                loading={groupProcessing}
-            >
-                <FieldGroup className="mt-4">
-                    <Field data-invalid={!!groupErrors.name} className="gap-2">
-                        <FieldLabel htmlFor="group.name">Group name</FieldLabel>
-                        <Input
-                            value={group.name}
-                            onChange={(e) => setGroup('name', e.target.value)}
-                            type="text"
-                            id="group.name"
-                            placeholder="Group name"
-                            aria-invalid={!!groupErrors.name}
-                            tabIndex={1}
-                        />
-                        {groupErrors.name && (
-                            <FieldError>{groupErrors.name}</FieldError>
-                        )}
-                    </Field>
-                </FieldGroup>
-            </ReusableDrawer>
+
             <div className="flex items-center justify-end">
                 <div className="flex items-center gap-2">
                     <Button
@@ -1004,6 +1031,165 @@ export default function EmployeeForm({
                     </Button>
                 </div>
             </div>
+
+            <ReusableDrawer
+                open={open}
+                onOpenChange={setOpen}
+                title="Add new group"
+                description="Manage you new group"
+                onSubmit={onSubmitGroup}
+                loading={groupProcessing}
+            >
+                <FieldGroup className="mt-4">
+                    <Field data-invalid={!!groupErrors.name} className="gap-2">
+                        <FieldLabel htmlFor="group.name">Name</FieldLabel>
+                        <Input
+                            value={group.name}
+                            onChange={(e) => setGroup('name', e.target.value)}
+                            type="text"
+                            id="group.name"
+                            placeholder="Group name"
+                            aria-invalid={!!groupErrors.name}
+                            tabIndex={1}
+                        />
+                        {groupErrors.name && (
+                            <FieldError>{groupErrors.name}</FieldError>
+                        )}
+                    </Field>
+                </FieldGroup>
+            </ReusableDrawer>
+
+            <ReusableDrawer
+                open={open2}
+                onOpenChange={setOpen2}
+                title="Add new position"
+                description="Manage you new position"
+                onSubmit={onSubmitPosition}
+                loading={positionProcessing}
+            >
+                <FieldGroup className="mt-4">
+                    <Field
+                        data-invalid={!!positionError.name}
+                        className="gap-2"
+                    >
+                        <FieldLabel htmlFor="position.name">Name</FieldLabel>
+                        <Input
+                            value={position.name}
+                            onChange={(e) =>
+                                setPosition('name', e.target.value)
+                            }
+                            type="text"
+                            id="position.name"
+                            placeholder="Position name"
+                            aria-invalid={!!positionError.name}
+                            tabIndex={1}
+                        />
+                        {positionError.name && (
+                            <FieldError>{positionError.name}</FieldError>
+                        )}
+                    </Field>
+                </FieldGroup>
+                <FieldGroup className="mt-4">
+                    <Field
+                        data-invalid={!!positionError.name}
+                        className="gap-2"
+                    >
+                        <FieldLabel htmlFor="position.type">Group</FieldLabel>
+                        <Select
+                            value={position.type}
+                            onValueChange={(value) =>
+                                setPosition('type', value)
+                            }
+                        >
+                            <SelectTrigger
+                                id="position.type"
+                                className="w-full"
+                                tabIndex={2}
+                                aria-invalid={!!positionError.type}
+                            >
+                                <SelectValue placeholder="Select a group" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Groups</SelectLabel>
+                                    {groups.map((group) => (
+                                        <SelectItem
+                                            key={group.value}
+                                            value={group.value}
+                                        >
+                                            {group.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                        {positionError.type && (
+                            <FieldError>{positionError.type}</FieldError>
+                        )}
+                    </Field>
+                </FieldGroup>
+            </ReusableDrawer>
+
+            <ReusableDrawer
+                open={open3}
+                onOpenChange={setOpen3}
+                title="Add new area"
+                description="Manage you new area"
+                onSubmit={onSubmitArea}
+                loading={areaProcessing}
+            >
+                <FieldGroup className="mt-4">
+                    <Field data-invalid={!!areaError.name} className="gap-2">
+                        <FieldLabel htmlFor="area.name">Name</FieldLabel>
+                        <Input
+                            value={area.name}
+                            onChange={(e) => setArea('name', e.target.value)}
+                            type="text"
+                            id="area.name"
+                            placeholder="Area name"
+                            aria-invalid={!!areaError.name}
+                            tabIndex={1}
+                        />
+                        {areaError.name && (
+                            <FieldError>{areaError.name}</FieldError>
+                        )}
+                    </Field>
+                </FieldGroup>
+                <FieldGroup className="mt-4">
+                    <Field data-invalid={!!area.name} className="gap-2">
+                        <FieldLabel htmlFor="area.type">Group</FieldLabel>
+                        <Select
+                            value={area.type}
+                            onValueChange={(value) => setArea('type', value)}
+                        >
+                            <SelectTrigger
+                                id="area.type"
+                                className="w-full"
+                                tabIndex={2}
+                                aria-invalid={!!areaError.type}
+                            >
+                                <SelectValue placeholder="Select a group" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Groups</SelectLabel>
+                                    {groups.map((group) => (
+                                        <SelectItem
+                                            key={group.value}
+                                            value={group.value}
+                                        >
+                                            {group.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                        {areaError.type && (
+                            <FieldError>{areaError.type}</FieldError>
+                        )}
+                    </Field>
+                </FieldGroup>
+            </ReusableDrawer>
         </div>
     );
 }

@@ -27,9 +27,9 @@ import { Spinner } from '@/components/ui/spinner';
 
 import { index as dtrProcessIndex } from '@/routes/dtr';
 import { index as payrollPeriodIndex } from '@/routes/payroll_period';
+import { generatePaySlip } from '@/routes/report';
 import type { PayrollPeriod } from '@/types/payroll-period';
 import type { StepperStep } from '@/types/stepper';
-
 type SummaryItem = {
     label: string;
     value: number;
@@ -137,23 +137,29 @@ export default function ProcessPeriodPage({ employee_details, period }: Props) {
                 break;
 
             case 4:
-                alert('view payslip');
+                router.visit(
+                    generatePaySlip.url({ query: { period: period.id } }),
+                    {
+                        preserveScroll: true,
+                        preserveState: true,
+                    },
+                );
                 break;
         }
     };
 
-    const onRecomputePayroll = () => {
-        router.post(
-            reComputePayroll(Number(period.id)).url,
-            {},
-            {
-                preserveScroll: true,
-                onStart: () => setProcessing(true),
-                onFinish: () => setProcessing(false),
-                onHttpException: () => setProcessing(false),
-            },
-        );
-    };
+    // const onRecomputePayroll = () => {
+    //     router.post(
+    //         reComputePayroll(Number(period.id)).url,
+    //         {},
+    //         {
+    //             preserveScroll: true,
+    //             onStart: () => setProcessing(true),
+    //             onFinish: () => setProcessing(false),
+    //             onHttpException: () => setProcessing(false),
+    //         },
+    //     );
+    // };
 
     return (
         <div className="space-y-4 p-4">
@@ -217,14 +223,14 @@ export default function ProcessPeriodPage({ employee_details, period }: Props) {
                                 Cancel
                             </Button>
 
-                            {currentStep == 4 && (
+                            {/* {currentStep == 4 && (
                                 <Button onClick={onRecomputePayroll}>
                                     {currentStep == 4 && processing && (
                                         <Spinner />
                                     )}
                                     Recompute payroll
                                 </Button>
-                            )}
+                            )} */}
                             <Button className="w-40" onClick={onNextStep}>
                                 {currentStep !== 4 && processing && <Spinner />}
                                 {buttonLabel}

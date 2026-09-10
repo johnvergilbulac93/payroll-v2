@@ -1,4 +1,4 @@
-import { Head} from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import {
     IconCalendar,
     IconCheck,
@@ -8,7 +8,6 @@ import {
     IconUsers,
 } from '@tabler/icons-react';
 import { useState } from 'react';
-import { FormDialog } from '@/components/base-modal';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,53 +21,26 @@ import {
     CommandShortcut,
 } from '@/components/ui/command';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
-import { ScrollArea } from '@/components/ui/scroll-area';
-
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { usePaginationIndexFilters } from '@/hooks/use-pagination-filter';
-import { EmployeeDtr } from '@/pages/process_dtr/employee-dtr';
-import { ReportEmployeeDtrTable } from '@/pages/report/report-dtr-table';
-import {
-    generateDtr,
-    printDtrPerEmployee,
-    printDtrAllEmployees,
-} from '@/routes/report';
-import type { Option } from '@/types/option';
+import { ReportEmployeePayslipTable } from '@/pages/report/report-payslip-table';
+import { generatePaySlip, printPayslipPerEmployee } from '@/routes/report';
 import type { PaginatedData } from '@/types/paginated';
-import type {
-    DTRRecordsDetails,
-    EmployeeDtrPeriod,
-    PayrollPeriod,
-} from '@/types/payroll-period';
-type Props = {
-    employees: PaginatedData<EmployeeDtrPeriod>;
-    periods: PayrollPeriod[];
-    groups: Option[];
-};
+import type { PayrollPeriod } from '@/types/payroll-period';
+import type { Payslip } from '@/types/payslip';
 
+type Props = {
+    payslips: PaginatedData<Payslip>;
+    periods: PayrollPeriod[];
+};
 type ProcessMode = 'all' | 'per-employee';
 
-export default function ReportDtrPage({ employees, periods, groups }: Props) {
+export default function ReportPaySlipPage({ periods, payslips }: Props) {
     const [processMode, setProcessMode] = useState<ProcessMode>('all');
     const [openCommand, setOpenCommand] = useState(false);
 
-    const [openDialogDtr, setOpenDialogDtr] = useState(false);
-    const [description, setDescription] = useState('');
-
-    const [employeeDtr, setEmployeeDtr] = useState<DTRRecordsDetails[]>([]);
-
     const { filters, updateFilters } = usePaginationIndexFilters({
-        route: generateDtr.url(),
+        route: generatePaySlip.url(),
         defaults: { search: '', page: 1, limit: 10, period: '', group: '' },
     });
 
@@ -79,25 +51,17 @@ export default function ReportDtrPage({ employees, periods, groups }: Props) {
         ? `${selectedPeriodData.Label} - ${selectedPeriodData.PayDate}`
         : 'Select a Period';
 
-    const onEdit = (record: EmployeeDtrPeriod) => {
-        setEmployeeDtr(record.DTRRecords ?? []);
-        setDescription(`${record.FullName} - ${record.Period}`);
-        setOpenDialogDtr(true);
-    };
-    const onGenerateAll = () => {
+    const onPrintAll = () => {
         window.open(
-            printDtrAllEmployees.url(
-                { period: Number(filters.period) },
-                { query: { group_id: filters.group } },
-            ),
+            printPayslipPerEmployee.url({
+                query: { period: filters.period, employee: '' },
+            }),
         );
     };
-
-    const onPrint = (record: EmployeeDtrPeriod) => {
+    const onPrint = (record: Payslip) => {
         window.open(
-            printDtrPerEmployee.url({
-                period: Number(filters.period),
-                employee: record.id,
+            printPayslipPerEmployee.url({
+                query: { period: filters.period, employee: record.EmpID },
             }),
         );
     };
@@ -106,12 +70,12 @@ export default function ReportDtrPage({ employees, periods, groups }: Props) {
         <div className="p-4">
             <Head title="Report" />
             <Heading
-                title="Generate Daily Time Record"
-                description="Generate daily time records for employees."
+                title="Generate Payslip"
+                description="Generate payslip for employees."
             />
             <div className="space-y-4">
                 <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-4 sm:items-end">
-                    <Field className="min-w-0 gap-2">
+                    <Field className="col-span-2 min-w-0 gap-2">
                         <FieldLabel>Periods</FieldLabel>
                         <Button
                             onClick={() => setOpenCommand(true)}
@@ -125,40 +89,7 @@ export default function ReportDtrPage({ employees, periods, groups }: Props) {
                             <IconSelector className="shrink-0" />
                         </Button>
                     </Field>
-                    <Field className="gap-2">
-                        <FieldLabel>Group</FieldLabel>
-                        <Select
-                            value={filters.group}
-                            onValueChange={(value) => {
-                                const resolved = value === 'all' ? '' : value;
-                                updateFilters({ group: resolved, page: 1 });
-                            }}
-                        >
-                            <SelectTrigger
-                                id="employee.Group"
-                                className="w-full"
-                                tabIndex={2}
-                            >
-                                <SelectValue placeholder="Select a group" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectLabel>Group</SelectLabel>
-                                    <SelectItem value="all">
-                                        All groups
-                                    </SelectItem>
-                                    {groups.map((group) => (
-                                        <SelectItem
-                                            key={group.value}
-                                            value={group.value}
-                                        >
-                                            {group.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-                    </Field>
+
                     <Field className="gap-2">
                         <FieldLabel>Print mode</FieldLabel>
                         <ToggleGroup
@@ -188,21 +119,20 @@ export default function ReportDtrPage({ employees, periods, groups }: Props) {
                         </ToggleGroup>
                     </Field>
                     <Field className="sm:items-end">
-                        {processMode === 'all' && filters.period && (
-                            <Button onClick={onGenerateAll} className="w-fit!">
+                        {processMode === 'all' && (
+                            <Button onClick={onPrintAll} className="w-fit!">
                                 <IconPrinter />
                                 Print all
                             </Button>
                         )}
                     </Field>
                 </FieldGroup>
-                <ReportEmployeeDtrTable
+                <ReportEmployeePayslipTable
                     initialSearch={filters.search}
-                    data={employees}
+                    data={payslips}
                     onSearch={(value) =>
                         updateFilters({ search: value, page: 1 })
                     }
-                    onEdit={(record) => onEdit(record)}
                     onPrint={(record) => onPrint(record)}
                     onPerPage={(value) =>
                         updateFilters({ limit: value, page: 1 })
@@ -210,22 +140,7 @@ export default function ReportDtrPage({ employees, periods, groups }: Props) {
                     processMode={processMode}
                 />
             </div>
-            <FormDialog
-                key="view-dtr-dialog"
-                open={openDialogDtr}
-                onOpenChange={setOpenDialogDtr}
-                title="Daily Time Record"
-                description={description}
-                disabled
-                onCancel={() => setOpenDialogDtr(false)}
-                size="full"
-                canAdd={false}
-                cancelText="Close"
-            >
-                <ScrollArea className="min-100 max-h-[70vh] overflow-y-auto px-3">
-                    <EmployeeDtr dailyTimeRecords={employeeDtr} />
-                </ScrollArea>
-            </FormDialog>
+
             <CommandDialog open={openCommand} onOpenChange={setOpenCommand}>
                 <Command>
                     <CommandInput placeholder="Type a period or search..." />
@@ -265,11 +180,10 @@ export default function ReportDtrPage({ employees, periods, groups }: Props) {
         </div>
     );
 }
-
-ReportDtrPage.layout = {
+ReportPaySlipPage.layout = {
     breadcrumbs: [
         {
-            title: 'Generate Daily Time Record',
+            title: 'Generate Payslip',
             href: '#',
         },
     ],

@@ -120,7 +120,10 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
                             className="flex w-full justify-between"
                             tabIndex={1}
                         >
-                            {selectedPeriodLabel}
+                            <span className="truncate">
+                                {' '}
+                                {selectedPeriodLabel}
+                            </span>
                             <IconSelector />
                         </Button>
                     </Field>
@@ -154,7 +157,7 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
                             </ToggleGroupItem>
                         </ToggleGroup>
                     </Field>
-                    <Field className=" sm:items-end">
+                    <Field className="sm:items-end">
                         {processMode === 'all' && filters.period && (
                             <Button
                                 onClick={onProcessDTR}
@@ -217,9 +220,13 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
                                         }}
                                     >
                                         <IconCalendar />
-                                        <span>
-                                            {period.Label} - {period.PayDate}
-                                        </span>
+                                        <div className="flex flex-col">
+                                            <span>
+                                                {period.Label} -{' '}
+                                                {period.PayDate}
+                                            </span>
+                                            <span>{period.Cutoff}</span>
+                                        </div>
                                         {filters.period ===
                                             period.id.toString() && (
                                             <CommandShortcut>

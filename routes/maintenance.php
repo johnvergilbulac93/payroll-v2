@@ -5,6 +5,7 @@ use App\Http\Controllers\Maintenance\GroupController;
 use App\Http\Controllers\Maintenance\HolidayController;
 use App\Http\Controllers\Maintenance\LoanTypeController;
 use App\Http\Controllers\Maintenance\PositionController;
+use App\Http\Controllers\Settings\MaintenanceController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->prefix('maintenance')->name('maintenance.')->group(function () {
@@ -18,4 +19,8 @@ Route::middleware(['auth'])->prefix('maintenance')->name('maintenance.')->group(
         ->except(['create', 'edit', 'show']);
     Route::resource('holiday', HolidayController::class)
         ->except(['create', 'edit', 'show']);
+
+    Route::post('/group/option', [MaintenanceController::class, 'storeGroup'])->name('storeGroup');
+    Route::post('/position/option', [MaintenanceController::class, 'storePosition'])->name('storePosition');
+    Route::post('/area/option', [MaintenanceController::class, 'storeArea'])->name('storeArea');
 });

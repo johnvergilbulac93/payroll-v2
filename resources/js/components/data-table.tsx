@@ -567,7 +567,7 @@ export function DataTable<T extends RowData>({
                     </SelectGroup>
                 </SelectContent>
             </Select>
-            <Button onClick={onAdd} variant={'outline'} className="w-full">
+            <Button onClick={onAdd} variant={'default'} className="w-full">
                 <IconPlus data-icon="inline-start" />
                 {buttonText}
             </Button>

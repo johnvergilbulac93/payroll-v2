@@ -65,13 +65,6 @@ class DtrViewerService
                 'employees.LastName',
                 'groups.name'
             )
-            // ->havingRaw("
-            //     CASE
-            //         WHEN COUNT(dtr_records.EmpID) = 0 THEN 'pending'
-            //         WHEN MAX(dtr_records.Remarks) IS NULL THEN 'processed'
-            //         ELSE 'flagged'
-            //     END != 'processed'
-            // ")
             ->orderBy('employees.LastName')
             ->paginate($limit ?: 10)
             ->onEachSide(1)
@@ -80,20 +73,107 @@ class DtrViewerService
         return $paginated;
         // dd($paginated->toArray());
     }
+
+    public function printingDtrEmployee(
+        PayrollPeriod $period,
+        int $empId,
+        ?int $groupId = null,
+    ): Collection {
+
+        return DB::table('employees')
+            ->where('employees.Status', 1)
+            ->where('employees.id', $empId)
+            ->whereNull('employees.deleted_at')
+            ->leftJoin('groups', 'groups.id', '=', 'employees.Group')
+            ->leftJoin('dtr_records', function ($join) use ($period) {
+                $join->on('dtr_records.EmpID', '=', 'employees.id')
+                    ->whereBetween('dtr_records.DTRDate', [
+                        $period->PeriodStart,
+                        $period->PeriodEnd,
+                    ]);
+            })
+            // ->when($search, function ($query) use ($search) {
+            //     $query->where('employees.FullName', 'like', "%{$search}%");
+            // })
+            ->when($groupId, function ($query, $groupId) {
+                $query->where('employees.Group', $groupId);
+            })
+            ->select(
+                'employees.id',
+                'employees.FullName',
+                'employees.EmpNbr',
+                'employees.LastName',
+                'employees.Group',
+                'groups.name as GroupName',
+            )
+            ->groupBy(
+                'employees.id',
+                'employees.FullName',
+                'employees.EmpNbr',
+                'employees.LastName',
+                'employees.Group',
+                'groups.name'
+            )
+            ->orderBy('employees.LastName')
+            ->get();
+    }
+    public function printingDtrAllEmployee(
+        PayrollPeriod $period,
+        ?int $groupId = null,
+    ): Collection {
+
+        return DB::table('employees')
+            ->where('employees.Status', 1)
+            ->whereNull('employees.deleted_at')
+            ->leftJoin('groups', 'groups.id', '=', 'employees.Group')
+            ->leftJoin('dtr_records', function ($join) use ($period) {
+                $join->on('dtr_records.EmpID', '=', 'employees.id')
+                    ->whereBetween('dtr_records.DTRDate', [
+                        $period->PeriodStart,
+                        $period->PeriodEnd,
+                    ]);
+            })
+            // ->when($search, function ($query) use ($search) {
+            //     $query->where('employees.FullName', 'like', "%{$search}%");
+            // })
+            ->when($groupId, function ($query, $groupId) {
+                $query->where('employees.Group', $groupId);
+            })
+            ->select(
+                'employees.id',
+                'employees.FullName',
+                'employees.EmpNbr',
+                'employees.LastName',
+                'employees.Group',
+                'groups.name as GroupName',
+            )
+            ->groupBy(
+                'employees.id',
+                'employees.FullName',
+                'employees.EmpNbr',
+                'employees.LastName',
+                'employees.Group',
+                'groups.name'
+            )
+            ->orderBy('employees.LastName')
+            ->get();
+    }
     public function attachDtrRecords(
-        LengthAwarePaginator $employees,
+        LengthAwarePaginator|Collection $employees,
         PayrollPeriod $period
     ): void {
-        $empIds = collect($employees->items())->pluck('id');
+        $items = $employees instanceof LengthAwarePaginator
+            ? $employees->getCollection()
+            : $employees;
+
+        $empIds = $items->pluck('id');
 
         $dtrRecords = $this->build($empIds, $period);
 
-        $employees->getCollection()->transform(function ($employee) use ($dtrRecords) {
-
+        $items->transform(function ($employee) use ($dtrRecords) {
             $employee->dtr_records = $dtrRecords
                 ->get($employee->id, collect())
                 ->values();
-
             return $employee;
         });
     }

@@ -22,7 +22,6 @@ import {
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
@@ -77,12 +76,10 @@ export default function EmployeeSchedule({
     const {
         data,
         setData,
-        post,
         processing,
         errors,
         reset,
         clearErrors,
-        delete: destroy,
     } = useForm({
         id: 0,
         EmpID: 0,

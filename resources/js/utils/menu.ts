@@ -26,7 +26,7 @@ import { index as employeeScheduleIndex } from '@/routes/employee_schedule';
 import { index as loanIndex } from '@/routes/loan';
 import { index as loanTypeIndex } from '@/routes/maintenance/loan_type';
 import { index as payrollPeriodIndex } from '@/routes/payroll_period';
-import { generateDtr } from '@/routes/report';
+import { generateDtr, generatePaySlip } from '@/routes/report';
 import { index as roleIndex } from '@/routes/role';
 import { index as shiftIndex } from '@/routes/shift';
 import { index as uploadingIndex } from '@/routes/uploading';
@@ -113,7 +113,7 @@ export const navItems: NavGroup[] = [
                 Label: 'Cutoff Dates',
                 Url: cutoffDateIndex.url(),
                 Icon: IconCalendarPlus,
-                Permission: 'cutoff-scheme-view',
+                Permission: 'cutoff-dates-view',
             },
             // {
             //     Label: 'Reports',
@@ -128,15 +128,15 @@ export const navItems: NavGroup[] = [
         Items: [
             {
                 Label: 'Generate Payslip',
-                Url: '#',
+                Url: generatePaySlip.url(),
                 Icon: IconReport,
-                Permission: 'users-view',
+                Permission: 'generate-payslip-view',
             },
             {
                 Label: 'Generate Dtr',
                 Url: generateDtr.url(),
                 Icon: IconReport,
-                Permission: 'users-view',
+                Permission: 'generate-dtr-view',
             },
         ],
     },
@@ -165,7 +165,7 @@ export const navItems: NavGroup[] = [
                 Label: 'Maintenance',
                 Url: loanTypeIndex.url(),
                 Icon: IconSettings,
-                Permission: 'archives-view',
+                Permission: 'maintenance-view',
             },
             // {
             //     Label: 'Deductions',

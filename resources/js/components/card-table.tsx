@@ -60,8 +60,8 @@ import {
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { useDebounce } from '@/hooks/use-debounce';
-import type { PaginatedData } from '@/types/paginated';
 import { cn } from '@/lib/utils';
+import type { PaginatedData } from '@/types/paginated';
 
 const features = tableFeatures({
     columnFilteringFeature,

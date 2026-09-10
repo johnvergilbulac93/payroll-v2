@@ -19,7 +19,7 @@ class PayrollPeriodResource extends JsonResource
             'id' => $this->id,
             'Label' => Carbon::createFromFormat('!m', $this->Month)->format('M') . ' ' . $this->Year . ' - Cutoff ' . $this->CutoffNumber,
             'Scheme' =>  $this->cutoffDates?->Name,
-            'Cutoff' => Carbon::parse($this->PeriodStart)->format('M d') . ' - ' . Carbon::parse($this->PeriodEnd)->format('M d'),
+            'Cutoff' => Carbon::parse($this->PeriodStart)->format('M d, Y') . ' - ' . Carbon::parse($this->PeriodEnd)->format('M d, Y'),
             'PayDate' => Carbon::parse($this->PayDate)->format('M d, Y'),
             'Status' => $this->Status,
             'Year' => $this->Year,

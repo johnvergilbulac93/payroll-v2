@@ -9,8 +9,8 @@ import { index as areaIndex } from '@/routes/maintenance/area_of_assignment';
 import { index as groupIndex } from '@/routes/maintenance/group';
 import { index as holidayIndex } from '@/routes/maintenance/holiday';
 import { index as loanIndex } from '@/routes/maintenance/loan_type';
-import type { NavItem } from '@/types';
 import { index as positionIndex } from '@/routes/maintenance/position';
+import type { NavItem } from '@/types';
 
 const sidebarNavItems: NavItem[] = [
     {

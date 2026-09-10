@@ -37,7 +37,7 @@ export type EmployeeDtrPeriod = {
     FullName: string;
     GroupName: string;
     Remarks: string;
-    ProcessAt: string;
+    ProcessedAt: string;
     RecordCount: number;
     Period: string;
     EmpNbr: string;
