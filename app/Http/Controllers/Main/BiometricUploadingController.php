@@ -69,9 +69,29 @@ class BiometricUploadingController extends Controller
     }
     public function reProcessBiometricData(BiometricImportBatch $biometricImportBatch)
     {
-        $this->importService->reprocess($biometricImportBatch);
-        return to_route('uploading.index')
-            ->with('success', "Reprocessing of '{$biometricImportBatch->original_filename}' completed.");
+        try {
+            $this->importService->reprocess($biometricImportBatch);
+
+            activity('biometric-reprocess')
+                ->performedOn($biometricImportBatch)
+                ->causedBy(auth()->user())
+                ->event('biometric_reprocessing')
+                ->withProperties([$biometricImportBatch])
+                ->log("Employee biometric reprocessing");
+
+            return to_route('uploading.index')
+                ->with('success', "Reprocessing of '{$biometricImportBatch->original_filename}' completed.");
+        } catch (\Throwable $e) {
+            activity('biometric-reprocess')
+                ->performedOn($biometricImportBatch)
+                ->causedBy(auth()->user())
+                ->event('biometric_reprocessing_failed')
+                ->withProperties([$e->getMessage()])
+                ->log("Employee biometric reprocessing failed");
+
+            return to_route('uploading.index')
+                ->with('error', "Server Error");
+        }
     }
     public function destroy(BiometricImportBatch $biometricImportBatch)
     {

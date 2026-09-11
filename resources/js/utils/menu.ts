@@ -101,7 +101,7 @@ export const navItems: NavGroup[] = [
                 Label: 'Employee Shift Schedule',
                 Url: employeeScheduleIndex.url(),
                 Icon: IconCalendarUser,
-                Permission: 'shift-code-view',
+                Permission: 'employee-shift-schedule-view',
             },
             {
                 Label: 'Shift Code',

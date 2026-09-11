@@ -38,6 +38,12 @@ export default function RolePermission({
     const [search, setSearch] = useState(initialSearch);
     const onSearchRef = useRef(onSearch);
     const debouncedSearch = useDebounce(search, 500);
+    const [prevInitialSearch, setPrevInitialSearch] = useState(initialSearch);
+
+    if (initialSearch !== prevInitialSearch) {
+        setPrevInitialSearch(initialSearch);
+        setSearch(initialSearch);
+    }
 
     useEffect(() => {
         onSearchRef.current = onSearch;
@@ -48,7 +54,6 @@ export default function RolePermission({
     }, [debouncedSearch]);
 
     const onToggle = (permissionId: number, roleId: number, next: boolean) => {
-        // optimistic update
         setMatrix((prev) => ({
             ...prev,
             [permissionId]: {
@@ -63,8 +68,8 @@ export default function RolePermission({
             {
                 preserveScroll: true,
                 preserveState: true,
+                preserveUrl: true,
                 onError: () => {
-                    // rollback on failure
                     setMatrix((prev) => ({
                         ...prev,
                         [permissionId]: {

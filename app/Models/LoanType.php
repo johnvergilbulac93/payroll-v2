@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * @property string $name
@@ -12,6 +14,23 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable(['name'])]
 class LoanType extends Model
 {
+    use LogsActivity;
+
+    protected static $recordEvents = [
+        'created',
+        'updated',
+        'deleted',
+
+    ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('loan_types')
+            ->logAll()
+            ->logOnlyDirty();
+    }
+
     public function scopeFilter(Builder $query, array $filters)
     {
         $query->when($filters['search'] ?? null, function ($query, $search) {

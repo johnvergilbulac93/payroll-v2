@@ -1,19 +1,9 @@
-import { Head, InfiniteScroll, useForm } from '@inertiajs/react';
-import {
-    IconCalendar,
-    IconEdit,
-    IconLoader2,
-    IconPlus,
-    IconSearch,
-    IconTrash,
-    IconX,
-} from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
+import { Head, useForm } from '@inertiajs/react';
+import { IconTrash } from '@tabler/icons-react';
+import { useState } from 'react';
 import { ConfirmDialog } from '@/components/alert-dialog';
 import { FormDialog } from '@/components/base-modal';
 import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
     FieldGroup,
     FieldLabel,
@@ -21,25 +11,15 @@ import {
     FieldError,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import {
-    Item,
-    ItemActions,
-    ItemContent,
-    ItemDescription,
-    ItemMedia,
-    ItemTitle,
-} from '@/components/ui/item';
-import { useDebounce } from '@/hooks/use-debounce';
 import { usePaginationIndexFilters } from '@/hooks/use-pagination-filter';
 import { useUndoableAction } from '@/hooks/use-undoable';
-import { cn } from '@/lib/utils';
+import { CutoffDateTable } from '@/pages/cutoff_date/cutoff-date-table';
 import { destroy as remove, index, store, update } from '@/routes/cutoff';
 import type { CuffOffDate } from '@/types/cutoff-date';
 import type { PaginatedData } from '@/types/paginated';
 type Props = {
     cutoff_dates: PaginatedData<CuffOffDate>;
 };
-
 const initialData: CuffOffDate = {
     id: '',
     Name: '',
@@ -51,9 +31,6 @@ const initialData: CuffOffDate = {
 };
 
 export default function CutoffDatePage({ cutoff_dates }: Props) {
-    const [search, setSearch] = useState('');
-    const debouncedSearch = useDebounce(search, 500);
-
     const [dialogTitle, setDialogTitle] = useState('');
     const [dialogDescription, setDialogDescription] = useState('');
 
@@ -75,14 +52,10 @@ export default function CutoffDatePage({ cutoff_dates }: Props) {
         delete: destroy,
     } = useForm(initialData);
 
-    const { getData, isLoading } = usePaginationIndexFilters({
+    const { filters, updateFilters } = usePaginationIndexFilters({
         route: index.url(),
-        defaults: { page: 1, search: '' },
+        defaults: { page: 1, search: '', limit: 10 },
     });
-
-    useEffect(() => {
-        getData({ search: debouncedSearch, page: 1 });
-    }, [debouncedSearch, getData]);
 
     const onCreate = () => {
         resetAndClearErrors();
@@ -138,96 +111,15 @@ export default function CutoffDatePage({ cutoff_dates }: Props) {
                 title="Cut-off dates"
                 description="View, add, edit, and manage cutoff date details."
             />
-            <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <div className="relative w-1/2">
-                        <IconSearch className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                            type="text"
-                            id="input-button-group"
-                            placeholder="Type to search..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="pr-9 pl-9"
-                        />
-                        {search && (
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setSearch('')}
-                                className="absolute top-1/2 right-1 size-7 -translate-y-1/2 text-muted-foreground hover:bg-transparent hover:text-foreground"
-                            >
-                                <IconX className="size-4" />
-                                <span className="sr-only">Clear search</span>
-                            </Button>
-                        )}
-                    </div>
-                    <Button variant="outline" onClick={onCreate}>
-                        <IconPlus />
-                        New Cuf-Off
-                    </Button>
-                </div>
-                <InfiniteScroll data="cutoff_dates" className="space-y-2">
-                    {isLoading ? (
-                        <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
-                            <IconLoader2 className="size-4 animate-spin" />
-                            Searching cutoff dates...
-                        </div>
-                    ) : cutoff_dates.data.length === 0 ? (
-                        <div className="py-8 text-center text-sm text-muted-foreground">
-                            No results found.
-                        </div>
-                    ) : (
-                        cutoff_dates.data.map((row) => (
-                            <Item
-                                variant="outline"
-                                key={row.id}
-                                className="bg-accent"
-                            >
-                                <ItemMedia>
-                                    <IconCalendar className="text-muted-foreground" />
-                                </ItemMedia>
-                                <ItemContent>
-                                    <ItemTitle>{row.Name} </ItemTitle>
-                                    <ItemDescription>
-                                        {row.Label}
-                                        <br />
-                                        <Badge
-                                            variant="outline"
-                                            className={cn(
-                                                'capitalize',
-                                                row.IsActive && 'text-primary',
-                                            )}
-                                        >
-                                            {row.IsActive
-                                                ? 'Active'
-                                                : 'Inactive'}
-                                        </Badge>
-                                    </ItemDescription>
-                                </ItemContent>
-                                <ItemActions>
-                                    <Button
-                                        onClick={() => onEdit(row)}
-                                        size="icon-sm"
-                                        aria-label="edit"
-                                    >
-                                        <IconEdit />
-                                    </Button>
-                                    <Button
-                                        onClick={() => onConfirm(row.id)}
-                                        size="icon-sm"
-                                        variant="destructive"
-                                        aria-label="trash"
-                                    >
-                                        <IconTrash />
-                                    </Button>
-                                </ItemActions>
-                            </Item>
-                        ))
-                    )}
-                </InfiniteScroll>
-            </div>
+            <CutoffDateTable
+                initialSearch={filters.search}
+                data={cutoff_dates}
+                onSearch={(value) => updateFilters({ search: value, page: 1 })}
+                onAdd={onCreate}
+                onPerPage={(value) => updateFilters({ limit: value, page: 1 })}
+                onEdit={onEdit}
+                onDelete={onConfirm}
+            />
             <FormDialog
                 key={isAdd ? 'add' : `edit-${data.id}`}
                 open={visible}
@@ -388,7 +280,6 @@ export default function CutoffDatePage({ cutoff_dates }: Props) {
                     }
                 }}
             />
-
         </div>
     );
 }

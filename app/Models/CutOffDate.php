@@ -6,12 +6,29 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 #[Table('cutoff_dates')]
 #[Fillable(['Name', 'Cutoff1StartDay', 'Cutoff1EndDay', 'Cutoff2StartDay', 'Cutoff2EndDay', 'IsActive'])]
 class CutOffDate extends Model
 {
+    use LogsActivity;
+
+    protected static $recordEvents = [
+        'created',
+        'updated',
+        'deleted',
+    ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('cutoff_dates')
+            ->logAll()
+            ->logOnlyDirty();
+    }
+
     protected $casts = [
         'Cutoff1StartDay' => 'integer',
         'Cutoff1EndDay' => 'integer',

@@ -111,10 +111,9 @@ export function PayrollPeriodTable({
             id: 'actions',
             size: 20,
             cell: ({ row }) => {
-                const canEdit = can('roles-update');
-                const canDelete = can('roles-delete');
+                const canEdit = can('payroll-periods-update');
 
-                if (!canEdit && !canDelete) {
+                if (!canEdit) {
                     return null;
                 }
 

@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * @property string $name
@@ -13,7 +15,23 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable(['name', 'IsActive'])]
 class Role extends Model
 {
+    use LogsActivity;
+
     protected $table = 'roles';
+
+    protected static $recordEvents = [
+        'created',
+        'updated',
+        'deleted',
+    ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('roles')
+            ->logAll()
+            ->logOnlyDirty();
+    }
 
     protected function casts(): array
     {

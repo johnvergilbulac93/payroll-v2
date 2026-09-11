@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Payroll System — User Guide</title>
+<style>
+    * { box-sizing: border-box; }
+    html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+    @page {
+        margin: 12mm;
+        size: A4 portrait;
+        margin: 20mm 16mm 18mm 16mm;
+
+        @bottom-left {
+            content: "Sister of Mary of Banneux, Inc. · Payroll System · User Guide";
+            font-family: 'Segoe UI', sans-serif; font-size: 8pt; color: #94a3b8;
+        }
+        @bottom-right {
+            content: counter(page) " / " counter(pages);
+            font-family: 'Segoe UI', sans-serif; font-size: 8pt; color: #94a3b8;
+        }
+        @top-right {
+            content: "Internal — Confidential";
+            font-family: 'Segoe UI', sans-serif; font-size: 7.5pt; color: #cbd5e1;
+        }
+    }
+
+    body {
+        font-family: 'Segoe UI', 'Segoe UI Variable Text', Arial, sans-serif;
+        font-size: 10pt;
+        line-height: 1.5;
+        color: #1f2937;
+        margin: 0;
+    }
+
+    /* ---------- Typography ---------- */
+    h1 { font-size: 20pt; color: #0f172a; margin: 0 0 4pt; }
+    h2 {
+        font-size: 14pt; color: #111827; margin: 0 0 6pt;
+        border-bottom: 2pt solid #1d4ed8; padding-bottom: 4pt;
+    }
+    h3 { font-size: 11.5pt; color: #1e293b; margin: 10pt 0 4pt; }
+    h4 { font-size: 10pt; color: #334155; margin: 8pt 0 3pt; }
+    p { margin: 6pt 0 8pt; text-align: justify; }
+    ul, ol { margin: 6pt 0 8pt 18pt; }
+    li { margin: 2pt 0 4pt; }
+    strong { color: #0f172a; }
+    a { color: #1d4ed8; text-decoration: none; }
+    code, .kbd {
+        font-family: Consolas, 'Cascadia Code', monospace;
+        font-size: 8.5pt; background: #eef2f7; color: #0f172a;
+        padding: 0 4pt; border-radius: 3pt;
+    }
+    .kbd { border: 0.5pt solid #cbd5e1; background: #f8fafc; }
+
+    /* ---------- Layout & page breaks ---------- */
+    .page { page-break-before: always; }
+    h2, h3, h4 { page-break-after: avoid; }
+    table, tr, figure, .box, .callout, .flow { page-break-inside: avoid; }
+
+    /* ---------- Cover ---------- */
+    .cover {
+        height: 242mm; position: relative;
+        background: linear-gradient(160deg, #0f172a 0%, #1e3a8a 55%, #2563eb 100%);
+        color: #ffffff; padding: 42mm 18mm 22mm 18mm;
+    }
+    .cover h1 { font-size: 30pt; color: #ffffff; letter-spacing: 0.5pt; }
+    .cover .eyebrow { font-size: 12pt; text-transform: uppercase; letter-spacing: 2pt; color: #bfdbfe; margin-bottom: 14pt; }
+    .cover .subtitle { font-size: 13pt; color: #dbeafe; margin-top: 10pt; }
+    .cover .rule { border-bottom: 2pt solid #93c5fd; margin: 18pt 0; }
+    .cover .meta { font-size: 10pt; color: #e2e8f0; line-height: 1.8; margin-top: 12pt; }
+    .cover .badge {
+        display: inline-block; background: rgba(255,255,255,0.12);
+        border: 1pt solid #93c5fd; color: #dbeafe; padding: 4pt 12pt; border-radius: 999pt;
+        font-size: 9pt; margin: 4pt;
+    }
+/* ---------- TOC ---------- */
+    .toc { columns: 2; column-gap: 24pt; font-size: 10pt; }
+    .toc .l1 { font-weight: 700; color: #1d4ed8; margin: 6pt 0 2pt; }
+    .toc .l2 { color: #334155; margin: 1pt 0 1pt; padding-left: 12pt; }
+
+    /* ---------- Boxes / callouts ---------- */
+    .callout { border: 1pt solid #cbd5e1; border-left: 4pt solid #2563eb; background: #eef4fb; padding: 8pt 12pt; border-radius: 4pt; margin: 8pt 0; }
+    .callout.warn { border-left-color: #d97706; background: #fffbeb; }
+    .callout.tip { border-left-color: #16a34a; background: #f0fdf4; }
+    .callout.danger { border-left-color: #dc2626; background: #fef2f2; }
+    .callout .t { font-weight: 700; text-transform: uppercase; font-size: 8pt; letter-spacing: 0.5pt; }
+
+    .box { border: 1pt solid #d8dee7; background: #fafbfc; border-radius: 5pt; padding: 8pt 12pt; margin: 8pt 0; }
+
+    /* ---------- Tables ---------- */
+    table { width: 100%; border-collapse: collapse; font-size: 8.8pt; margin: 8pt 0 4pt; }
+    th {
+        background: #1d4ed8; color: #ffffff; padding: 5pt 7pt; text-align: left;
+        border: 0.5pt solid #b9c2d0;
+    }
+    td { padding: 4.5pt 7pt; border: 0.5pt solid #b9c2d0; vertical-align: top; }
+    tbody tr:nth-child(even) td { background: #f1f5f9; }
+    caption { caption-side: top; font-size: 8.5pt; color: #64748b; text-align: left; margin: 2pt 0; }
+
+    /* ---------- Components ---------- */
+    .chip { display: inline-block; padding: 0.5pt 7pt; border-radius: 999pt; font-size: 8pt; font-weight: 600; border: 0.5pt solid rgba(0,0,0,0.12); }
+    .chip.open       { background: #e2e8f0; color: #475569; }
+    .chip.processing { background: #fde68a; color: #b45309; }
+    .chip.closed     { background: #bfdbfe; color: #1d4ed8; }
+    .chip.released   { background: #bbf7d0; color: #15803d; }
+    .chip.default    { background: #e5e7eb; color: #4b5563; }
+
+    .btn { display: inline-block; padding: 3pt 10pt; border-radius: 6pt; background: #1d4ed8; color: #fff; font-size: 8.5pt; font-weight: 600; }
+    .btn.ghost { background: #ffffff; color: #1e293b; border: 1pt solid #cbd5e1; }
+    .btn.danger { background: #dc2626; color: #fff; }
+
+    .field { display: inline-block; padding: 4pt 10pt; border: 1pt solid #cbd5e1; border-radius: 5pt; background: #ffffff; color: #334155; font-size: 8.5pt; }
+    .menu-label { display: inline-block; padding: 1pt 8pt; border-radius: 4pt; background: #1e293b; color: #e2e8f0; font-size: 8pt; font-weight: 600; letter-spacing: 0.5pt; }
+
+    .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8pt; margin: 8pt 0; }
+    .flow .node { background: #eff6ff; border: 1pt solid #93c5fd; color: #1e40af; padding: 6pt 10pt; border-radius: 6pt; font-size: 9pt; font-weight: 600; text-align: center; }
+    .flow .node.fill { background: #1d4ed8; color: #fff; }
+    .flow .node.todo { background: #f8fafc; border-color: #cbd5e1; color: #64748b; }
+    .flow .arrow { font-size: 12pt; color: #64748b; }
+
+    .kpis { display: flex; gap: 10pt; }
+    .kpis .kpi { flex: 1; border: 1pt solid #d8dee7; border-radius: 6pt; padding: 8pt; background: #ffffff; }
+    .kpis .kpi .n { font-size: 16pt; font-weight: 700; color: #1d4ed8; }
+    .kpis .kpi .l { font-size: 8.5pt; color: #64748b; }
+
+    /* ---------- Enhanced document styling ---------- */
+    :root {
+        --ink: #172033;
+        --muted: #64748b;
+        --brand: #1d4ed8;
+        --brand-dark: #173a9b;
+        --line: #dbe3ef;
+        --surface: #f8fafc;
+    }
+
+    .page {
+        padding-left: 18mm;
+        padding-right: 18mm;
+        padding-top: 2mm;
+    }
+
+    h2 {
+        position: relative;
+        color: var(--ink);
+        border-bottom: 0;
+        padding: 0 0 8pt 12pt;
+        margin-bottom: 12pt;
+        letter-spacing: -0.15pt;
+    }
+
+    h2::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 1pt;
+        bottom: 3pt;
+        width: 4pt;
+        border-radius: 4pt;
+        background: linear-gradient(180deg, #2563eb, #1e40af);
+    }
+
+    h3 {
+        color: #1e3a8a;
+        margin-top: 13pt;
+    }
+
+    p { color: #334155; }
+
+    .toc {
+        column-rule: 0.5pt solid #e2e8f0;
+        column-fill: balance;
+        background: #f8fafc;
+        border: 1pt solid var(--line);
+        border-radius: 8pt;
+        padding: 10pt 14pt;
+    }
+
+    .toc .l1 {
+        color: #1e40af;
+        padding: 4pt 0;
+    }
+
+    .callout, .box {
+        box-shadow: 0 1pt 2pt rgba(15, 23, 42, 0.04);
+    }
+
+    .callout {
+        border-radius: 7pt;
+        padding: 9pt 12pt;
+    }
+
+    table {
+        border: 1pt solid var(--line);
+        border-radius: 7pt;
+        overflow: hidden;
+    }
+
+    th {
+        background: linear-gradient(135deg, #1e40af, #2563eb);
+        border-color: #1e40af;
+        padding: 6pt 8pt;
+    }
+
+    td {
+        border-color: #e2e8f0;
+        padding: 5.5pt 8pt;
+    }
+
+    tbody tr:nth-child(even) td { background: #f8fafc; }
+    tbody tr:hover td { background: #eff6ff; }
+
+    .kpis .kpi {
+        border-color: var(--line);
+        box-shadow: 0 1pt 3pt rgba(15, 23, 42, 0.05);
+        padding: 10pt;
+    }
+
+    .kpis .kpi .n {
+        font-size: 15pt;
+        letter-spacing: -0.2pt;
+    }
+
+    .flow .node {
+        border-color: #bfdbfe;
+        box-shadow: 0 1pt 2pt rgba(30, 64, 175, 0.05);
+    }
+
+    .flow .node.fill {
+        background: linear-gradient(135deg, #1e40af, #2563eb);
+        border-color: #1e40af;
+    }
+
+    .field {
+        box-shadow: inset 0 1pt 2pt rgba(15, 23, 42, 0.03);
+    }
+
+    .btn {
+        background: linear-gradient(135deg, #1e40af, #2563eb);
+    }
+
+    .cover {
+        background:
+            radial-gradient(circle at 85% 18%, rgba(147,197,253,0.24), transparent 28%),
+            radial-gradient(circle at 10% 90%, rgba(96,165,250,0.16), transparent 30%),
+            linear-gradient(155deg, #0f172a 0%, #172554 45%, #2563eb 100%);
+        border-radius: 0 0 14pt 14pt;
+    }
+
+    .cover .rule {
+        border-bottom: 0;
+        height: 2pt;
+        width: 72mm;
+        background: linear-gradient(90deg, #93c5fd, rgba(147,197,253,0));
+    }
+
+    .cover .badge {
+        background: rgba(255,255,255,0.10);
+        backdrop-filter: blur(2pt);
+        margin: 3pt 3pt 3pt 0;
+    }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+    <div class="eyebrow">Sister of Mary of Banneux, Inc.</div>
+    <h1>Payroll System</h1>
+    <div class="subtitle">User Guide — learning how to manage employees, attendance, payroll periods, and payslip reports.</div>
+    <div class="rule"></div>
+    <div style="margin-top:10pt">
+        <span class="badge">Employees</span>
+        <span class="badge">Loans</span>
+        <span class="badge">Biometric Uploading</span>
+        <span class="badge">DTR Processing</span>
+        <span class="badge">Payroll Periods</span>
+        <span class="badge">Reports</span>
+        <span class="badge">Access Control</span>
+    </div>
+    <div class="meta">
+        <strong>Document version:</strong> 1.0<br/>
+        <strong>Applicable to:</strong> Payroll System (Laravel + React web application)<br/>
+        <strong>Prepared for:</strong> Administrative staff, HR personnel, and payroll administrators<br/>
+        <strong>Audience level:</strong> New users (step-by-step) and experienced users (reference)
+    </div>
+</div>
+
+<!-- ============ TABLE OF CONTENTS ============ -->
+<div class="page">
+<h2 style="border-bottom:2pt solid #1d4ed8">Table of Contents</h2>
+<div class="toc">
+    <div class="l1">1. Introduction</div>
+    <div class="l2">1.1 Purpose &amp; scope &nbsp;·&nbsp; 1.2 System overview &nbsp;·&nbsp; 1.3 Key features</div>
+
+    <div class="l1">2. Getting Started</div>
+    <div class="l2">2.1 Opening the application &nbsp;·&nbsp; 2.2 Logging in &nbsp;·&nbsp; 2.3 Forgotten password &nbsp;·&nbsp; 2.4 Account security (2FA &amp; passkeys)</div>
+
+    <div class="l1">3. The Dashboard</div>
+    <div class="l2">3.1 Statistic cards &nbsp;·&nbsp; 3.2 Payroll overview chart &nbsp;·&nbsp; 3.3 Recent activity feed</div>
+
+    <div class="l1">4. Navigation &amp; Common Screen Elements</div>
+    <div class="l2">4.1 Sidebar menu &nbsp;·&nbsp; 4.2 Page header &nbsp;·&nbsp; 4.3 Data tables &nbsp;·&nbsp; 4.4 Forms &amp; dialogs &nbsp;·&nbsp; 4.5 Flash messages</div>
+
+    <div class="l1">5. Employees</div>
+    <div class="l1">6. Loans</div>
+    <div class="l1">7. Biometric Uploading</div>
+    <div class="l1">8. Shift Codes</div>
+    <div class="l1">9. Employee Shift Schedule</div>
+    <div class="l1">10. Cutoff Dates</div>
+    <div class="l1">11. Process DTR (Daily Time Record)</div>
+
+    <div class="l1">12. Payroll Periods</div>
+    <div class="l2">12.1 Generating yearly periods &nbsp;·&nbsp; 12.2 Period statuses &nbsp;·&nbsp; 12.3 Filtering</div>
+
+    <div class="l1">13. Processing a Payroll Period</div>
+    <div class="l2">13.1 Workflow at a glance &nbsp;·&nbsp; 13.2 Step 1: DTR collection &nbsp;·&nbsp; 13.3 Step 2: Lock &amp; compute &nbsp;·&nbsp; 13.4 Step 3: Review &amp; release &nbsp;·&nbsp; 13.5 Re-computing</div>
+
+    <div class="l1">14. Reports</div>
+    <div class="l2">14.1 Generate Payslip &nbsp;·&nbsp; 14.2 Generate DTR</div>
+
+    <div class="l1">15. Maintenance</div>
+    <div class="l2">15.1 Loan types &nbsp;·&nbsp; 15.2 Groups &nbsp;·&nbsp; 15.3 Positions &nbsp;·&nbsp; 15.4 Areas of assignment &nbsp;·&nbsp; 15.5 Holidays</div>
+
+    <div class="l1">16. Users, Roles &amp; Access Control</div>
+    <div class="l2">16.1 Users &nbsp;·&nbsp; 16.2 Roles &nbsp;·&nbsp; 16.3 Permissions &amp; the access-control matrix</div>
+
+    <div class="l1">17. Settings</div>
+    <div class="l2">17.1 Profile &nbsp;·&nbsp; 17.2 Security &nbsp;·&nbsp; 17.3 Appearance</div>
+
+    <div class="l1">18. Payroll Period Status Reference</div>
+    <div class="l1">19. Frequently Asked Questions &amp; Troubleshooting</div>
+    <div class="l1">20. Appendix — Permission Codes</div>
+</div>
+</div>
+<!-- ============ 1. INTRODUCTION ============ -->
+<div class="page">
+<h2>1. Introduction</h2>
+
+<h3>1.1 Purpose &amp; scope</h3>
+<p>This guide explains how to use the <strong>Payroll System</strong>, the payroll and human-resources application of <strong>Sister of Mary of Banneux, Inc.</strong> It walks through every module—from maintaining employee records and uploading biometric attendance, to processing daily time records (DTR), generating payroll periods, computing payroll, and printing payslips and DTR reports.</p>
+<p>The guide is written for two audiences: <em>new users</em>, who should read the chapters in order, and <em>experienced users</em>, who can use the table of contents as a quick reference.</p>
+
+<h3>1.2 System overview</h3>
+<p>The application is a secure, web-based system that centralizes employee master data, attendance (DTR), payroll computation, loans, and reporting. Access is role-based: each screen and action is guarded by <em>permissions</em> (see <strong>Chapter 16</strong> and <strong>Appendix A</strong>), so users only see the menu items they are allowed to use.</p>
+
+<div class="kpis">
+    <div class="kpi"><div class="n">Employees</div><div class="l">Master records — names, positions, groups, areas, rates</div></div>
+    <div class="kpi"><div class="n">Attendance</div><div class="l">Biometric files, shift codes, schedules, DTR</div></div>
+    <div class="kpi"><div class="n">Payroll</div><div class="l">Periods, cutoff dates, compute &amp; release</div></div>
+    <div class="kpi"><div class="n">Reports</div><div class="l">Payslips and DTR reports, printable</div></div>
+</div>
+
+<h3>1.3 Key features</h3>
+<ul>
+    <li><strong>Employee management</strong> — add, search, group, and maintain employee records with employment and tenured statuses.</li>
+    <li><strong>Biometric uploading</strong> — upload raw biometric batches and re-process them to build attendance records.</li>
+    <li><strong>Timekeeping</strong> — shift codes, employee shift schedules (templates and per-date), and cutoff dates.</li>
+    <li><strong>DTR processing</strong> — process attendance for all employees at once or per employee, with a reviewable daily-time-record view.</li>
+    <li><strong>Payroll periods</strong> — generate a full year of periods from a cutoff scheme, then walk each period through <em>open → processing → closed → released</em>.</li>
+    <li><strong>Payroll computation</strong> — lock DTR, compute payroll, review employee summaries, and release payslips.</li>
+    <li><strong>Reports</strong> — print DTR per employee or for all employees; print payslips per employee.</li>
+    <li><strong>Loans</strong> — record loans with a deduction frequency (every payday, every 15th, or end of month).</li>
+    <li><strong>Maintenance</strong> — loan types, groups, positions, areas of assignment, and holidays.</li>
+    <li><strong>Administration</strong> — users, roles, and a permission/access-control matrix.</li>
+    <li><strong>Security</strong> — login with rate limiting, two-factor authentication (2FA), and passkeys.</li>
+</ul>
+</div>
+
+<!-- ============ 2. GETTING STARTED ============ -->
+<div class="page">
+<h2>2. Getting Started</h2>
+
+<h3>2.1 Opening the application</h3>
+<p>Open a modern web browser (Microsoft Edge, Google Chrome, Mozilla Firefox, or Safari) and go to the address provided by your administrator — for example <code>http://127.0.0.1:8000</code> on the office network. The application adapts to desktop, tablet, and phone screens, but a desktop screen is recommended for payroll processing.</p>
+
+<div class="callout tip"><span class="t">Tip</span><br/>Bookmark the main address and keep the tab open for the fastest day-to-day use. The session is also remembered on the computer you trust.</div>
+
+<h3>2.2 Logging in</h3>
+<ol>
+    <li>On the <strong>Sign in</strong> screen, enter your <strong>username</strong> in the first field.</li>
+    <li>Enter your <strong>password</strong> in the second field.</li>
+    <li>Optionally tick <strong>Remember me</strong> so the browser keeps you signed in on that device.</li>
+    <li>Click <span class="btn">Sign in</span>.</li>
+</ol>
+
+<div class="callout warn"><span class="t">Important</span><br/>After a number of failed attempts, the system temporarily locks the sign-in form and shows a countdown before you can try again. This protects your account from password guessing. Wait for the countdown to finish rather than refreshing repeatedly.</div>
+
+<h3>2.3 Forgotten password</h3>
+<ol>
+    <li>On the sign-in screen, click the <strong>forgot password</strong> link.</li>
+    <li>Enter your account's email address.</li>
+    <li>Open the password-reset email you receive, follow the link, and choose a new password.</li>
+    <li>Return to the sign-in screen and sign in with the new password.</li>
+</ol>
+
+<h3>2.4 Account security</h3>
+<p>From <strong>Settings → Security</strong> (Chapter 17) you can strengthen your account with <strong>two-factor authentication (2FA)</strong> — signing in then requires a one-time code from an authenticator app — and <strong>passkeys</strong>, which let you sign in with your device's built-in biometrics (fingerprint, face, or PIN) instead of a password.</p>
+
+<div class="callout"><span class="t">Note</span><br/>Your administrator may require certain security measures (such as 2FA) before you can access payroll data. Keep your recovery codes in a safe place when you enable 2FA.</div>
+</div>
+<!-- ============ 3. THE DASHBOARD ============ -->
+<div class="page">
+<h2>3. The Dashboard</h2>
+<p>The Dashboard is the home screen you land on after signing in. It gives an at-a-glance summary of the whole payroll operation.</p>
+
+<h3>3.1 Statistic cards</h3>
+<p>Four summary cards at the top of the screen show live totals:</p>
+<table>
+    <tr><th style="width:25%">Card</th><th>What it shows</th></tr>
+    <tr><td><strong>Loans</strong></td><td>Total number of loan records on file.</td></tr>
+    <tr><td><strong>Employees</strong></td><td>Total number of employee records.</td></tr>
+    <tr><td><strong>Users</strong></td><td>Total number of system user accounts.</td></tr>
+    <tr><td><strong>Periods</strong></td><td>Total number of payroll periods available (usually one per month of the current year).</td></tr>
+</table>
+
+<h3>3.2 Payroll overview chart</h3>
+<p>A <strong>bar chart</strong> displays the payroll totals per month, so you can quickly compare one period against another (for example, spotting a heavier pay period or an unusually empty one).</p>
+
+<h3>3.3 Recent activity feed</h3>
+<p>The activity feed logs notable events across the system — records created, updated, and deleted — together with who performed them and when. This is your first stop when checking what changed in the system.</p>
+
+<div class="callout tip"><span class="t">Tip</span><br/>Use the Recent Activity feed to confirm that a payroll period was processed, a payslip was released, or an employee record was modified before following up with other users.</div>
+</div>
+
+<!-- ============ 4. NAVIGATION ============ -->
+<div class="page">
+<h2>4. Navigation &amp; Common Screen Elements</h2>
+
+<h3>4.1 Sidebar menu</h3>
+<p>The left sidebar is the main menu. It is grouped into the following sections (you will only see the items your permissions allow):</p>
+<table>
+    <tr><th style="width:30%">Group</th><th>Items</th></tr>
+    <tr><td>— (no label)</td><td>Dashboard</td></tr>
+    <tr><td><span class="menu-label">MAIN</span></td><td>Employee · Loan · Biometric Uploading · Process DTR · Payroll Periods · Employee Shift Schedule · Shift Code · Cutoff Dates</td></tr>
+    <tr><td><span class="menu-label">REPORTS</span></td><td>Generate Payslip · Generate DTR</td></tr>
+    <tr><td><span class="menu-label">SETTINGS</span></td><td>Users · Roles · Access Control · Maintenance</td></tr>
+</table>
+<p>The sidebar can be <strong>collapsed to icons</strong> with the toggle button at its top-left corner to give the workspace more room. Your name and a small menu (Profile, Security, Appearance, Sign out) appear at the bottom of the sidebar.</p>
+
+<h3>4.2 Page header</h3>
+<p>Each main screen has a header with a <strong>title</strong> and a short <strong>description</strong> explaining the screen's purpose, and usually an <span class="btn">Add / New</span> button to create records.</p>
+
+<h3>4.3 Data tables</h3>
+<p>Most list screens (Employees, Payroll Periods, Loans, and so on) use a standard data table with the same controls:</p>
+<ul>
+    <li><strong>Search box</strong> — type to filter rows by name, code, or keyword.</li>
+    <li><strong>Filters</strong> — screen-specific dropdowns (for example year, month, status on Payroll Periods; group on Employees).</li>
+    <li><strong>Rows per page</strong> — choose how many rows are shown (for example 10, 25, 50).</li>
+    <li><strong>Pagination</strong> — move through pages of results when there are more rows than fit on one page.</li>
+    <li><strong>Row actions</strong> — icons or buttons at the end of each row for actions such as View, Edit, Process, or Delete.</li>
+</ul>
+
+<h3>4.4 Forms &amp; dialogs</h3>
+<p>Creating and editing is done in a <strong>dialog window</strong> that opens on top of the list. Fill in the required fields and click <span class="btn">Save</span> (or <span class="btn">Generate</span> for batch actions). Validation messages appear under fields that need correction. Use <span class="btn ghost">Cancel</span> or press <span class="kbd">Esc</span> to close without saving.</p>
+
+<h3>4.5 Flash messages</h3>
+<p>After successful actions a green confirmation message appears; after errors, a red message explains what went wrong. They disappear automatically after a few seconds. If a <strong>server error</strong> message appears, take note of what you were doing and contact the administrator.</p>
+</div>
+<!-- ============ 5. EMPLOYEES ============ -->
+<div class="page">
+<h2>5. Employees</h2>
+<p>The <strong>Employee</strong> screen (<span class="menu-label">MAIN</span> → Employee) is where the master data for every employee is kept. All other modules refer back to these records, so keep them complete and up to date.</p>
+
+<h3>5.1 Viewing employees</h3>
+<ul>
+    <li>Open <strong>Employee</strong> from the sidebar to see the employee table.</li>
+    <li>Use the <strong>search box</strong> to find an employee by name.</li>
+    <li>Use the <strong>group filter</strong> to narrow the list to one group (department/unit).</li>
+    <li>Click a row's <strong>view</strong> action to open the employee's full record.</li>
+</ul>
+
+<h3>5.2 Adding an employee</h3>
+<ol>
+    <li>Click <span class="btn">Add employee</span> (or <strong>New</strong>) on the Employee screen.</li>
+    <li>Fill in the employee's details, including:
+        <ul>
+            <li><strong>Name</strong> — first and last name exactly as used on official records.</li>
+            <li><strong>Employment status</strong> — <span class="chip default">Probationary</span> or <span class="chip default">Regular</span>.</li>
+            <li><strong>Tenured status</strong> — <span class="chip default">Tenured</span> or <span class="chip default">Non-Tenured</span>.</li>
+            <li><strong>Position</strong> — select from the positions maintained under Maintenance, or add a new one directly from the field if available.</li>
+            <li><strong>Group</strong> and <strong>Area of assignment</strong> — select from the values maintained under Maintenance.</li>
+            <li><strong>Rate / pay details</strong> — the amounts used when payroll is computed.</li>
+            <li><strong>Profile photo</strong> — optional image upload.</li>
+        </ul>
+    </li>
+    <li>Click <span class="btn">Save</span>. The new employee appears in the table immediately.</li>
+</ol>
+
+<h3>5.3 Editing and deleting</h3>
+<ul>
+    <li>To correct details, open the employee and use the <strong>edit</strong> action, then save your changes.</li>
+    <li>To remove a record, use the <strong>delete</strong> action and confirm. Deletion is recorded in the Recent Activity feed.</li>
+</ul>
+
+<div class="callout warn"><span class="t">Reminders</span><br/>Check the spelling of names and the accuracy of positions, groups, and rates — these flow directly into DTR processing, payroll, and payslips. If an employee is leaving, consider what the organization's process is before deleting their historical payroll records.</div>
+</div>
+
+<!-- ============ 6. LOANS ============ -->
+<div class="page">
+<h2>6. Loans</h2>
+<p>The <strong>Loan</strong> screen (<span class="menu-label">MAIN</span> → Loan) records loans granted to employees. Loan deductions are then applied automatically when payroll is computed.</p>
+
+<h3>6.1 Adding a loan</h3>
+<ol>
+    <li>Open <strong>Loan</strong> from the sidebar and click <span class="btn">Add loan</span>.</li>
+    <li>Select the <strong>employee</strong> who received the loan.</li>
+    <li>Choose the <strong>loan type</strong> (maintained under Maintenance → Loan types).</li>
+    <li>Enter the loan <strong>amount</strong> and any relevant dates.</li>
+    <li>Set the <strong>deduction frequency</strong>:
+        <ul>
+            <li><span class="chip default">Every Payday</span> — a deduction is taken from each pay run.</li>
+            <li><span class="chip default">Every 15th</span> — deducted on the 15th of the month.</li>
+            <li><span class="chip default">End of Month</span> — deducted at the end of the month.</li>
+        </ul>
+    </li>
+    <li>Click <span class="btn">Save</span>.</li>
+</ol>
+
+<h3>6.2 Managing loans</h3>
+<ul>
+    <li>Use the <strong>search box</strong> to find loans by employee or loan type.</li>
+    <li>Use the row <strong>edit</strong> action to change amounts, frequency, or dates.</li>
+    <li>Use the row <strong>delete</strong> action to remove a loan record (for example, if it was entered by mistake).</li>
+</ul>
+</div>
+
+<!-- ============ 7. BIOMETRIC UPLOADING ============ -->
+<div class="page">
+<h2>7. Biometric Uploading</h2>
+<p>The <strong>Biometric Uploading</strong> screen (<span class="menu-label">MAIN</span> → Biometric Uploading) is where raw attendance files from the biometric clocking devices are brought into the system. Each uploaded file becomes an <em>import batch</em> that is processed into daily time records.</p>
+
+<h3>7.1 Uploading a biometric file</h3>
+<ol>
+    <li>Open <strong>Biometric Uploading</strong> from the sidebar.</li>
+    <li>Click the <strong>upload / new batch</strong> button and choose the biometric file from your computer.</li>
+    <li>Confirm the import. The system creates a batch and begins processing the punches it contains.</li>
+    <li>Check the import result message for the number of records read and any warnings.</li>
+</ol>
+
+<h3>7.2 Re-processing a batch</h3>
+<p>If a batch produced missing or incorrect records (for example, because employee data was fixed after the first import), you can <strong>re-process</strong> it: find the batch in the list and click its <em>reprocess</em> action. The system reads the original file again and rebuilds the attendance records with the current employee data.</p>
+
+<h3>7.3 Deleting a batch</h3>
+<p>To discard an incorrectly uploaded file, use the batch's <strong>delete</strong> action. This removes the batch and the records it produced.</p>
+
+<div class="callout tip"><span class="t">Good practice</span><br/>Upload biometric files as they become available (for example, daily or weekly). Waiting until the end of a payroll period makes problems harder to trace. After uploading, go to <strong>Process DTR</strong> (Chapter 11) to verify the attendance data per employee.</div>
+</div>
+<!-- ============ 8. SHIFT CODES ============ -->
+<div class="page">
+<h2>8. Shift Codes</h2>
+<p>The <strong>Shift Code</strong> screen (<span class="menu-label">MAIN</span> → Shift Code) defines the shifts that exist in the organization — for example morning, afternoon, or night shifts.</p>
+
+<h3>8.1 Viewing and filtering</h3>
+<p>The shift list shows every shift code together with its description. Use the <strong>search box</strong> to find a code quickly.</p>
+
+<h3>8.2 Adding a shift code</h3>
+<ol>
+    <li>Click <span class="btn">Add shift code</span>.</li>
+    <li>Enter a short, unique <strong>code</strong> and a clear <strong>description</strong> (for example, <code>AM</code> — Morning Shift).</li>
+    <li>Define the <strong>start and end times</strong> for the shift.</li>
+    <li>Click <span class="btn">Save</span>.</li>
+</ol>
+
+<h3>8.3 Editing and deleting</h3>
+<ul>
+    <li>Use the row <strong>edit</strong> action to change any detail of a shift.</li>
+    <li>Use the row <strong>delete</strong> action only if the shift is no longer used by any employee schedule — otherwise schedules that reference it may break.</li>
+</ul>
+
+<div class="callout"><span class="t">Note</span><br/>Shift codes are the building blocks used by the <strong>Employee Shift Schedule</strong> (Chapter 9). Keep codes short and consistent, and avoid creating duplicate codes with different spellings.</div>
+</div>
+
+<!-- ============ 9. EMPLOYEE SHIFT SCHEDULE ============ -->
+<div class="page">
+<h2>9. Employee Shift Schedule</h2>
+<p>The <strong>Employee Shift Schedule</strong> screen (<span class="menu-label">MAIN</span> → Employee Shift Schedule) assigns shifts to employees, either as a reusable <em>template</em> applied to an employee or as a <em>per-date</em> override for a specific day.</p>
+
+<h3>9.1 Scheduling approaches</h3>
+<table>
+    <tr><th style="width:30%">Approach</th><th>When to use it</th></tr>
+    <tr><td><strong>Template</strong></td><td>The employee's usual weekly rhythm repeats every week. One template covers it.</td></tr>
+    <tr><td><strong>Per-date</strong></td><td>A specific day differs from the routine — a training day, a holiday coverage, a swap. Add just that date.</td></tr>
+</table>
+
+<h3>9.2 Adding a schedule</h3>
+<ol>
+    <li>Open <strong>Employee Shift Schedule</strong> and click <span class="btn">Add schedule</span>.</li>
+    <li>Select the <strong>employee</strong> and the <strong>shift code</strong> to assign.</li>
+    <li>For templates, set the days of the week the shift applies to; for per-date schedules, pick the specific date.</li>
+    <li>Click <span class="btn">Save</span>.</li>
+</ol>
+
+<h3>9.3 Removing a schedule</h3>
+<p>Select the schedule row and use the <strong>delete</strong> action. Removing a per-date schedule restores the employee's normal template; removing a template leaves the employee without a default schedule, so add the replacement first.</p>
+</div>
+<!-- ============ 10. CUTOFF DATES ============ -->
+<div class="page">
+<h2>10. Cutoff Dates</h2>
+<p>The <strong>Cutoff Dates</strong> screen (<span class="menu-label">MAIN</span> → Cutoff Dates) defines the <em>cutoff scheme</em> — the day of the month on which attendance is cut and payroll periods close. This scheme is used when payroll periods are generated (Chapter 12).</p>
+
+<h3>10.1 Viewing cutoff dates</h3>
+<p>The screen lists the configured cutoff dates with their labels and the day-of-month values. For example, a scheme might cut attendance on the <strong>15th</strong> and at <strong>end of month (30th)</strong>, or use a single monthly cutoff.</p>
+
+<h3>10.2 Adding a cutoff date</h3>
+<ol>
+    <li>Click <span class="btn">Add cutoff date</span>.</li>
+    <li>Give the cutoff a <strong>label</strong> (for example, "Mid-month") and the <strong>day of the month</strong> it falls on.</li>
+    <li>Click <span class="btn">Save</span>.</li>
+</ol>
+
+<h3>10.3 Editing and deleting</h3>
+<ul>
+    <li>Use the row <strong>edit</strong> action to correct a cutoff's label or day.</li>
+    <li>Use the row <strong>delete</strong> action with care: payroll periods already generated from a cutoff are not automatically changed.</li>
+</ul>
+
+<div class="callout warn"><span class="t">Sequence matters</span><br/>Define the cutoff scheme <strong>before</strong> generating payroll periods. If the organization changes its pay schedule, update the cutoff dates first, then generate new periods (or regenerate for the affected year).</div>
+</div>
+
+<!-- ============ 11. PROCESS DTR ============ -->
+<div class="page">
+<h2>11. Process DTR (Daily Time Record)</h2>
+<p>The <strong>Process DTR</strong> screen (<span class="menu-label">MAIN</span> → Process DTR) turns raw attendance (from biometric uploads and schedules) into verified <em>daily time records</em> for a payroll period. This is where you confirm that each employee's time is correct before payroll is computed.</p>
+
+<h3>11.1 Choosing what to process</h3>
+<ol>
+    <li>Select the <strong>period</strong> (month) you are processing from the Periods field.</li>
+    <li>Choose the <strong>process mode</strong>:
+        <ul>
+            <li><span class="chip default">All</span> — process every employee in the period in one run.</li>
+            <li><span class="chip default">Per employee</span> — process employees one at a time, useful when only a few employees need attention.</li>
+        </ul>
+    </li>
+</ol>
+
+<h3>11.2 Processing</h3>
+<ul>
+    <li>In <strong>All</strong> mode, click <span class="btn">Process All</span>. The system builds DTR for every employee in the period.</li>
+    <li>In <strong>Per employee</strong> mode, use each row's process action, or open an employee's record with the <em>view</em> action to inspect the <strong>Daily Time Record</strong> dialog showing that employee's dates and times.</li>
+</ul>
+
+<h3>11.3 Reviewing DTR</h3>
+<p>Rows that have not been processed yet show a pending state; processed rows show their status. Open any employee's DTR to check clock-in/clock-out times against the expected schedule before moving on to payroll.</p>
+
+<div class="callout tip"><span class="t">Before you continue</span><br/>When every DTR row looks correct, the period is ready to be <strong>locked</strong> and computed — continue to <strong>Chapter 13: Processing a Payroll Period</strong>.</div>
+</div>
+<!-- ============ 12. PAYROLL PERIODS ============ -->
+<div class="page">
+<h2>12. Payroll Periods</h2>
+<p>The <strong>Payroll Periods</strong> screen (<span class="menu-label">MAIN</span> → Payroll Periods) is the control center for the pay calendar. It lists every payroll period with its dates and processing status, and is where you generate periods and open them for processing.</p>
+
+<h3>12.1 Generating yearly periods</h3>
+<p>Rather than creating one month at a time, the system can generate a period for every month of a year in a single action:</p>
+<ol>
+    <li>Click <span class="btn">Generate Payroll Period</span>.</li>
+    <li>Choose the <strong>year</strong> to generate (available years are shown in the dropdown).</li>
+    <li>Choose the <strong>cutoff date scheme</strong> — the cutoff configuration from Chapter 10 that defines the period's cut and close dates.</li>
+    <li>Click <span class="btn">Generate</span>.</li>
+</ol>
+<p>The dialog explains: <em>"This will generate payroll periods for the entire year based on the selected cutoff date."</em> All twelve periods are created and appear in the list with status <span class="chip open">Open</span>.</p>
+
+<h3>12.2 Period statuses</h3>
+<p>Each period carries a status that reflects where it is in the payroll lifecycle:</p>
+<table>
+    <tr><th style="width:22%">Status</th><th>Meaning</th></tr>
+    <tr><td><span class="chip open">Open</span></td><td>Attendance is still being collected and verified (DTR not yet locked).</td></tr>
+    <tr><td><span class="chip processing">Processing</span></td><td>DTR has been locked and payroll is being computed.</td></tr>
+    <tr><td><span class="chip closed">Closed</span></td><td>Payroll has been computed and is being reviewed before release.</td></tr>
+    <tr><td><span class="chip released">Released</span></td><td>Payslips have been finalized and released; the period is complete.</td></tr>
+</table>
+<p>Full details of each state and what you can do in it are in <strong>Chapter 18</strong>.</p>
+
+<h3>12.3 Filtering the list</h3>
+<ul>
+    <li><strong>Year</strong> — show periods of a specific year.</li>
+    <li><strong>Month</strong> — jump straight to one month.</li>
+    <li><strong>Status</strong> — show only Open, Processing, Closed, or Released periods.</li>
+    <li><strong>Search</strong> — free-text search across the period list.</li>
+</ul>
+
+<h3>12.4 Opening a period for processing</h3>
+<p>Click a period row (or its processing action) to open the <strong>Process Period</strong> screen described in the next chapter. From there you lock DTR, compute payroll, and release payslips.</p>
+</div>
+<!-- ============ 13. PROCESSING A PERIOD ============ -->
+<div class="page">
+<h2>13. Processing a Payroll Period</h2>
+<p>Each payroll period follows the same three-stage workflow. The <strong>Process Period</strong> screen guides you through it with a <em>stepper</em> at the top that shows where the period currently is:</p>
+
+<div class="flow">
+    <div class="node fill">1 · DTR collection<br/>Attendance gathered &amp; verified</div>
+    <div class="arrow">→</div>
+    <div class="node">2 · Lock &amp; compute<br/>DTR locked, payroll calculated</div>
+    <div class="arrow">→</div>
+    <div class="node">3 · Review &amp; release<br/>Payslips finalized &amp; released</div>
+</div>
+
+<h3>13.1 Workflow at a glance</h3>
+<table>
+    <tr><th style="width:22%">Stage</th><th style="width:38%">Your action</th><th>Result / status</th></tr>
+    <tr><td>1 — DTR collection</td><td>Process DTR (Chapter 11), review attendance</td><td>Period stays <span class="chip open">Open</span></td></tr>
+    <tr><td>2 — Lock &amp; compute</td><td>Click <span class="btn">Lock DTR</span>, then <span class="btn">Compute Payroll</span></td><td>Moves to <span class="chip processing">Processing</span>, then <span class="chip closed">Closed</span></td></tr>
+    <tr><td>3 — Review &amp; release</td><td>Review summary, click <span class="btn">Release Payslips</span></td><td>Moves to <span class="chip released">Released</span></td></tr>
+</table>
+
+<h3>13.2 The employee summary panel</h3>
+<p>The screen shows a summary of the period so you can see progress at a glance:</p>
+<table>
+    <tr><th style="width:30%">Counter</th><th>Meaning</th></tr>
+    <tr><td><strong>Employees</strong></td><td>Total number of employees in the period.</td></tr>
+    <tr><td><strong>Processed</strong></td><td>Employees whose DTR has been processed.</td></tr>
+    <tr><td><strong>Flagged</strong></td><td>Employees whose records need attention before computing.</td></tr>
+    <tr><td><strong>Pending</strong></td><td>Employees still waiting to be processed.</td></tr>
+</table>
+
+<h3>13.3 Step 1 — DTR collection (period is Open)</h3>
+<ol>
+    <li>Use <strong>Process DTR</strong> to build every employee's daily time records.</li>
+    <li>Return to this period's Process screen and confirm the summary looks complete (no unexpected Pending or Flagged rows).</li>
+    <li>When ready, click <span class="btn">Lock DTR</span>. Locking stops attendance changes for the period — from this point the DTR is the record of truth for the payroll run.</li>
+</ol>
+
+<h3>13.4 Step 2 — Lock &amp; compute (period is Processing)</h3>
+<ol>
+    <li>After the lock succeeds, click <span class="btn">Compute Payroll</span>.</li>
+    <li>The system calculates gross pay, deductions, and loan deductions for every employee using the locked DTR, rates, and loan records.</li>
+    <li>Wait for the computation to finish and check for any flagged employees before proceeding.</li>
+</ol>
+
+<h3>13.5 Step 3 — Review &amp; release (period is Closed)</h3>
+<ol>
+    <li>Review the computed results for the period.</li>
+    <li>Click <span class="btn">Release Payslips</span> to finalize the payslips so they can be generated and printed (Chapter 14).</li>
+    <li>The period becomes <span class="chip released">Released</span>.</li>
+</ol>
+
+<h3>13.6 Re-computing a period</h3>
+<p>If corrections are needed after computing — for example a rate was wrong, or a loan was missed — the system provides a <strong>recompute</strong> action. Note that periods already released should not be recomputed without following the organization's correction procedure, since payslips may already have been printed or used for disbursement.</p>
+
+<div class="callout danger"><span class="t">Locking is final</span><br/>Once a period is locked, DTR for that period can no longer be changed freely. Always confirm attendance is complete and correct <em>before</em> clicking <span class="btn">Lock DTR</span>.</div>
+</div>
+<!-- ============ 14. REPORTS ============ -->
+<div class="page">
+<h2>14. Reports</h2>
+<p>The <span class="menu-label">REPORTS</span> menu contains two reporting tools: <strong>Generate Payslip</strong> and <strong>Generate DTR</strong>. Both prepare printable documents from the payroll data — use them to produce payslips for employees and to verify attendance on paper.</p>
+
+<h3>14.1 Generate Payslip</h3>
+<ol>
+    <li>Open <strong>Reports → Generate Payslip</strong>.</li>
+    <li>Choose the <strong>period</strong> (month) to report on.</li>
+    <li>Select <strong>per employee</strong> to produce one employee's payslip, or pick from the list to view others.</li>
+    <li>Review the payslip preview, then use your browser's <strong>Print</strong> command (or the screen's print button) to save or print it.</li>
+</ol>
+<div class="callout tip"><span class="t">Tip</span><br/>Payslips display cleanly on paper when you use the print option; choose "Save as PDF" in the print dialog if you need an electronic copy to email.</div>
+
+<h3>14.2 Generate DTR</h3>
+<ol>
+    <li>Open <strong>Reports → Generate DTR</strong>.</li>
+    <li>Choose the <strong>period</strong> (month) to report on.</li>
+    <li>Generate the DTR <strong>for all employees</strong> (a full attendance register) or <strong>per employee</strong> (one employee's daily time records).</li>
+    <li>Review and print the report, or save it as a PDF from the print dialog.</li>
+</ol>
+
+<div class="callout"><span class="t">Note</span><br/>Reports reflect the data as it exists at the moment you generate them. For a Released period this is final; for an Open period, re-generate after any DTR changes to get the current picture.</div>
+</div>
+
+<!-- ============ 15. MAINTENANCE ============ -->
+<div class="page">
+<h2>15. Maintenance</h2>
+<p>The <strong>Maintenance</strong> screen (<span class="menu-label">SETTINGS</span> → Maintenance) holds the reference data used throughout the system. There are five maintenance modules, each a simple list that you add to, edit, and remove as needed:</p>
+
+<table>
+    <tr><th style="width:28%">Module</th><th>Used by</th></tr>
+    <tr><td><strong>Loan types</strong></td><td>The Loan screen (Chapter 6) — categories such as salary advance, emergency, or equipment loan.</td></tr>
+    <tr><td><strong>Groups</strong></td><td>Employees — department/unit the employee belongs to; also used to filter employee lists.</td></tr>
+    <tr><td><strong>Positions</strong></td><td>Employees — the job title or role an employee holds.</td></tr>
+    <tr><td><strong>Areas of assignment</strong></td><td>Employees — where the employee is assigned (a building, site, or station).</td></tr>
+    <tr><td><strong>Holidays</strong></td><td>The pay calendar — official holidays relevant to attendance and payroll.</td></tr>
+</table>
+
+<h3>15.1 Adding a value</h3>
+<ol>
+    <li>Open <strong>Maintenance</strong> and select the module tab (Loan types, Groups, Positions, Areas of assignment, Holidays).</li>
+    <li>Click <span class="btn">Add</span> and enter the name (and any extra fields, such as a holiday date).</li>
+    <li>Click <span class="btn">Save</span>.</li>
+</ol>
+
+<h3>15.2 Quick-add from forms</h3>
+<p>When filling in an employee or loan form, some fields (for example Group, Position, or Area of assignment) offer an option to <strong>add a new value on the spot</strong> instead of leaving the form. Use this for genuinely new values; for typos, fix the value in Maintenance.</p>
+
+<h3>15.3 Editing and deleting</h3>
+<ul>
+    <li>Use the row <strong>edit</strong> action to correct a label or date.</li>
+    <li>Use the row <strong>delete</strong> action only when the value is no longer referenced by employees, loans, or periods.</li>
+</ul>
+
+<div class="callout warn"><span class="t">Keep it consistent</span><br/>Misspelled or duplicate reference values ("Nurse", "Nurse ", "NURSE") create splits in reports and filters. Review the Maintenance lists periodically and remove or merge duplicates.</div>
+</div>
+<!-- ============ 16. USERS ROLES & ACCESS CONTROL ============ -->
+<div class="page">
+<h2>16. Users, Roles &amp; Access Control</h2>
+<p>These three screens (<span class="menu-label">SETTINGS</span> → Users, Roles, Access Control) manage who can use the system and what each person can do.</p>
+
+<h3>16.1 Users</h3>
+<p>The <strong>Users</strong> screen lists every system account (name, username, status). To add a user:</p>
+<ol>
+    <li>Click <span class="btn">Add user</span>.</li>
+    <li>Enter the user's <strong>name</strong> and <strong>login username</strong>.</li>
+    <li>A default password will be set — ask your administrator for the details.</li>
+    <li>Assign the user one or more <strong>roles</strong> that grant the permissions the person needs.</li>
+    <li>Click <span class="btn">Save</span>.</li>
+</ol>
+<p>Use the row <strong>edit</strong> action to change a user's details, and the row <strong>delete</strong> action to remove an account. Users should be removed or disabled as soon as they leave the organization.</p>
+
+<h3>16.2 Roles</h3>
+<p>A <strong>role</strong> is a named collection of permissions — for example "Payroll Officer" or "HR Staff". Instead of assigning permissions to each user one by one, you:</p>
+<ol>
+    <li>Click <span class="btn">Add role</span> on the <strong>Roles</strong> screen.</li>
+    <li>Name the role.</li>
+    <li>Assign the role the permissions it needs (Chapter 16.3).</li>
+    <li>Attach users to the role.</li>
+</ol>
+<p>When a permission needs to change, update the role once and every user attached to it inherits the change.</p>
+
+<h3>16.3 Access Control (permissions)</h3>
+<p>The <strong>Access Control</strong> screen shows the full permission matrix. Open a <strong>user</strong> or a <strong>role</strong> to see every module and action side by side with a toggle for each permission:</p>
+<table>
+    <tr><th style="width:40%">Example permission</th><th>Effect</th></tr>
+    <tr><td><code>employee-view</code></td><td>Can open the Employee screen and view records.</td></tr>
+    <tr><td><code>employee-create</code> / <code>employee-update</code> / <code>employee-delete</code></td><td>Can add, edit, or delete employee records.</td></tr>
+    <tr><td><code>payroll-periods-view</code></td><td>Can see the Payroll Periods screen.</td></tr>
+    <tr><td><code>archives-view</code></td><td>Can view archived data.</td></tr>
+</table>
+<p>Changes take effect immediately. The sidebar and page actions adjust automatically: screens the user cannot access disappear from the menu, and actions without permission are hidden or disabled.</p>
+
+<div class="callout danger"><span class="t">Principle of least privilege</span><br/>Give users only the permissions their job requires. In particular, payroll computation and release permissions should be limited to the staff responsible for the pay run.</div>
+</div>
+
+<!-- ============ 17. SETTINGS ============ -->
+<div class="page">
+<h2>17. Settings</h2>
+<p>Your personal account settings live under <strong>Settings</strong> in the sidebar menu, or under your name in the sidebar bottom menu, with three tabs: Profile, Security, and Appearance.</p>
+
+<h3>17.1 Profile</h3>
+<p>View and update your own <strong>name</strong> and <strong>email address</strong>. These should always be current, because password resets and notifications are sent to the email on file.</p>
+
+<h3>17.2 Security</h3>
+<ul>
+    <li><strong>Password</strong> — change your password. For security, you may be asked to confirm your current password first.</li>
+    <!-- <li><strong>Two-factor authentication (2FA)</strong> — enable an authenticator app. Each sign-in then needs a one-time code, and you receive <strong>recovery codes</strong> — store them somewhere safe (they are the only way back in if you lose the authenticator device).</li> -->
+    <!-- <li><strong>Passkeys</strong> — register and manage device passkeys (fingerprint/face/PIN) for passwordless sign-in.</li> -->
+</ul>
+<!-- <div class="callout tip"><span class="t">Recommendation</span><br/>Enable 2FA on accounts that can compute or release payroll. If you use a shared office device, sign out when you finish and never tick "Remember me" on shared machines.</div> -->
+
+<h3>17.3 Appearance</h3>
+<p>Choose the interface theme:</p>
+<ul>
+    <li><span class="chip default">Light</span> — bright interface.</li>
+    <li><span class="chip default">Dark</span> — dark interface, easier on the eyes in low light.</li>
+    <li><span class="chip default">System</span> — follows your device's light/dark setting automatically.</li>
+</ul>
+</div>
+<!-- ============ 18. STATUS REFERENCE ============ -->
+<div class="page">
+<h2>18. Payroll Period Status Reference</h2>
+<p>This quick-reference table summarizes what happens in each period status and what actions are available (subject to your permissions).</p>
+
+<table>
+    <tr><th style="width:14%">Status</th><th style="width:34%">What is happening</th><th style="width:26%">Things you can do</th><th>Moves to</th></tr>
+    <tr>
+        <td><span class="chip open">Open</span></td>
+        <td>Payroll period created. Attendance is being collected: biometric files are uploaded and DTR is processed and reviewed.</td>
+        <td>Upload biometrics · Process DTR · Edit DTR · View reports</td>
+        <td>Process DTR review complete</td>
+    </tr>
+    <tr>
+        <td><span class="chip processing">Processing</span></td>
+        <td>DTR locked. The system computes payroll using locked attendance, employee rates, and loans.</td>
+        <td>Compute payroll · View status · Recompute</td>
+        <td>Computation finished</td>
+    </tr>
+    <tr>
+        <td><span class="chip closed">Closed</span></td>
+        <td>Payroll computed. Results are reviewed before employees' payslips are made available.</td>
+        <td>Review summary · Release payslips · Recompute (if corrections needed)</td>
+        <td>Payslips released</td>
+    </tr>
+    <tr>
+        <td><span class="chip released">Released</span></td>
+        <td>Payslips finalized and released. Employees' payslips can be generated and printed.</td>
+        <td>Generate payslips · Print DTR/payslip reports</td>
+        <td>— (period complete)</td>
+    </tr>
+</table>
+
+<div class="flow">
+    <div class="node fill">Open</div><div class="arrow">→</div>
+    <div class="node fill">Processing</div><div class="arrow">→</div>
+    <div class="node fill">Closed</div><div class="arrow">→</div>
+    <div class="node fill">Released</div>
+</div>
+<p style="font-size:8.8pt;color:#64748b">Period lifecycle. Status changes are driven by the actions on the Process Period screen: <span class="kbd">Lock DTR</span> → <span class="kbd">Compute Payroll</span> → <span class="kbd">Release Payslips</span>.</p>
+</div>
+<!-- ============ 19. FAQ & TROUBLESHOOTING ============ -->
+<div class="page">
+<h2>19. Frequently Asked Questions &amp; Troubleshooting</h2>
+
+<table>
+    <tr><th style="width:42%">Question</th><th>Answer</th></tr>
+    <tr><td><strong>I can't sign in — the form shows a countdown.</strong></td><td>Too many failed attempts temporarily locked the form. Wait out the countdown, verify the username is spelled correctly, then try again.</td></tr>
+    <tr><td><strong>A menu item I need is missing.</strong></td><td>Menu items are hidden by permissions. Ask the administrator to grant the corresponding permission through Access Control (Chapter 16).</td></tr>
+    <tr><td><strong>I processed DTR but an employee has no records.</strong></td><td>Check that the employee's biometric data was uploaded for that period, that their shift schedule exists, and that the correct period is selected. Re-process the employee after fixing the data.</td></tr>
+    <tr><td><strong>I released a payslip and then found an error.</strong></td><td>Do not silently recompute. Follow the organization's correction procedure: notify the responsible staff, recompute the period, and re-issue the affected payslip.</td></tr>
+    <tr><td><strong>Can I change DTR after locking?</strong></td><td>No — locking is designed to prevent changes. Correct the underlying data (or recompute if permitted) and follow your office procedure for adjustments.</td></tr>
+    <tr><td><strong>Where do payslips and DTR reports go?</strong></td><td>They are generated on screen in the Reports menu and printed, or saved as PDF from the print dialog. The system does not email them automatically.</td></tr>
+    <tr><td><strong>I forgot my password.</strong></td><td>Use the forgot-password link on the sign-in screen (Section 2.3). If you cannot access the linked email, contact the administrator.</td></tr>
+    <tr><td><strong>I get a "server error" message.</strong></td><td>Note what you were doing, when, and any error text, then contact the administrator with those details.</td></tr>
+    <tr><td><strong>Is it safe to leave the application open?</strong></td><td>The session expires after inactivity. Still, sign out when you leave your desk and never share your password or 2FA codes.</td></tr>
+</table>
+</div>
+<!-- ============ 20. APPENDIX ============ -->
+<div class="page">
+<h2>20. Appendix — Permission Codes</h2>
+<p>The permission matrix (Access Control) uses machine-readable codes. They follow a predictable pattern: <code>&lt;module&gt;-&lt;action&gt;</code>. The table below lists the permission families currently used by the system.</p>
+
+<table>
+    <tr><th style="width:38%">Permission family</th><th>Covered modules / effect</th></tr>
+    <tr><td><code>access-control(-view)</code></td><td>Open the Access Control matrix; view permissions.</td></tr>
+    <tr><td><code>archives(-view,-create,-update,-delete)</code></td><td>View and manage archived data.</td></tr>
+    <tr><td><code>biometric-uploading(-view,-create,-update,-delete)</code></td><td>View, upload, re-process, and delete biometric batches.</td></tr>
+    <tr><td><code>cutoff-scheme(-view,-create,-update,-delete)</code></td><td>View and manage cutoff dates.</td></tr>
+    <tr><td><code>dtr(-view,-...)</code></td><td>View and process DTR.</td></tr>
+    <tr><td><code>employee(-view,-create,-update,-delete)</code></td><td>View, add, edit, and delete employees.</td></tr>
+    <tr><td><code>employee-shift-schedule(-view,-...)</code></td><td>View and manage employee shift schedules.</td></tr>
+    <tr><td><code>loan(-view,-create,-update,-delete)</code></td><td>View, add, edit, and delete loans.</td></tr>
+    <tr><td><code>maintenance / loan-type(-view,...)</code></td><td>View and manage maintenance reference data.</td></tr>
+    <tr><td><code>payroll-periods(-view,-create,-update,-delete)</code></td><td>View, generate, and manage payroll periods.</td></tr>
+    <tr><td><code>process-dtr(-view,-...)</code></td><td>Process and review daily time records.</td></tr>
+    <tr><td><code>generate-payslip-view</code> / <code>generate-dtr-view</code></td><td>Generate payslip and DTR reports.</td></tr>
+    <tr><td><code>roles(-view,-create,-update,-delete)</code></td><td>View and manage roles.</td></tr>
+    <tr><td><code>shift-code(-view,-create,-update,-delete)</code></td><td>View and manage shift codes.</td></tr>
+    <tr><td><code>users(-view,-create,-update,-delete)</code></td><td>View and manage user accounts.</td></tr>
+</table>
+
+<div class="callout"><span class="t">Note</span><br/>The exact list shown in Access Control is definitive; the codes above combine the <em>view</em> baseline with action permissions. When in doubt, open Settings → Access Control and read the toggles for the module in question.</div>
+</div>
+
+<hr style="border:none;border-top:1pt solid #cbd5e1;margin:16pt 0"/>
+<p style="font-size:8.5pt;color:#64748b">End of the Payroll System User Guide · Version 1.0 · Prepared for Sister of Mary of Banneux, Inc. · For questions or corrections, contact the system administrator.</p>
+
+</body>
+</html>

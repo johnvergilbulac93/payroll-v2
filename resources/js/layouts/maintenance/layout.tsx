@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
+import { index as activityLogsIndex } from '@/routes/maintenance/activity_logs';
 import { index as areaIndex } from '@/routes/maintenance/area_of_assignment';
 import { index as groupIndex } from '@/routes/maintenance/group';
 import { index as holidayIndex } from '@/routes/maintenance/holiday';
@@ -38,6 +39,11 @@ const sidebarNavItems: NavItem[] = [
         href: holidayIndex.url(),
         icon: null,
     },
+    {
+        title: 'Activity Logs',
+        href: activityLogsIndex.url(),
+        icon: null,
+    },
 ];
 
 export default function MaintenanceLayout({ children }: PropsWithChildren) {
@@ -50,7 +56,7 @@ export default function MaintenanceLayout({ children }: PropsWithChildren) {
                 description="Manage system master data and configurations."
             />
 
-            <div className="flex flex-col lg:flex-row lg:space-x-12">
+            <div className="flex min-w-0 flex-col lg:flex-row lg:space-x-12">
                 <aside className="w-full max-w-xl lg:w-48">
                     <nav
                         className="flex flex-col space-y-1 space-x-0"
@@ -79,8 +85,8 @@ export default function MaintenanceLayout({ children }: PropsWithChildren) {
 
                 <Separator className="my-6 lg:hidden" />
 
-                <div className="flex-1 md:max-w-5xl">
-                    <section className="max-w-5xl space-y-12">
+                <div className="min-w-0 flex-1 md:max-w-5xl">
+                    <section className="min-w-0 max-w-5xl space-y-12">
                         {children}
                     </section>
                 </div>

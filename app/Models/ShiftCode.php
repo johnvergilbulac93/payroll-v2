@@ -6,11 +6,29 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 #[Table('shift_codes')]
 #[Fillable(['Name', 'TimeIn', 'TimeOut', 'BreakMinutes', 'GracePeriodMinutes', 'CrossesMidNight', 'IsWorkingDay', 'TotalHours', 'IsActive'])]
 class ShiftCode extends Model
 {
+    use LogsActivity;
+
+    protected static $recordEvents = [
+        'created',
+        'updated',
+        'deleted',
+    ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('shift_codes')
+            ->logAll()
+            ->logOnlyDirty();
+    }
+
     protected $casts = [
         'CrossesMidNight' => 'boolean',
         'IsWorkingDay' => 'boolean',

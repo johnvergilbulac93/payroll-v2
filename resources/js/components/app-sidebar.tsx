@@ -19,10 +19,11 @@ export function AppSidebar() {
 
     return (
         <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
+            <SidebarHeader className="border-b border-sidebar-border/60">
+
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
+                        <SidebarMenuButton size="lg" className="group-data-[collapsible=icon]:justify-center" asChild>
                             <Link href={dashboard()} prefetch>
                                 <AppLogo />
                             </Link>
@@ -31,12 +32,11 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
+            <SidebarContent className="px-2 py-3">
                 <NavMain items={filteredNavGroups} />
             </SidebarContent>
 
-            <SidebarFooter>
-                {/* <NavFooter items={footerNavItems} className="mt-auto" /> */}
+            <SidebarFooter className="border-t border-sidebar-border/60 p-2">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

@@ -580,8 +580,8 @@ export function DataTable<T extends RowData>({
             {controlType === 'process-dtr' && tableControls2}
             {controlType === 'payroll-period' && tableControls3}
 
-            <div className="overflow-hidden rounded-lg border">
-                <Table>
+            <div className="w-full max-w-full overflow-x-auto rounded-lg border">
+                <Table className="w-full">
                     <TableHeader className="sticky top-0 z-10 bg-muted">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>

@@ -60,7 +60,7 @@ class AccessControlController extends Controller
     public function updateUserPermission(Request $request, User $user)
     {
         $user->permissions()->sync($request->permission_ids);
-        return to_route('access_control.index');
+        return back()->with('success', 'Permission updated.');
     }
 
     public function updateRolePermission(Request $request, Role $role)
@@ -72,6 +72,6 @@ class AccessControlController extends Controller
         } else {
             $role->permissions()->detach($permissionID);
         }
-        return to_route('access_control.index');
+        return back()->with('success', 'Permission updated.');
     }
 }

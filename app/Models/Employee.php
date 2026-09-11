@@ -12,15 +12,32 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 #[Fillable(['EmpNbr', 'Group', 'FirstName', 'MidName', 'LastName', 'Suffix', 'FullName', 'Address', 'CityProv', 'BirthDate', 'EmployDate', 'RegularDate', 'Position', 'Assignment', 'SalaryGrade', 'BasicPay', 'DailyRate', 'HourlyRate', 'Status', 'SSSNbr', 'PHICNbr', 'HDMFNbr', 'TIN', 'Degree', 'AllowReg', 'ResignDate', 'BPIATM', 'BPIEmpCode', 'PIN', 'PERAAID', 'BiometricID', 'DeductionStatus', 'Image', 'EmploymentStatus', 'TenureStatus', 'IsLETPasser', 'DailyRateDivisor'])]
-
 class Employee extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, LogsActivity;
 
     protected $appends = ['image_url'];
     protected $hidden = ['Image'];
+
+    protected static $recordEvents = [
+        'created',
+        'updated',
+        'deleted',
+        'restored',
+        'forceDeleted',
+    ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('employees')
+            ->logAll()
+            ->logOnlyDirty();
+    }
 
     protected function casts(): array
     {

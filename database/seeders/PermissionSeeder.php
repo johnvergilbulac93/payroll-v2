@@ -26,6 +26,7 @@ class PermissionSeeder extends Seeder
         'Access Control',
         'Deductions',
         'Maintenance',
+        'Activity Logs',
     ];
 
     protected array $actions = [
@@ -47,6 +48,9 @@ class PermissionSeeder extends Seeder
             'view'
         ],
         'Maintenance' => [
+            'view'
+        ],
+        'Activity Logs' => [
             'view'
         ]
     ];

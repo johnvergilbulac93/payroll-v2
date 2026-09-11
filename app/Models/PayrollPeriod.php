@@ -8,10 +8,29 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 #[Fillable(['Year', 'Month', 'CutoffNumber', 'PeriodStart', 'PeriodEnd', 'CutoffDateID', 'PayDate', 'Status'])]
 class PayrollPeriod extends Model
 {
+    use LogsActivity;
+
+    protected static $recordEvents = [
+        'created',
+        'updated',
+        'deleted',
+    ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('payroll_periods')
+            ->logAll()
+            ->logOnlyDirty();
+    }
+
     protected $casts = [
         'PeriodStart' => 'date',
         'PeriodEnd' => 'date',
@@ -26,6 +45,11 @@ class PayrollPeriod extends Model
     public function cutoffDates(): BelongsTo
     {
         return $this->belongsTo(CutOffDate::class, 'CutoffDateID');
+    }
+
+    public function logs(): MorphMany
+    {
+        return $this->activities()->with('causer');
     }
 
     public static function forDate(string $date, CutOffDate $cutoffDate): self

@@ -1,6 +1,4 @@
 import type { Icon } from '@tabler/icons-react';
-import { Button } from '@/components/ui/button';
-
 type DashboardCardProps = {
     icon: Icon;
     label: string;
@@ -17,29 +15,42 @@ export function DashboardCard({
     onClick,
 }: DashboardCardProps) {
     return (
-        <div className="rounded-lg border overflow-hidden">
-            <div className="p-5">
-                <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-md bg-blue-50 text-primary">
-                        <Icon size={25} />
+        <div
+            className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+            onClick={onClick}
+            role={onClick ? 'button' : undefined}
+            tabIndex={onClick ? 0 : undefined}
+            onKeyDown={(event) => {
+                if (onClick && (event.key === 'Enter' || event.key === ' ')) {
+                    event.preventDefault();
+                    onClick();
+                }
+            }}
+        >
+            <div className="absolute inset-x-0 top-0 h-0.5 bg-primary opacity-0 transition-opacity group-hover:opacity-100" />
+            <div className="flex-1 p-4 sm:p-5">
+                <div className="flex min-w-0 items-start justify-between gap-3">
+                    <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-muted-foreground">
+                            {label}
+                        </p>
+                        <p className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+                            {value}
+                        </p>
                     </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">{label}</p>
-                        <p className="text-2xl font-semibold">{value}</p>
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground sm:size-11">
+                        <Icon size={21} stroke={1.8} />
                     </div>
                 </div>
                 {sublabel && (
-                    <p className="mt-3 text-xs text-muted">{sublabel}</p>
+                    <p className="mt-3 text-xs text-muted-foreground">{sublabel}</p>
                 )}
             </div>
-            <div className="border-t">
-                <button
-                    className="flex w-full items-center justify-center bg-blue-50 px-4 py-2 text-xs text-primary hover:underline "
-                    onClick={onClick}
-                >
-                    Click here
-                </button>
-            </div>
+            {onClick && (
+                <div className="border-t bg-muted/20 px-4 py-2.5 text-xs font-medium text-muted-foreground transition-colors group-hover:text-primary">
+                    View details <span aria-hidden="true">→</span>
+                </div>
+            )}
         </div>
     );
 }
