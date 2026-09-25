@@ -8,7 +8,6 @@ import {
     IconUsers,
 } from '@tabler/icons-react';
 import { useState } from 'react';
-import { FormDialog } from '@/components/base-modal';
 import Heading from '@/components/heading';
 
 import { Button } from '@/components/ui/button';
@@ -24,22 +23,19 @@ import {
 } from '@/components/ui/command';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 
-import { ScrollArea } from '@/components/ui/scroll-area';
-
 import { Spinner } from '@/components/ui/spinner';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 import { usePaginationIndexFilters } from '@/hooks/use-pagination-filter';
-import { EmployeeDtr } from '@/pages/process_dtr/employee-dtr';
 import { ProcessDtrTable } from '@/pages/process_dtr/process-dtr-table';
 import { index } from '@/routes/dtr';
-import { processDTRPeriod, processPerEmployee } from '@/routes/dtr';
+import {
+    employeeAttendance,
+    processDTRPeriod,
+    processPerEmployee,
+} from '@/routes/dtr';
 import type { PaginatedData } from '@/types/paginated';
-import type {
-    DTRRecordsDetails,
-    EmployeeDtrPeriod,
-    PayrollPeriod,
-} from '@/types/payroll-period';
+import type { EmployeeDtrPeriod, PayrollPeriod } from '@/types/payroll-period';
 type Props = {
     employees: PaginatedData<EmployeeDtrPeriod>;
     periods: PayrollPeriod[];
@@ -51,11 +47,6 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
 
     const [openCommand, setOpenCommand] = useState(false);
     const [processing, setProcessing] = useState(false);
-    const [openDialogDtr, setOpenDialogDtr] = useState(false);
-    const [description, setDescription] = useState('');
-
-    const [employeeDtr, setEmployeeDtr] = useState<DTRRecordsDetails[]>([]);
-
     const { filters, updateFilters } = usePaginationIndexFilters({
         route: index.url(),
         defaults: { period: '', search: '', page: 1, limit: 10 },
@@ -98,9 +89,12 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
     };
 
     const onEdit = (record: EmployeeDtrPeriod) => {
-        setEmployeeDtr(record.DTRRecords ?? []);
-        setDescription(`${record.FullName} - ${record.Period}`);
-        setOpenDialogDtr(true);
+        router.visit(
+            employeeAttendance.url({
+                payrollPeriod: Number(filters.period),
+                employee: record.id,
+            }),
+        );
     };
 
     return (
@@ -186,22 +180,6 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
                     />
                 )}
 
-                <FormDialog
-                    key="view-dtr-dialog"
-                    open={openDialogDtr}
-                    onOpenChange={setOpenDialogDtr}
-                    title="Daily Time Record"
-                    description={description}
-                    disabled
-                    onCancel={() => setOpenDialogDtr(false)}
-                    size="full"
-                    canAdd={false}
-                    cancelText="Close"
-                >
-                    <ScrollArea className="min-100 max-h-[70vh] overflow-y-auto px-3">
-                        <EmployeeDtr dailyTimeRecords={employeeDtr} />
-                    </ScrollArea>
-                </FormDialog>
                 <CommandDialog open={openCommand} onOpenChange={setOpenCommand}>
                     <Command>
                         <CommandInput placeholder="Type a period or search..." />

@@ -247,6 +247,51 @@ class DtrViewerService
                 );
             });
     }
+    public function employeeAttendance(
+        PayrollPeriod $period,
+        int $empId
+    ): array {
+        $employee = DB::table('employees')
+            ->where('employees.Status', 1)
+            ->where('employees.id', $empId)
+            ->whereNull('employees.deleted_at')
+            ->leftJoin('areas', 'areas.id', '=', 'employees.Assignment')
+            ->leftJoin('groups as assignment_groups', 'assignment_groups.id', '=', 'areas.type')
+            ->select(
+                'employees.id',
+                'employees.FullName',
+                'employees.EmpNbr',
+                'areas.name as Assignment',
+                'assignment_groups.name as Department'
+            )
+            ->first();
+
+        abort_unless($employee, 404);
+
+        $dtrRecords = $this->build(collect([$empId]), $period)
+            ->get($empId, collect())
+            ->values();
+
+        $payrollSummary = DB::table('payroll_summaries')
+            ->where('EmpID', $empId)
+            ->where('PayrollPeriodID', $period->id)
+            ->first();
+
+        return [
+            'employee' => $employee,
+            'period' => [
+                'id' => $period->id,
+                'Label' => Carbon::parse($period->PeriodStart)->format('M j')
+                    . ' – ' . Carbon::parse($period->PeriodEnd)->format('M j, Y'),
+                'PeriodStart' => $period->PeriodStart,
+                'PeriodEnd' => $period->PeriodEnd,
+                'PayDate' => $period->PayDate,
+            ],
+            'dtrRecords' => $dtrRecords,
+            'payrollSummary' => $payrollSummary,
+        ];
+    }
+
     public function summary(PayrollPeriod $period): array
     {
         $grouped = DB::table('employees')
@@ -379,4 +424,5 @@ class DtrViewerService
             ? (int) $value
             : $value;
     }
+
 }

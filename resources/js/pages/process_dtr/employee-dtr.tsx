@@ -37,8 +37,8 @@ export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
                     </TableRow>
                 </TableHeader>
                 <TableBody className="**:data-[slot=table-cell]:first:w-8">
-                    {dailyTimeRecords.map((dtr) =>
-                        dtr.DTRDate !== 'TOTAL' && dtr.IsDayOff ? (
+                    {dailyTimeRecords.filter((dtr) => dtr.DTRDate !== 'TOTAL').map((dtr) =>
+                        dtr.IsDayOff ? (
                             <TableRow key={dtr.DTRDate}>
                                 <TableCell className="font-medium">
                                     {dtr.DTRDate}
@@ -64,8 +64,7 @@ export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
                                 <TableCell>{dtr.LATE}</TableCell>
                                 <TableCell>{dtr.UT}</TableCell>
                                 <TableCell>{dtr.DW}</TableCell>
-                                {dtr.DTRDate !== 'TOTAL' && (
-                                    <TableCell className="text-2xl">
+                                <TableCell className="text-2xl">
                                         {dtr.Punches.length > 0 && (
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
@@ -86,8 +85,7 @@ export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
                                                 </TooltipContent>
                                             </Tooltip>
                                         )}
-                                    </TableCell>
-                                )}
+                                </TableCell>
                             </TableRow>
                         ),
                     )}

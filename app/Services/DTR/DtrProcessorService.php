@@ -5,6 +5,7 @@ namespace App\Services\DTR;
 use App\Models\DTRRecord;
 use App\Models\Employee;
 use App\Models\PayrollPeriod;
+use App\Models\PayrollSummary;
 use App\Models\ShiftCode;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -124,9 +125,61 @@ class DtrProcessorService
                         ['ShiftCodeID', 'IN', 'OUT', 'LateMinutes', 'UndertimeMinutes', 'RenderedHours', 'OvertimeHours', 'DaysWorked', 'Remarks', 'PayrollPeriodID']
                     );
                 });
+
+
+            $this->upsertPayrollSummary($records, $periodId);
         }
     }
+    protected function upsertPayrollSummary(array $records, ?int $periodId): void
+    {
+        if (!$periodId) {
+            return;
+        }
 
+        $period = PayrollPeriod::find($periodId);
+
+        if (!$period) {
+            return;
+        }
+
+        $summaries = collect($records)
+            ->groupBy('EmpID')
+            ->map(function (Collection $empRecords, $empId) use ($periodId, $period) {
+                $daysWorked = max((float) $empRecords->sum('DaysWorked'), 0);
+                $absences = $this->scheduleResolver->countAbsences(
+                    (int) $empId,
+                    Carbon::parse($period->PeriodStart),
+                    Carbon::parse($period->PeriodEnd),
+                    $empRecords,
+                );
+
+                return [
+                    'EmpID' => $empId,
+                    'PayrollPeriodID' => $periodId,
+                    'TotalWorkingDays' => round($daysWorked, 4),
+                    'Absences' => round($absences, 4),
+                    'Tardiness' => $empRecords->sum('LateMinutes'),
+                    'OTHours' => round($empRecords->sum('OvertimeHours'), 2),
+                    'NDHours' => 0,
+                    'RegularHoliday' => 0,
+                    'SpecialHoliday' => 0,
+                    'SL' => 0,
+                    'VL' => 0,
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        if (empty($summaries)) {
+            return;
+        }
+
+        PayrollSummary::upsert(
+            $summaries,
+            ['EmpID', 'PayrollPeriodID'],
+            ['TotalWorkingDays', 'Absences', 'Tardiness', 'OTHours', 'NDHours', 'RegularHoliday', 'SpecialHoliday', 'SL', 'VL']
+        );
+    }
     protected function buildNoScheduleRecord(object $row, ?int $periodId = null): array
     {
         return [

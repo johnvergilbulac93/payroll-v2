@@ -17,6 +17,7 @@ require __DIR__ . '/role.php';
 require __DIR__ . '/access_control.php';
 require __DIR__ . '/employee.php';
 require __DIR__ . '/loan.php';
+require __DIR__ . '/deduction.php';
 require __DIR__ . '/loan_type.php';
 require __DIR__ . '/biometric.php';
 require __DIR__ . '/shift_code.php';

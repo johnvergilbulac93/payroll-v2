@@ -78,14 +78,15 @@ class ScheduleResolverService
      */
     public function countWorkDaysInPeriod(int $employeeId, Carbon $startDate, Carbon $endDate): int
     {
-
         $ctx = $this->preload(collect([$employeeId]), $startDate, $endDate);
 
         $count = 0;
         $cursor = $startDate->copy();
 
         while ($cursor->lte($endDate)) {
-            if ($this->resolveFor($employeeId, $cursor, $ctx) !== null) {
+            $shiftCode = $this->resolveFor($employeeId, $cursor, $ctx);
+
+            if ($shiftCode && (bool) $shiftCode->IsWorkingDay) {
                 $count++;
             }
 
@@ -93,5 +94,42 @@ class ScheduleResolverService
         }
 
         return $count;
+    }
+
+    public function countAbsences(
+        int $employeeId,
+        Carbon $startDate,
+        Carbon $endDate,
+        Collection $records
+    ): float {
+        $ctx = $this->preload(collect([$employeeId]), $startDate, $endDate);
+        $recordsByDate = $records->keyBy(
+            fn ($record) => Carbon::parse(data_get($record, 'DTRDate'))->toDateString()
+        );
+
+        $absences = 0.0;
+        $cursor = $startDate->copy();
+
+        while ($cursor->lte($endDate)) {
+            $shiftCode = $this->resolveFor($employeeId, $cursor, $ctx);
+
+            if (!$shiftCode || !(bool) $shiftCode->IsWorkingDay) {
+                $cursor->addDay();
+                continue;
+            }
+
+            $record = $recordsByDate->get($cursor->toDateString());
+            $daysWorked = (float) data_get($record, 'DaysWorked', 0);
+
+            if ($daysWorked <= 0) {
+                $absences += 1;
+            } elseif ($daysWorked < 1) {
+                $absences += 1 - $daysWorked;
+            }
+
+            $cursor->addDay();
+        }
+
+        return round($absences, 4);
     }
 }

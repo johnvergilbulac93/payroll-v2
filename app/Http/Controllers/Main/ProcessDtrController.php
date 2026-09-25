@@ -13,6 +13,7 @@ use App\Services\DTR\DtrViewerService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ProcessDtrController extends Controller
@@ -61,6 +62,52 @@ class ProcessDtrController extends Controller
             ]
         );
     }
+    public function employeeAttendance(PayrollPeriod $payrollPeriod, Employee $employee)
+    {
+        $attendance = $this->dtrViewerService->employeeAttendance(
+            $payrollPeriod,
+            $employee->id
+        );
+
+        return Inertia::render('process_dtr/employee-attendance-logs', $attendance);
+    }
+
+    public function updatePayrollSummary(Request $request, PayrollPeriod $payrollPeriod, Employee $employee)
+    {
+        $validated = $request->validate([
+            'TotalWorkingDays' => ['required', 'numeric', 'min:0'],
+            'Absences' => ['required', 'numeric', 'min:0'],
+            'Tardiness' => ['required', 'numeric', 'min:0'],
+            'OTHours' => ['required', 'numeric', 'min:0'],
+            'NDHours' => ['required', 'numeric', 'min:0'],
+            'RegularHoliday' => ['required', 'numeric', 'min:0'],
+            'SpecialHoliday' => ['required', 'numeric', 'min:0'],
+            'SL' => ['required', 'numeric', 'min:0'],
+            'VL' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        $summaryQuery = DB::table('payroll_summaries')
+            ->where('EmpID', $employee->id)
+            ->where('PayrollPeriodID', $payrollPeriod->id);
+
+        if ($summaryQuery->exists()) {
+            $summaryQuery->update([
+                ...$validated,
+                'updated_at' => now(),
+            ]);
+        } else {
+            DB::table('payroll_summaries')->insert([
+                'EmpID' => $employee->id,
+                'PayrollPeriodID' => $payrollPeriod->id,
+                ...$validated,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return back()->with('success', 'Payroll summary updated successfully.');
+    }
+
     public function processDTRPeriod(PayrollPeriod $payrollPeriod)
     {
         $start = Carbon::parse($payrollPeriod->PeriodStart)->format('M d, Y');

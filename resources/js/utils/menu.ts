@@ -24,6 +24,9 @@ import { index as processDtrIndex } from '@/routes/dtr';
 import { index as employeeIndex } from '@/routes/employee';
 import { index as employeeScheduleIndex } from '@/routes/employee_schedule';
 import { index as loanIndex } from '@/routes/loan';
+import { index as deductionIndex } from '@/routes/deduction';
+// import { index as deductionTypeIndex } from '@/routes/maintenance/deduction_type';
+// import { index as governmentMandatedIndex } from '@/routes/maintenance/government_mandated';
 import { index as loanTypeIndex } from '@/routes/maintenance/loan_type';
 import { index as payrollPeriodIndex } from '@/routes/payroll_period';
 import { generateDtr, generatePaySlip } from '@/routes/report';
@@ -78,6 +81,12 @@ export const navItems: NavGroup[] = [
                 Url: loanIndex.url(),
                 Icon: IconClipboardList,
                 Permission: 'loan-view',
+            },
+            {
+                Label: 'Deductions',
+                Url: deductionIndex.url(),
+                Icon: IconClipboardList,
+                Permission: 'deductions-view',
             },
             {
                 Label: 'Biometric Uploading',
@@ -166,6 +175,23 @@ export const navItems: NavGroup[] = [
                 Url: loanTypeIndex.url(),
                 Icon: IconSettings,
                 Permission: 'maintenance-view',
+                // Children: [
+                //     {
+                //         Label: 'Loan Type',
+                //         Url: loanTypeIndex.url(),
+                //         Permission: 'maintenance-view',
+                //     },
+                //     {
+                //         Label: 'Deduction Type',
+                //         Url: deductionTypeIndex.url(),
+                //         Permission: 'maintenance-view',
+                //     },
+                //     {
+                //         Label: 'Government Mandated',
+                //         Url: governmentMandatedIndex.url(),
+                //         Permission: 'maintenance-view',
+                //     },
+                // ],
             },
             // {
             //     Label: 'Deductions',

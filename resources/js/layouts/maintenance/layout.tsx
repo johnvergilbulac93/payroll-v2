@@ -11,6 +11,10 @@ import { index as groupIndex } from '@/routes/maintenance/group';
 import { index as holidayIndex } from '@/routes/maintenance/holiday';
 import { index as loanIndex } from '@/routes/maintenance/loan_type';
 import { index as positionIndex } from '@/routes/maintenance/position';
+import { index as governmentMandatedIndex } from '@/routes/maintenance/government_mandated';
+import { index as loanTypeIndex } from '@/routes/maintenance/loan_type';
+import { index as deductionTypeIndex } from '@/routes/maintenance/deduction_type';
+
 import type { NavItem } from '@/types';
 
 const sidebarNavItems: NavItem[] = [
@@ -32,6 +36,16 @@ const sidebarNavItems: NavItem[] = [
     {
         title: 'Area of assignment',
         href: areaIndex.url(),
+        icon: null,
+    },
+    {
+        title: 'Deduction type',
+        href: deductionTypeIndex.url(),
+        icon: null,
+    },
+    {
+        title: 'Government mandated',
+        href: governmentMandatedIndex.url(),
         icon: null,
     },
     {
@@ -86,7 +100,7 @@ export default function MaintenanceLayout({ children }: PropsWithChildren) {
                 <Separator className="my-6 lg:hidden" />
 
                 <div className="min-w-0 flex-1 md:max-w-5xl">
-                    <section className="min-w-0 max-w-5xl space-y-12">
+                    <section className="max-w-5xl min-w-0 space-y-12">
                         {children}
                     </section>
                 </div>

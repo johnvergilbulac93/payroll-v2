@@ -110,7 +110,7 @@ export function FormDialog({
                             {isBusy && (
                                 <IconLoader2 className="size-4 animate-spin" />
                             )}
-                            {addText}
+                            {isBusy ? 'Saving...' : addText}
                         </Button>
                     )}
                 </DialogFooter>

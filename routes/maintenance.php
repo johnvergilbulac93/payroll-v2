@@ -3,6 +3,8 @@
 use App\Http\Controllers\Maintenance\ActivityLogController;
 use App\Http\Controllers\Maintenance\AreaOfAssignmentController;
 use App\Http\Controllers\Maintenance\GroupController;
+use App\Http\Controllers\Maintenance\DeductionTypeController;
+use App\Http\Controllers\Maintenance\GovernmentMandatedController;
 use App\Http\Controllers\Maintenance\HolidayController;
 use App\Http\Controllers\Maintenance\LoanTypeController;
 use App\Http\Controllers\Maintenance\PositionController;
@@ -13,6 +15,12 @@ Route::middleware(['auth'])->prefix('maintenance')->name('maintenance.')->group(
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity_logs.index');
 
     Route::resource('loan_type', LoanTypeController::class)
+        ->except(['create', 'edit', 'show']);
+    Route::resource('deduction_type', DeductionTypeController::class)
+        ->except(['create', 'edit', 'show']);
+    Route::get('/government_mandated/{governmentMandated}/download', [GovernmentMandatedController::class, 'download'])
+        ->name('government_mandated.download');
+    Route::resource('government_mandated', GovernmentMandatedController::class)
         ->except(['create', 'edit', 'show']);
     Route::resource('group', GroupController::class)
         ->except(['create', 'edit', 'show']);

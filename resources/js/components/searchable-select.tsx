@@ -107,7 +107,7 @@ export default function SearchableSelect({
                     }}
                 >
                     <CommandInput placeholder="Search..." />
-                    <CommandList >
+                    <CommandList className="max-h-72 overflow-y-auto">
                         <CommandEmpty>{emptyText}</CommandEmpty>
                         <CommandGroup heading="Employees">
                             {filteredItems.map((item) => (
