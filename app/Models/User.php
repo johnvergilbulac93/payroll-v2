@@ -12,11 +12,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\Support\LogOptions;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * @property int $id
@@ -32,16 +33,15 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property Carbon|null $created_at
  * @property int $role_id
  * @property Carbon|null $updated_at
- * @property boolean $IsActive
+ * @property bool $IsActive
  */
-
 #[Fillable(['name', 'email', 'password', 'username', 'IsActive', 'role_id'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 
 class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable, SoftDeletes, LogsActivity;
+    use HasFactory, LogsActivity, Notifiable, PasskeyAuthenticatable, SoftDeletes, TwoFactorAuthenticatable;
 
     protected static $recordEvents = [
         'created',
@@ -50,6 +50,7 @@ class User extends Authenticatable implements PasskeyUser
         'restored',
         'forceDeleted',
     ];
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -57,6 +58,7 @@ class User extends Authenticatable implements PasskeyUser
             ->logAll()
             ->logOnlyDirty();
     }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -68,9 +70,10 @@ class User extends Authenticatable implements PasskeyUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
-            'IsActive' => 'boolean'
+            'IsActive' => 'boolean',
         ];
     }
+
     public function permissions()
     {
         return $this->belongsToMany(Permission::class, 'user_permissions')
@@ -82,13 +85,15 @@ class User extends Authenticatable implements PasskeyUser
     {
         return $this->belongsTo(Role::class);
     }
-    public function getEffectivePermissions(): \Illuminate\Support\Collection
+
+    public function getEffectivePermissions(): Collection
     {
         $roleSlugs = $this->role?->permissions->pluck('slug') ?? collect();
         $directSlugs = $this->permissions->pluck('slug');
 
         return $roleSlugs->merge($directSlugs)->unique()->values();
     }
+
     public function scopeFilter(Builder $query, array $filters)
     {
         $query->when($filters['search'] ?? null, function ($query, $search) {

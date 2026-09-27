@@ -6,9 +6,8 @@ use App\Enums\HolidayType;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\Support\LogOptions;
-
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 #[Fillable('Name', 'Date', 'HolidayType', 'IsRecurring')]
 class Holiday extends Model
@@ -38,6 +37,7 @@ class Holiday extends Model
             'HolidayType' => HolidayType::class,
         ];
     }
+
     public function scopeFilter(Builder $query, array $filters)
     {
         $query->when($filters['search'] ?? null, function ($query, $search) {

@@ -8,9 +8,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\Support\LogOptions;
-
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 #[Fillable(['LoanTypeID', 'EmpNbr', 'OrigBal', 'DedAmt', 'StartDate', 'Frequency', 'BalanceAmt', 'BalanceasofDate', 'Crtd_Date', 'Crtd_User', 'LUpd_Date'])]
 class LoanMaster extends Model
@@ -22,6 +21,7 @@ class LoanMaster extends Model
         'updated',
         'deleted',
     ];
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -34,6 +34,7 @@ class LoanMaster extends Model
     {
         return $this->belongsTo(LoanType::class, 'LoanTypeID');
     }
+
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'EmpNbr', 'EmpNbr');

@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             GovernmentMandatedSeeder::class,
             DeductionTypeSeeder::class,
             EmployeeSeeder::class,
+            PayrollPeriodSeeder::class,
 
         ]);
     }

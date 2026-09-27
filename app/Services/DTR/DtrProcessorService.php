@@ -2,26 +2,29 @@
 
 namespace App\Services\DTR;
 
+use App\Enums\HolidayType;
 use App\Models\DTRRecord;
 use App\Models\Employee;
+use App\Models\Holiday;
 use App\Models\PayrollPeriod;
 use App\Models\PayrollSummary;
 use App\Models\ShiftCode;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class DtrProcessorService
 {
     public function __construct(
         protected ScheduleResolverService $scheduleResolver
     ) {}
+
     protected int $clusterGapSeconds = 300;
+
     public function processPayrollPeriod(PayrollPeriod $period, ?int $employeeId = null): void
     {
         if ($period->Status === 'closed') {
-            throw new \RuntimeException("Cannot process DTR — payroll period is closed.");
+            throw new \RuntimeException('Cannot process DTR — payroll period is closed.');
         }
 
         $this->processForEmployees(
@@ -31,6 +34,7 @@ class DtrProcessorService
             $period->id
         );
     }
+
     public function processEmployeeForPeriod(int|Employee $employee, PayrollPeriod $period): void
     {
         if ($period->Status === 'closed') {
@@ -46,12 +50,14 @@ class DtrProcessorService
             $period->id
         );
     }
+
     public function processEmployee(int|Employee $employee, Carbon $startDate, Carbon $endDate): void
     {
         $employeeId = $employee instanceof Employee ? $employee->id : $employee;
 
         $this->processChunk(collect([$employeeId]), $startDate, $endDate);
     }
+
     protected function processForEmployees(Carbon $startDate, Carbon $endDate, ?int $employeeId = null, ?int $periodId = null): void
     {
         $employeeIds = $employeeId
@@ -62,6 +68,7 @@ class DtrProcessorService
             $this->processChunk($chunk, $startDate, $endDate, $periodId);
         });
     }
+
     protected function processChunk(Collection $employeeIds, Carbon $startDate, Carbon $endDate, ?int $periodId = null): void
     {
         $lockedKeys = DTRRecord::query()
@@ -69,21 +76,21 @@ class DtrProcessorService
             ->whereBetween('DTRDate', [$startDate, $endDate])
             ->where('PayrollStatus', '!=', 'pending')
             ->get(['EmpID', 'DTRDate'])
-            ->map(fn($r) => $r->EmpID . '|' . $r->DTRDate)
+            ->map(fn ($r) => $r->EmpID.'|'.$r->DTRDate)
             ->flip();
 
         $rawPunches = $this->fetchGroupedPunches($startDate, $endDate, $employeeIds);
 
         if ($rawPunches->isEmpty()) {
             throw new \RuntimeException(sprintf(
-                "No biometric punch data found for employee(s) between %s and %s.",
+                'No biometric punch data found for employee(s) between %s and %s.',
                 $startDate->toDateString(),
                 $endDate->toDateString()
             ));
         }
 
         $groupedPunches = $this->fetchGroupedPunches($startDate, $endDate, $employeeIds)
-            ->reject(fn($row) => isset($lockedKeys[$row->employee_id . '|' . $row->dtr_date]));
+            ->reject(fn ($row) => isset($lockedKeys[$row->employee_id.'|'.$row->dtr_date]));
 
         // $groupedPunches = $this->fetchGroupedPunches($startDate, $endDate, $employeeIds);
         $ctx = $this->scheduleResolver->preload($employeeIds, $startDate, $endDate);
@@ -94,13 +101,15 @@ class DtrProcessorService
             $date = Carbon::parse($row->dtr_date);
             $shiftCode = $this->scheduleResolver->resolveFor((int) $row->employee_id, $date, $ctx);
 
-            if (!$shiftCode) {
+            if (! $shiftCode) {
                 $records[] = $this->buildNoScheduleRecord($row, $periodId);
+
                 continue;
             }
 
             if ($row->punch_count == 1) {
                 $records[] = $this->buildSinglePunchRecord(Carbon::parse($row->time_in), $row, $shiftCode, $periodId);
+
                 continue;
             }
 
@@ -115,7 +124,7 @@ class DtrProcessorService
             );
         }
 
-        if (!empty($records)) {
+        if (! empty($records)) {
             collect($records)
                 ->chunk(500)
                 ->each(function ($chunk) {
@@ -126,19 +135,19 @@ class DtrProcessorService
                     );
                 });
 
-
             $this->upsertPayrollSummary($records, $periodId);
         }
     }
+
     protected function upsertPayrollSummary(array $records, ?int $periodId): void
     {
-        if (!$periodId) {
+        if (! $periodId) {
             return;
         }
 
         $period = PayrollPeriod::find($periodId);
 
-        if (!$period) {
+        if (! $period) {
             return;
         }
 
@@ -153,6 +162,8 @@ class DtrProcessorService
                     $empRecords,
                 );
 
+                $holidaySummary = $this->mapHolidaySummary($empRecords, $period);
+
                 return [
                     'EmpID' => $empId,
                     'PayrollPeriodID' => $periodId,
@@ -161,8 +172,8 @@ class DtrProcessorService
                     'Tardiness' => $empRecords->sum('LateMinutes'),
                     'OTHours' => round($empRecords->sum('OvertimeHours'), 2),
                     'NDHours' => 0,
-                    'RegularHoliday' => 0,
-                    'SpecialHoliday' => 0,
+                    'RegularHoliday' => $holidaySummary['RegularHoliday'],
+                    'SpecialHoliday' => $holidaySummary['SpecialHoliday'],
                     'SL' => 0,
                     'VL' => 0,
                 ];
@@ -180,6 +191,83 @@ class DtrProcessorService
             ['TotalWorkingDays', 'Absences', 'Tardiness', 'OTHours', 'NDHours', 'RegularHoliday', 'SpecialHoliday', 'SL', 'VL']
         );
     }
+
+    protected function mapHolidaySummary(Collection $empRecords, PayrollPeriod $period): array
+    {
+        $startDate = Carbon::parse($period->PeriodStart)->startOfDay();
+        $endDate = Carbon::parse($period->PeriodEnd)->endOfDay();
+
+        $holidays = Holiday::query()
+            ->where(function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('Date', [$startDate->toDateString(), $endDate->toDateString()])
+                    ->orWhere('IsRecurring', true);
+            })
+            ->get(['Date', 'HolidayType', 'IsRecurring']);
+
+        if ($holidays->isEmpty()) {
+            return [
+                'RegularHoliday' => 0.0,
+                'SpecialHoliday' => 0.0,
+            ];
+        }
+
+        $holidayMap = $holidays->flatMap(function (Holiday $holiday) use ($startDate, $endDate) {
+            $date = Carbon::parse($holiday->Date);
+
+            if (! $holiday->IsRecurring) {
+                return [$date->toDateString() => $holiday->HolidayType->value];
+            }
+
+            $dates = [];
+            $year = $startDate->year;
+            $candidate = Carbon::create($year, $date->month, $date->day);
+
+            if ($candidate->betweenIncluded($startDate, $endDate)) {
+                $dates[$candidate->toDateString()] = $holiday->HolidayType->value;
+            }
+
+            if ($startDate->year !== $endDate->year) {
+                $candidate = Carbon::create($endDate->year, $date->month, $date->day);
+                if ($candidate->betweenIncluded($startDate, $endDate)) {
+                    $dates[$candidate->toDateString()] = $holiday->HolidayType->value;
+                }
+            }
+
+            return $dates;
+        });
+
+        $regularHoliday = 0.0;
+        $specialHoliday = 0.0;
+
+        foreach ($empRecords as $record) {
+            $date = Carbon::parse($record['DTRDate'])->toDateString();
+            $holidayType = $holidayMap->get($date);
+            $daysWorked = max((float) ($record['DaysWorked'] ?? 0), 0);
+
+            if ($daysWorked <= 0 || ! $holidayType) {
+                continue;
+            }
+
+            if ($holidayType === HolidayType::Regular->value) {
+                $regularHoliday += $daysWorked;
+
+                continue;
+            }
+
+            if (in_array($holidayType, [
+                HolidayType::SpecialNonWorking->value,
+                HolidayType::SpecialWorking->value,
+            ], true)) {
+                $specialHoliday += $daysWorked;
+            }
+        }
+
+        return [
+            'RegularHoliday' => round($regularHoliday, 4),
+            'SpecialHoliday' => round($specialHoliday, 4),
+        ];
+    }
+
     protected function buildNoScheduleRecord(object $row, ?int $periodId = null): array
     {
         return [
@@ -194,9 +282,10 @@ class DtrProcessorService
             'OvertimeHours' => 0.0,
             'DaysWorked' => 0.0,
             'Remarks' => 'No active schedule assigned — flagged for review',
-            'PayrollPeriodID' => $periodId
+            'PayrollPeriodID' => $periodId,
         ];
     }
+
     protected function fetchGroupedPunches(Carbon $startDate, Carbon $endDate, Collection $employeeIds): Collection
     {
         $placeholders = implode(',', array_fill(0, $employeeIds->count(), '?'));
@@ -353,9 +442,10 @@ class DtrProcessorService
             'PayrollPeriodID' => $periodId,
         ];
     }
+
     protected function resolveSinglePunch(Carbon $punchTime, ShiftCode $shiftCode): array
     {
-        if (!$shiftCode) {
+        if (! $shiftCode) {
             return [$punchTime, null, 'Single punch, no shift to compare — flagged for review'];
         }
 
@@ -382,7 +472,7 @@ class DtrProcessorService
             $daysWorked
         ] = $this->computeHours($in, $out, $shiftCode);
 
-        $remark = (!$shiftCode->TimeIn || !$shiftCode->TimeOut)
+        $remark = (! $shiftCode->TimeIn || ! $shiftCode->TimeOut)
             ? "Punch recorded on {$date} for shift '{$shiftCode->Name}' — no active schedule assigned, flagged for review"
             : null;
 
@@ -402,14 +492,13 @@ class DtrProcessorService
         ];
     }
 
-
     protected function computeHours(?Carbon $in, ?Carbon $out, ShiftCode $shiftCode): array
     {
-        if (!$in || !$out || !$shiftCode) {
+        if (! $in || ! $out || ! $shiftCode) {
             return [0, 0, 0.0, 0.0, 0.0];
         }
 
-        if (!$shiftCode->TimeIn || !$shiftCode->TimeOut) {
+        if (! $shiftCode->TimeIn || ! $shiftCode->TimeOut) {
             return [0, 0, 0.0, 0.0, 0.0];
         }
         $expectedStart = $in->copy()->setTimeFromTimeString($shiftCode->TimeIn->format('H:i'));

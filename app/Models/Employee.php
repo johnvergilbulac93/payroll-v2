@@ -6,21 +6,22 @@ use App\Enums\EmploymentStatus;
 use App\Enums\TenuredStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\Support\LogOptions;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 #[Fillable(['EmpNbr', 'Group', 'FirstName', 'MidName', 'LastName', 'Suffix', 'FullName', 'Address', 'CityProv', 'BirthDate', 'EmployDate', 'RegularDate', 'Position', 'Assignment', 'SalaryGrade', 'BasicPay', 'DailyRate', 'HourlyRate', 'Status', 'SSSNbr', 'PHICNbr', 'HDMFNbr', 'TIN', 'Degree', 'AllowReg', 'ResignDate', 'BPIATM', 'BPIEmpCode', 'PIN', 'PERAAID', 'BiometricID', 'DeductionStatus', 'Image', 'EmploymentStatus', 'TenureStatus', 'IsLETPasser', 'DailyRateDivisor'])]
 class Employee extends Model
 {
-    use SoftDeletes, LogsActivity;
+    use LogsActivity, SoftDeletes;
 
     protected $appends = ['image_url'];
+
     protected $hidden = ['Image'];
 
     protected static $recordEvents = [
@@ -52,22 +53,27 @@ class Employee extends Model
             'TenureStatus' => TenuredStatus::class,
         ];
     }
+
     public function scheduleTemplate(): HasMany
     {
         return $this->HasMany(ScheduleTemplate::class, 'EmpID');
     }
+
     public function position(): BelongsTo
     {
         return $this->belongsTo(EmployeePosition::class, 'Position');
     }
+
     public function areas(): BelongsTo
     {
         return $this->belongsTo(AreaAssignment::class, 'Assignment');
     }
+
     public function schedule(): HasMany
     {
         return $this->hasMany(EmployeeSchedule::class, 'EmpID');
     }
+
     protected static function booted(): void
     {
         // static::creating(function (Employee $employee) {
@@ -92,7 +98,7 @@ class Employee extends Model
 
         static::saving(function (Employee $employee) {
             $middleInitial = $employee->MidName
-                ? mb_strtoupper(mb_substr($employee->MidName, 0, 1)) . '.'
+                ? mb_strtoupper(mb_substr($employee->MidName, 0, 1)).'.'
                 : null;
 
             $employee->FullName = collect([
@@ -103,6 +109,7 @@ class Employee extends Model
             ])->filter()->implode(' ');
         });
     }
+
     public function scopeFilter(Builder $query, array $filters)
     {
         $query->when($filters['search'] ?? null, function ($query, $search) {
@@ -112,10 +119,11 @@ class Employee extends Model
             });
         });
     }
+
     protected function imageUrl(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->Image ? Storage::disk('public')->url($this->Image) : null,
+            get: fn () => $this->Image ? Storage::disk('public')->url($this->Image) : null,
         );
     }
 
@@ -123,6 +131,7 @@ class Employee extends Model
     {
         return $this->belongsTo(Group::class, 'Group');
     }
+
     public function dtrRecords(): HasMany
     {
         return $this->hasMany(DTRRecord::class, 'EmpID');
@@ -132,10 +141,10 @@ class Employee extends Model
     {
         return $query
             ->where('Status', 1)
-            ->when($groupId, fn($q) => $q->where('Group', $groupId))
+            ->when($groupId, fn ($q) => $q->where('Group', $groupId))
             ->with([
                 'group',
-                'dtrRecords' => fn($q) => $q
+                'dtrRecords' => fn ($q) => $q
                     ->whereBetween('DTRDate', [$period->PeriodStart, $period->PeriodEnd])
                     ->orderBy('DTRDate'),
             ]);

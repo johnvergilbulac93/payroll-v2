@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\Support\LogOptions;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 #[Fillable(['Year', 'Month', 'CutoffNumber', 'PeriodStart', 'PeriodEnd', 'CutoffDateID', 'PayDate', 'Status'])]
 class PayrollPeriod extends Model
@@ -38,10 +38,12 @@ class PayrollPeriod extends Model
         'Year' => 'integer',
         'Month' => 'integer',
     ];
+
     public function dtrRecords(): HasMany
     {
         return $this->hasMany(DtrRecord::class, 'PayrollPeriodID');
     }
+
     public function cutoffDates(): BelongsTo
     {
         return $this->belongsTo(CutOffDate::class, 'CutoffDateID');
@@ -107,6 +109,7 @@ class PayrollPeriod extends Model
             self::forDate(Carbon::create($year, $month, 16)->toDateString(), $cutoffDate);
         }
     }
+
     public function scopeFilter(Builder $query, array $filters)
     {
         $query->when($filters['status'] ?? null, function ($query, $status) {
