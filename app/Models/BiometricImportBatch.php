@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\Support\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 #[Fillable(['original_filename', 'stored_path', 'uploaded_by', 'status', 'total_rows', 'imported_rows', 'skipped_rows', 'failed_rows', 'started_at', 'finished_at', 'error_message'])]
 class BiometricImportBatch extends Model
