@@ -63,7 +63,16 @@ export default function ScheduleEmployeePage({
             />
             <>
                 {employee && (
-                    <Tabs defaultValue="daily-shift" className="w-full">
+                    <Tabs
+                        defaultValue={
+                            new URLSearchParams(window.location.search).get(
+                                'tab',
+                            ) === 'per-date'
+                                ? 'per-date'
+                                : 'daily-shift'
+                        }
+                        className="w-full"
+                    >
                         <TabsList>
                             <TabsTrigger value="daily-shift">
                                 Daily shift schedule

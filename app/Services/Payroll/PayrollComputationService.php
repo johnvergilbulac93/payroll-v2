@@ -2,6 +2,7 @@
 
 namespace App\Services\Payroll;
 
+use App\Models\DeductionType;
 use App\Models\Employee;
 use App\Models\PayrollPeriod;
 use App\Models\PayrollComputation;
@@ -53,6 +54,11 @@ class PayrollComputationService
             philHealthRate: $this->philHealth->preloadRate(),
             pagIbigDeduction: $this->pagIbig->preloadDeduction(),
             withholdingTaxBrackets: $this->withholdingTax->preloadBrackets(),
+            deductionFrequencies: DeductionType::query()
+                ->whereIn('name', ['SSS', 'Philhealth', 'Pag-IBIG (HDMF)', 'Withholding tax'])
+                ->pluck('frequency', 'name')
+                ->mapWithKeys(fn ($frequency, $name) => [strtolower($name) => (string) $frequency])
+                ->all(),
             holidayPreload: $this->holiday->preload($period),
         );
     }
@@ -138,13 +144,13 @@ class PayrollComputationService
             - $lateDeduction
             - $undertimeDeduction;
 
-        $sss = $period->CutoffNumber == 2
+        $sss = $this->isDeductionDue($lookups->deductionFrequencies, 'SSS', $period)
             ? $this->sss->calculate($employee, $lookups->sssBrackets)
             : 0;
-        $philHealth = $period->CutoffNumber == 2
+        $philHealth = $this->isDeductionDue($lookups->deductionFrequencies, 'Philhealth', $period)
             ? $this->philHealth->calculate($employee, $lookups->philHealthRate)
             : 0;
-        $pagIbig = $period->CutoffNumber == 2
+        $pagIbig = $this->isDeductionDue($lookups->deductionFrequencies, 'Pag-IBIG (HDMF)', $period)
             ? $this->pagIbig->calculate($employee, $lookups->pagIbigDeduction)
             : 0;
 
@@ -159,7 +165,7 @@ class PayrollComputationService
             - $philHealth;
         // - $hmoPremium;
 
-        $withholdingTax =  $period->CutoffNumber == 2
+        $withholdingTax = $this->isDeductionDue($lookups->deductionFrequencies, 'Withholding tax', $period)
             ? $this->withholdingTax->calculate(max($taxableIncome, 0), $lookups->withholdingTaxBrackets)
             : 0;
 
@@ -220,15 +226,15 @@ class PayrollComputationService
             // + $overloadPay
             - $absenceDeduction;
 
-        $sss = $period->CutoffNumber == 2
+        $sss = $this->isDeductionDue($lookups->deductionFrequencies, 'SSS', $period)
             ? $this->sss->calculate($employee, $lookups->sssBrackets)
             : 0;
 
-        $philHealth = $period->CutoffNumber == 2
+        $philHealth = $this->isDeductionDue($lookups->deductionFrequencies, 'Philhealth', $period)
             ? $this->philHealth->calculate($employee, $lookups->philHealthRate)
             : 0;
 
-        $pagIbig = $period->CutoffNumber == 2
+        $pagIbig = $this->isDeductionDue($lookups->deductionFrequencies, 'Pag-IBIG (HDMF)', $period)
             ? $this->pagIbig->calculate($employee, $lookups->pagIbigDeduction)
             : 0;
 
@@ -240,8 +246,8 @@ class PayrollComputationService
             - $sss
             - $philHealth;
 
-        $withholdingTax = $period->CutoffNumber == 2
-            ?  $withholdingTax = $this->withholdingTax->calculate(max($taxableIncome, 0), $lookups->withholdingTaxBrackets)
+        $withholdingTax = $this->isDeductionDue($lookups->deductionFrequencies, 'Withholding tax', $period)
+            ? $this->withholdingTax->calculate(max($taxableIncome, 0), $lookups->withholdingTaxBrackets)
             : 0;
         // $withholdingTax = $this->withholdingTax->calculate(max($taxableIncome, 0), $lookups->withholdingTaxBrackets);
 
@@ -263,6 +269,19 @@ class PayrollComputationService
         ];
     }
 
+    protected function isDeductionDue(array $frequencies, string $deductionType, PayrollPeriod $period): bool
+    {
+        $frequency = $frequencies[strtolower($deductionType)] ?? null;
+
+        if ($frequency === null) {
+            return false;
+        }
+
+        return $frequency === '00'
+            || ($frequency === '15' && (int) $period->CutoffNumber === 1)
+            || ($frequency === '30' && (int) $period->CutoffNumber === 2);
+    }
+
     protected function minutesToPesoDeduction(int $minutes, float $hourlyRate): float
     {
         return round(($minutes / 60) * $hourlyRate, 2);
@@ -276,7 +295,8 @@ class PayrollComputationService
                 'PayrollPeriodID' => $period->id,
             ],
             [
-                'BasicPay' => $employee->BasicPay,
+                // PayrollComputation stores the semi-monthly BasicPay for each cutoff.
+                'BasicPay' => round($employee->BasicPay / 2, 2),
                 'OvertimePay' => $result['overtimePay'] ?? 0,
                 'LateDeduction' => $result['lateDeduction'] ?? 0,
                 'UndertimeDeduction' => $result['undertimeDeduction'] ?? 0,

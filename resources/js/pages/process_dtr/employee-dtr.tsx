@@ -1,4 +1,8 @@
-import { IconInfoCircleFilled } from '@tabler/icons-react';
+import { router } from '@inertiajs/react';
+import {
+    IconInfoCircleFilled,
+    IconMessageCircleFilled,
+} from '@tabler/icons-react';
 import {
     Table,
     TableBody,
@@ -15,8 +19,9 @@ import {
 import type { DTRRecordsDetails } from '@/types/payroll-period';
 type DTRProps = {
     dailyTimeRecords: DTRRecordsDetails[];
+    employeeId?: number | string;
 };
-export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
+export function EmployeeDtr({ dailyTimeRecords, employeeId }: DTRProps) {
     return (
         <div className="overflow-hidden rounded-lg border">
             <Table>
@@ -64,27 +69,56 @@ export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
                                 <TableCell>{dtr.LATE}</TableCell>
                                 <TableCell>{dtr.UT}</TableCell>
                                 <TableCell>{dtr.DW}</TableCell>
-                                <TableCell className="text-2xl">
-                                        {dtr.Punches.length > 0 && (
+                                <TableCell>
+                                    <div className="flex items-center gap-2">
+                                        {dtr.Remarks ? (
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <IconInfoCircleFilled className="h-5 cursor-pointer text-muted-foreground" />
+                                                    <IconMessageCircleFilled
+                                                        className="size-5 cursor-pointer text-amber-500"
+                                                        onClick={() => {
+                                                            if (employeeId) {
+                                                                router.visit(
+                                                                    `/employee_schedule?emp_id=${employeeId}&tab=per-date`,
+                                                                );
+                                                            }
+                                                        }}
+                                                    />
                                                 </TooltipTrigger>
-                                                <TooltipContent side="right">
-                                                    <div className="flex flex-col gap-1">
-                                                        {dtr.Punches.map(
-                                                            (punch, i) => (
-                                                                <span key={i}>
-                                                                    {
-                                                                        punch.PunchTime
-                                                                    }
-                                                                </span>
-                                                            ),
-                                                        )}
-                                                    </div>
+                                                <TooltipContent side="right" className="max-w-xs">
+                                                    <p>{dtr.Remarks}</p>
                                                 </TooltipContent>
                                             </Tooltip>
+                                        ) : (
+                                            dtr.Punches.length > 0 && (
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <IconInfoCircleFilled
+                                                            className="size-5 cursor-pointer text-muted-foreground"
+                                                            onClick={() => {
+                                                                if (employeeId) {
+                                                                    router.visit(
+                                                                        `/employee_schedule?emp_id=${employeeId}&tab=per-date`,
+                                                                    );
+                                                                }
+                                                            }}
+                                                        />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent side="right">
+                                                        <div className="flex flex-col gap-1">
+                                                            {dtr.Punches.map(
+                                                                (punch, i) => (
+                                                                    <span key={i}>
+                                                                        {punch.PunchTime}
+                                                                    </span>
+                                                                ),
+                                                            )}
+                                                        </div>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            )
                                         )}
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ),

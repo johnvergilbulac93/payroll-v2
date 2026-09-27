@@ -32,7 +32,7 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent className="px-2 py-3">
+            <SidebarContent className="px-2 py-3 group-data-[collapsible=icon]:px-2">
                 <NavMain items={filteredNavGroups} />
             </SidebarContent>
 

@@ -66,6 +66,9 @@ export default function ReportDtrPage({ employees, periods, groups }: Props) {
     const [description, setDescription] = useState('');
 
     const [employeeDtr, setEmployeeDtr] = useState<DTRRecordsDetails[]>([]);
+    const [selectedEmployeeId, setSelectedEmployeeId] = useState<
+        number | string | undefined
+    >();
 
     const { filters, updateFilters } = usePaginationIndexFilters({
         route: generateDtr.url(),
@@ -80,6 +83,7 @@ export default function ReportDtrPage({ employees, periods, groups }: Props) {
         : 'Select a Period';
 
     const onEdit = (record: EmployeeDtrPeriod) => {
+        setSelectedEmployeeId(record.id);
         setEmployeeDtr(record.DTRRecords ?? []);
         setDescription(`${record.FullName} - ${record.Period}`);
         setOpenDialogDtr(true);
@@ -223,7 +227,10 @@ export default function ReportDtrPage({ employees, periods, groups }: Props) {
                 cancelText="Close"
             >
                 <ScrollArea className="min-100 max-h-[70vh] overflow-y-auto px-3">
-                    <EmployeeDtr dailyTimeRecords={employeeDtr} />
+                    <EmployeeDtr
+                        dailyTimeRecords={employeeDtr}
+                        employeeId={selectedEmployeeId}
+                    />
                 </ScrollArea>
             </FormDialog>
             <CommandDialog open={openCommand} onOpenChange={setOpenCommand}>

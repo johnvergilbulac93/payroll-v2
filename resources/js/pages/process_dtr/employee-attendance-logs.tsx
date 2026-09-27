@@ -201,7 +201,10 @@ export default function EmployeeAttendanceLogs({
                     </FieldLegend>
 
                     <Field>
-                        <EmployeeDtr dailyTimeRecords={dtrRecords} />
+                        <EmployeeDtr
+                            dailyTimeRecords={dtrRecords}
+                            employeeId={employee.id}
+                        />
                     </Field>
                 </FieldSet>
 
