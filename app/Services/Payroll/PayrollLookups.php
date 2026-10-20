@@ -2,7 +2,7 @@
 
 namespace App\Services\Payroll;
 
-use App\Models\Deduction;
+use App\Models\GovernmentMandated;
 use App\Models\PhilHealthContribution;
 use Illuminate\Support\Collection;
 
@@ -16,8 +16,9 @@ class PayrollLookups
     public function __construct(
         public readonly Collection $sssBrackets,
         public readonly ?PhilHealthContribution $philHealthRate,
-        public readonly ?Deduction $pagIbigDeduction,
+        public readonly ?GovernmentMandated $pagIbigDeduction,
         public readonly Collection $withholdingTaxBrackets,
+        public readonly array $deductionFrequencies,
         public array $holidayPreload,
     ) {}
 }

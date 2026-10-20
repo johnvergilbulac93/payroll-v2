@@ -1,4 +1,8 @@
-import { IconInfoCircleFilled } from '@tabler/icons-react';
+import { router } from '@inertiajs/react';
+import {
+    IconInfoCircleFilled,
+    IconMessageCircleFilled,
+} from '@tabler/icons-react';
 import {
     Table,
     TableBody,
@@ -13,10 +17,13 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import type { DTRRecordsDetails } from '@/types/payroll-period';
+
 type DTRProps = {
     dailyTimeRecords: DTRRecordsDetails[];
+    employeeId?: number | string;
 };
-export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
+
+export function EmployeeDtr({ dailyTimeRecords, employeeId }: DTRProps) {
     const records = dailyTimeRecords.filter((dtr) => dtr.DTRDate !== 'TOTAL');
 
     return (
@@ -34,7 +41,9 @@ export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
                             <TableHead className="min-w-16 text-right">LATE</TableHead>
                             <TableHead className="min-w-16 text-right">UT</TableHead>
                             <TableHead className="min-w-14 text-center">DW</TableHead>
-                            <TableHead className="w-12 text-center"><span className="sr-only">Punch logs</span></TableHead>
+                            <TableHead className="w-12 text-center">
+                                <span className="sr-only">Attendance details</span>
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -44,54 +53,111 @@ export function EmployeeDtr({ dailyTimeRecords }: DTRProps) {
                                     No daily attendance records found for this period.
                                 </TableCell>
                             </TableRow>
-                        ) : records.map((dtr, index) =>
-                            dtr.IsDayOff ? (
-                                <TableRow key={dtr.DTRDate} className="bg-muted/20">
-                                    <TableCell className="font-medium whitespace-nowrap">{dtr.DTRDate}</TableCell>
-                                    <TableCell className="text-muted-foreground">{dtr.Day}</TableCell>
-                                    <TableCell colSpan={8} className="text-center">
-                                        <span className="inline-flex rounded-full border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">Day off</span>
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                <TableRow key={dtr.DTRDate} className={index % 2 === 1 ? 'bg-muted/20' : ''}>
-                                    <TableCell className="font-medium whitespace-nowrap">{dtr.DTRDate}</TableCell>
-                                    <TableCell className="text-muted-foreground">{dtr.Day}</TableCell>
-                                    <TableCell className="font-medium tabular-nums whitespace-nowrap">{dtr.IN || '—'}</TableCell>
-                                    <TableCell className="font-medium tabular-nums whitespace-nowrap">{dtr.OUT || '—'}</TableCell>
-                                    <TableCell className="text-right tabular-nums">{dtr.OT || '—'}</TableCell>
-                                    <TableCell className="text-right tabular-nums">{dtr.HW || '—'}</TableCell>
-                                    <TableCell className="text-right tabular-nums">{dtr.LATE || '—'}</TableCell>
-                                    <TableCell className="text-right tabular-nums">{dtr.UT || '—'}</TableCell>
-                                    <TableCell className="text-center tabular-nums">{dtr.DW ?? '—'}</TableCell>
-                                    <TableCell className="text-center">
-                                        {dtr.Punches.length > 0 && (
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <button type="button" aria-label={`View punch logs for ${dtr.DTRDate}`} className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                                                        <IconInfoCircleFilled className="size-4" />
-                                                    </button>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="left">
-                                                    <div className="flex min-w-24 flex-col gap-1.5">
-                                                        <span className="mb-1 border-b pb-1 text-xs font-semibold">Punch times</span>
-                                                        {dtr.Punches.map((punch, i) => (
-                                                            <span key={`${punch.PunchTime}-${i}`} className="font-mono text-xs">{punch.PunchTime}</span>
-                                                        ))}
-                                                    </div>
-                                                </TooltipContent>
-                                            </Tooltip>
+                        ) : (
+                            records.map((dtr, index) => {
+                                const hasPunches = dtr.Punches.length > 0;
+                                const hasRemarks = Boolean(dtr.Remarks);
+                                const showDetails = hasRemarks || hasPunches;
+
+                                return (
+                                    <TableRow
+                                        key={dtr.DTRDate}
+                                        className={
+                                            dtr.IsDayOff
+                                                ? 'bg-muted/20'
+                                                : index % 2 === 1
+                                                  ? 'bg-muted/20'
+                                                  : ''
+                                        }
+                                    >
+                                        <TableCell className="font-medium whitespace-nowrap">
+                                            {dtr.DTRDate}
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground">{dtr.Day}</TableCell>
+                                        {dtr.IsDayOff && !showDetails ? (
+                                            <TableCell colSpan={8} className="text-center">
+                                                <span className="inline-flex rounded-full border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
+                                                    Day off
+                                                </span>
+                                            </TableCell>
+                                        ) : (
+                                            <>
+                                                <TableCell className="font-medium tabular-nums whitespace-nowrap">
+                                                    {dtr.IN || '—'}
+                                                </TableCell>
+                                                <TableCell className="font-medium tabular-nums whitespace-nowrap">
+                                                    {dtr.OUT || '—'}
+                                                </TableCell>
+                                                <TableCell className="text-right tabular-nums">{dtr.OT || '—'}</TableCell>
+                                                <TableCell className="text-right tabular-nums">{dtr.HW || '—'}</TableCell>
+                                                <TableCell className="text-right tabular-nums">{dtr.LATE || '—'}</TableCell>
+                                                <TableCell className="text-right tabular-nums">{dtr.UT || '—'}</TableCell>
+                                                <TableCell className="text-center tabular-nums">{dtr.DW ?? '—'}</TableCell>
+                                                <TableCell className="text-center">
+                                                    {showDetails && (
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <button
+                                                                    type="button"
+                                                                    aria-label={`View attendance details for ${dtr.DTRDate}`}
+                                                                    className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                                                    onClick={() => {
+                                                                        if (hasRemarks && employeeId) {
+                                                                            router.visit(
+                                                                                `/employee_schedule?emp_id=${employeeId}&tab=per-date`,
+                                                                            );
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    {hasRemarks ? (
+                                                                        <IconMessageCircleFilled className="size-4 text-amber-500" />
+                                                                    ) : (
+                                                                        <IconInfoCircleFilled className="size-4" />
+                                                                    )}
+                                                                </button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="left" className="max-w-sm">
+                                                                <div className="flex min-w-24 flex-col gap-1.5">
+                                                                    <span className="mb-1 border-b pb-1 text-xs font-semibold">
+                                                                        {dtr.IsDayOff
+                                                                            ? 'Day off'
+                                                                            : dtr.ShiftName || 'No shift assigned'}
+                                                                    </span>
+                                                                    {dtr.Remarks && (
+                                                                        <span className="text-xs">{dtr.Remarks}</span>
+                                                                    )}
+                                                                    {hasPunches && (
+                                                                        <div className="mt-1 flex flex-col gap-1 border-t pt-1">
+                                                                            <span className="text-xs font-semibold">Punch times</span>
+                                                                            {dtr.Punches.map((punch, punchIndex) => (
+                                                                                <span
+                                                                                    key={`${punch.PunchTime}-${punchIndex}`}
+                                                                                    className="font-mono text-xs"
+                                                                                >
+                                                                                    {punch.PunchTime}
+                                                                                </span>
+                                                                            ))}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    )}
+                                                </TableCell>
+                                            </>
                                         )}
-                                    </TableCell>
-                                </TableRow>
-                            ),
+                                    </TableRow>
+                                );
+                            })
                         )}
                     </TableBody>
                 </Table>
             </div>
             <div className="flex flex-col gap-1 border-t bg-muted/20 px-4 py-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-                <span>Showing {records.length} attendance {records.length === 1 ? 'record' : 'records'}</span>
-                <span>Hover the punch icon to inspect recorded biometric times.</span>
+                <span>
+                    Showing {records.length} attendance {records.length === 1 ? 'record' : 'records'}
+                </span>
+                <span>Hover the details icon to inspect remarks and recorded biometric times.</span>
             </div>
         </div>
     );

@@ -39,8 +39,8 @@ type FormDialogProps = {
     loading?: boolean;
     size?: DialogSize;
     disabled?: boolean;
-    canAdd?: boolean
-    
+    canAdd?: boolean;
+    className?: string;
 };
 
 export function FormDialog({
@@ -56,7 +56,8 @@ export function FormDialog({
     loading = false,
     size = 'md',
     disabled,
-    canAdd= true
+    canAdd = true,
+    className,
 }: FormDialogProps) {
     const isBusy = loading;
 
@@ -82,7 +83,7 @@ export function FormDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className={cn(sizeClasses[size])}>
+            <DialogContent className={cn(sizeClasses[size], 'max-h-[calc(100vh-2rem)] overflow-y-auto', className)}>
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     {description && (

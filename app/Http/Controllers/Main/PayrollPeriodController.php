@@ -106,6 +106,35 @@ class PayrollPeriodController extends Controller
         try {
             $employees = Employee::where('Status', 1)->with('group')->get();
 
+            // Validate all active employees before starting payroll computation.
+            // BasicPay is required by payroll_computations and by the payroll formulas.
+            $invalidEmployees = $employees->filter(function (Employee $employee) {
+                return $employee->BasicPay === null
+                    || ! is_numeric($employee->BasicPay)
+                    || (float) $employee->BasicPay < 0;
+            });
+
+            if ($invalidEmployees->isNotEmpty()) {
+                $employeeList = $invalidEmployees
+                    ->map(function (Employee $employee) {
+                        $name = $employee->FullName
+                            ?: trim(implode(' ', array_filter([
+                                $employee->FirstName,
+                                $employee->MidName,
+                                $employee->LastName,
+                                $employee->Suffix,
+                            ])));
+
+                        return $name ?: "Employee #{$employee->id}";
+                    })
+                    ->implode(', ');
+
+                return back()->with(
+                    'error',
+                    "Payroll cannot be computed. Basic Pay is missing or invalid for: {$employeeList}. Please update the employee salary information first.",
+                );
+            }
+
             $lookups = $payrollComputation->preloadLookups($payrollPeriod);
 
             DB::transaction(function () use ($employees, $payrollPeriod, $payrollComputation, $dtrSummary, $lookups) {
