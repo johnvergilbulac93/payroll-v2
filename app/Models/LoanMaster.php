@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
 #[Fillable(['LoanTypeID', 'EmpNbr', 'OrigBal', 'DedAmt', 'StartDate', 'Frequency', 'BalanceAmt', 'BalanceasofDate', 'Crtd_Date', 'Crtd_User', 'LUpd_Date'])]
 class LoanMaster extends Model

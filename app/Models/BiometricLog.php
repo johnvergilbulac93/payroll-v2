@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
 #[Table('biometric_logs')]
 #[Fillable(['device_user_id', 'employee_id', 'punch_time', 'status', 'verify_mode', 'io_state', 'reserved', 'raw_line'])]

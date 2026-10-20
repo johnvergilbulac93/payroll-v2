@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
 #[Fillable(['Year', 'Month', 'CutoffNumber', 'PeriodStart', 'PeriodEnd', 'CutoffDateID', 'PayDate', 'Status'])]
 class PayrollPeriod extends Model
