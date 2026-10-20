@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
@@ -8,43 +8,64 @@ export default function AuthSimpleLayout({
     title,
     description,
 }: AuthLayoutProps) {
-    return (
-        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-sidebar px-4 py-10 text-sidebar-foreground">
-            <div
-                className="pointer-events-none absolute inset-0"
-                style={{
-                    backgroundImage:
-                        'radial-gradient(circle, rgba(255, 255, 255, 0.16) 1.5px, transparent 1.5px)',
-                    backgroundSize: '24px 24px',
-                    maskImage:
-                        'radial-gradient(ellipse at center, transparent 20%, black 70%)',
-                    WebkitMaskImage:
-                        'radial-gradient(ellipse at center, transparent 20%, black 70%)',
-                }}
-            ></div>
-            <div className="relative z-10 w-full max-w-md rounded-2xl border border-sidebar-border bg-background p-7 text-foreground shadow-2xl shadow-black/25 sm:p-9">
-                <div className="flex flex-col gap-8">
-                    <div className="flex flex-col items-center gap-4">
-                        <Link
-                            href={home()}
-                            className="flex flex-col items-center gap-2 font-medium"
-                        >
-                            <div className="mb-1 flex h-16 w-16 items-center justify-center rounded-2xl bg-sidebar-primary p-2 text-sidebar-primary-foreground shadow-lg shadow-blue-950/25">
-                                <AppLogoIcon className="size-12 fill-current text-sidebar-primary-foreground" />
-                            </div>
-                            <span className="sr-only">{title}</span>
-                        </Link>
+    const { name, description: companyDescription } = usePage().props;
 
-                        <div className="space-y-2 text-center">
-                            <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-                            <p className="text-center text-sm leading-6 text-muted-foreground">
-                                {description}
-                            </p>
+    return (
+        <main className="grid min-h-screen bg-background lg:grid-cols-2">
+            <section className="relative hidden overflow-hidden bg-sidebar text-sidebar-foreground lg:flex lg:flex-col lg:items-center lg:justify-center lg:px-12">
+                <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 opacity-80"
+                    style={{
+                        backgroundImage:
+                            'radial-gradient(circle, rgba(255, 255, 255, 0.16) 1.5px, transparent 1.5px)',
+                        backgroundSize: '24px 24px',
+                        maskImage:
+                            'radial-gradient(ellipse at center, transparent 15%, black 75%)',
+                        WebkitMaskImage:
+                            'radial-gradient(ellipse at center, transparent 15%, black 75%)',
+                    }}
+                />
+                <div className="relative z-10 flex max-w-lg flex-col items-center text-center">
+                    <Link href={home()} aria-label="Go to home" className="mb-8">
+                        <div className="flex size-32 items-center justify-center rounded-[2rem] border border-white/15 bg-white/10 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                            <AppLogoIcon className="size-full fill-current text-sidebar-primary-foreground" />
                         </div>
+                    </Link>
+                    <h2 className="text-3xl font-bold tracking-tight xl:text-4xl">
+                        {name || 'Payroll Management System'}
+                    </h2>
+                    <p className="mt-4 max-w-md text-sm leading-7 text-sidebar-foreground/75 xl:text-base">
+                        {companyDescription || 'A simpler way to manage your workforce and payroll.'}
+                    </p>
+                    <div className="mt-10 h-1 w-16 rounded-full bg-sidebar-primary" />
+                </div>
+                <p className="absolute bottom-6 text-xs text-sidebar-foreground/50">
+                    Secure workforce and payroll management
+                </p>
+            </section>
+
+            <section className="flex min-h-screen items-center justify-center px-6 py-12 sm:px-10 lg:px-12">
+                <div className="w-full max-w-md">
+                    <div className="mb-8 flex flex-col gap-3 lg:mb-10">
+                        <div className="mb-2 flex items-center gap-3 lg:hidden">
+                            <div className="flex size-12 items-center justify-center rounded-xl bg-sidebar p-2 text-sidebar-primary-foreground shadow-md">
+                                <AppLogoIcon className="size-full fill-current" />
+                            </div>
+                            <span className="text-sm font-semibold text-foreground">
+                                {name || 'Payroll Management System'}
+                            </span>
+                        </div>
+                        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+                            {title}
+                        </h1>
+                        <p className="text-sm leading-6 text-muted-foreground">
+                            {description}
+                        </p>
                     </div>
                     {children}
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
     );
 }

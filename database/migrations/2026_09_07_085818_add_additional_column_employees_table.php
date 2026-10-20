@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('employees', function (Blueprint $table) {
-            $table->enum('EmploymentStatus', ['regular', 'probationary'])->nullable()->after('Image'); // non-teaching
+            $table->enum('EmploymentStatus', ['regular', 'probationary', 'contractual', 'consultant'])->nullable()->after('Image'); // non-teaching
             $table->enum('TenureStatus', ['tenured', 'non_tenured'])->nullable();      // teaching
             $table->boolean('IsLETPasser')->nullable();                               // teaching
             $table->unsignedSmallInteger('DailyRateDivisor')->default(365);

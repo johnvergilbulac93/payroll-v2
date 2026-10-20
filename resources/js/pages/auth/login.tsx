@@ -75,14 +75,14 @@ export default function Login({ status, canResetPassword }: Props) {
             <Form
                 {...store.form()}
                 resetOnSuccess={['password']}
-                className="flex flex-col gap-6"
+                className="flex flex-col gap-7"
                 onError={handleError}
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-6">
-                            <div className="grid gap-2">
-                                <Label htmlFor="username">Username</Label>
+                        <div className="grid gap-7">
+                            <div className="grid gap-3">
+                                <Label htmlFor="username" className="text-base">Username</Label>
                                 <Input
                                     id="username"
                                     type="text"
@@ -92,13 +92,14 @@ export default function Login({ status, canResetPassword }: Props) {
                                     tabIndex={1}
                                     autoComplete="username"
                                     placeholder="Username"
+                                    className="h-12 px-4 text-base"
                                 />
                                 <InputError message={usernameError} />
                             </div>
 
-                            <div className="grid gap-2">
+                            <div className="grid gap-3">
                                 <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                                    <Label htmlFor="password" className="text-base">Password</Label>
                                     {/* {canResetPassword && (
                                         <TextLink
                                             href={request()}
@@ -116,6 +117,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     placeholder="Password"
+                                    className="h-12 px-4 text-base"
                                 />
                                 <InputError message={errors.password} />
                             </div>
@@ -131,7 +133,7 @@ export default function Login({ status, canResetPassword }: Props) {
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
+                                className="mt-4 h-12 w-full justify-center text-base text-center"
                                 tabIndex={4}
                                 disabled={processing || countDown > 0}
                                 data-test="login-button"

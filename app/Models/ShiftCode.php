@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Support\LogOptions;
 
 #[Table('shift_codes')]
 #[Fillable(['Name', 'TimeIn', 'TimeOut', 'BreakMinutes', 'GracePeriodMinutes', 'CrossesMidNight', 'IsWorkingDay', 'TotalHours', 'IsActive'])]

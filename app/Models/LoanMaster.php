@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
 #[Fillable(['LoanTypeID', 'EmpNbr', 'OrigBal', 'DedAmt', 'StartDate', 'Frequency', 'BalanceAmt', 'BalanceasofDate', 'Crtd_Date', 'Crtd_User', 'LUpd_Date'])]

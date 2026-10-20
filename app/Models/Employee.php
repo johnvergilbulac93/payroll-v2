@@ -12,8 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 #[Fillable(['EmpNbr', 'Group', 'FirstName', 'MidName', 'LastName', 'Suffix', 'FullName', 'Address', 'CityProv', 'BirthDate', 'EmployDate', 'RegularDate', 'Position', 'Assignment', 'SalaryGrade', 'BasicPay', 'DailyRate', 'HourlyRate', 'Status', 'MaritalStatus', 'SSSNbr', 'PHICNbr', 'HDMFNbr', 'TIN', 'Degree', 'AllowReg', 'ResignDate', 'BPIATM', 'BPIEmpCode', 'PIN', 'PERAAID', 'BiometricID', 'DeductionStatus', 'Image', 'EmploymentStatus', 'TenureStatus', 'IsLETPasser', 'DailyRateDivisor'])]
 class Employee extends Model

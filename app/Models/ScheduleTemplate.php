@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Support\LogOptions;
 
 #[Table('employee_schedule_templates')]
 #[Fillable(['EmpID', 'DayOfWeek', 'ShiftCodeID', 'EffectiveFrom', 'EffectiveTo'])]

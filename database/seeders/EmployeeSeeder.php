@@ -275,6 +275,8 @@ class EmployeeSeeder extends Seeder
         return match (mb_strtolower(trim((string) $value))) {
             'regular' => EmploymentStatus::Regular->value,
             'probationary' => EmploymentStatus::Probationary->value,
+            'contractual' => EmploymentStatus::Contractual->value,
+            'consultant' => EmploymentStatus::Consultant->value,    
             default => null,
         };
     }

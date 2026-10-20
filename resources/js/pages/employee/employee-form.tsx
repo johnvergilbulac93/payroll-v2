@@ -53,6 +53,8 @@ type Props = {
 const employmentStatusOptions = [
     { label: 'Probationary', value: 'probationary' },
     { label: 'Regular', value: 'regular' },
+    { label: 'Contractual', value: 'contractual' },
+    { label: 'Consultant', value: 'consultant' },
 ];
 const tenuredStatusOptions = [
     { label: 'Tenured', value: 'tenured' },
@@ -958,7 +960,7 @@ export default function EmployeeForm({
                     </Field>
                 </FieldGroup>
                 <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <FieldLabel htmlFor="switch-status">
+                    <FieldLabel htmlFor="switch-IsLETPasser">
                         <Field
                             orientation="horizontal"
                             className="flex items-center"
@@ -975,7 +977,7 @@ export default function EmployeeForm({
                                 </FieldDescription>
                             </FieldContent>
                             <Switch
-                                id="switch-status"
+                                id="switch-IsLETPasser"
                                 checked={data.IsLETPasser}
                                 tabIndex={30}
                                 onCheckedChange={(checked) =>

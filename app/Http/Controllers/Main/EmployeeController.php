@@ -81,7 +81,7 @@ class EmployeeController extends Controller
         }
 
         $employee->update($validated);
-        return to_route('employee.index');
+        return to_route('employee.show', $employee);
     }
     public function destroy(Employee $employee)
     {
