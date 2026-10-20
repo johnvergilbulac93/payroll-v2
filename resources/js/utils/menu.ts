@@ -20,14 +20,16 @@ import type { ComponentType } from 'react';
 import { dashboard } from '@/routes';
 import { index as accessControlIndex } from '@/routes/access_control';
 import { index as cutoffDateIndex } from '@/routes/cutoff';
+import { index as deductionIndex } from '@/routes/deduction';
 import { index as processDtrIndex } from '@/routes/dtr';
 import { index as employeeIndex } from '@/routes/employee';
 import { index as employeeScheduleIndex } from '@/routes/employee_schedule';
 import { index as loanIndex } from '@/routes/loan';
-import { index as deductionIndex } from '@/routes/deduction';
 // import { index as deductionTypeIndex } from '@/routes/maintenance/deduction_type';
 // import { index as governmentMandatedIndex } from '@/routes/maintenance/government_mandated';
+// import { index as activityLogsIndex } from '@/routes/maintenance/activity_logs';
 import { index as loanTypeIndex } from '@/routes/maintenance/loan_type';
+// import { index as loginActivityIndex } from '@/routes/maintenance/login_activity';
 import { index as payrollPeriodIndex } from '@/routes/payroll_period';
 import { generateDtr, generatePaySlip } from '@/routes/report';
 import { index as roleIndex } from '@/routes/role';
@@ -182,15 +184,11 @@ export const navItems: NavGroup[] = [
                 //         Permission: 'maintenance-view',
                 //     },
                 //     {
-                //         Label: 'Deduction Type',
-                //         Url: deductionTypeIndex.url(),
+                //         Label: 'Activity Logs',
+                //         Url: activityLogsIndex.url(),
                 //         Permission: 'maintenance-view',
                 //     },
-                //     {
-                //         Label: 'Government Mandated',
-                //         Url: governmentMandatedIndex.url(),
-                //         Permission: 'maintenance-view',
-                //     },
+
                 // ],
             },
             // {

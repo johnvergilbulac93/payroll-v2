@@ -451,6 +451,10 @@ class DtrProcessorService
             return [$punchTime, null, 'Single punch, no shift to compare — flagged for review'];
         }
 
+        if (! $shiftCode->TimeIn || ! $shiftCode->TimeOut) {
+            return [$punchTime, null, 'Single punch, shift has no scheduled start or end time — flagged for review'];
+        }
+
         $expectedStart = $punchTime->copy()->setTimeFromTimeString($shiftCode->TimeIn->format('H:i'));
         $expectedEnd = $punchTime->copy()->setTimeFromTimeString($shiftCode->TimeOut->format('H:i'));
 

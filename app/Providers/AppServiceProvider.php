@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\LoginActivity;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -24,6 +28,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        Event::listen(Login::class, function (Login $event): void {
+            LoginActivity::record('login_success', $event->user->username ?? null, $event->user);
+        });
+
+        Event::listen(Logout::class, function (Logout $event): void {
+            LoginActivity::record('logout', $event->user->username ?? null, $event->user);
+        });
     }
 
     /**

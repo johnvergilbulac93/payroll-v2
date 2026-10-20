@@ -14,6 +14,7 @@ import { index as positionIndex } from '@/routes/maintenance/position';
 import { index as governmentMandatedIndex } from '@/routes/maintenance/government_mandated';
 import { index as loanTypeIndex } from '@/routes/maintenance/loan_type';
 import { index as deductionTypeIndex } from '@/routes/maintenance/deduction_type';
+import { index as loginActivityIndex } from '@/routes/maintenance/login_activity';
 
 import type { NavItem } from '@/types';
 
@@ -56,6 +57,12 @@ const sidebarNavItems: NavItem[] = [
     {
         title: 'Activity Logs',
         href: activityLogsIndex.url(),
+        icon: null,
+    },
+
+    {
+        title: 'Login Activity',
+        href: loginActivityIndex.url(),
         icon: null,
     },
 ];

@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Http\Requests\Auth\AuthRequest;
+use App\Models\LoginActivity;
 use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -114,6 +115,7 @@ class FortifyServiceProvider extends ServiceProvider
         $attemptsKey = "login_attempts:{$throttleKey}";
 
         if (Cache::has($lockKey)) {
+            LoginActivity::record('login_failed', $request->input(Fortify::username()), null, 'Account temporarily locked', $request);
             $expiresAt = Cache::get($lockKey);
             $secondsLeft = max(0, $expiresAt - now()->timestamp);
 
@@ -125,6 +127,7 @@ class FortifyServiceProvider extends ServiceProvider
         $user = User::where('username', $request->input(Fortify::username()))->first();
         $isValid = $user && Hash::check($request->password, $user->password);
         if (! $isValid) {
+            LoginActivity::record('login_failed', $request->input(Fortify::username()), null, 'Invalid credentials', $request);
             $attempts = Cache::get($attemptsKey, 0) + 1;
             Cache::put($attemptsKey, $attempts, self::LOCKOUT_SECONDS);
 
@@ -143,6 +146,7 @@ class FortifyServiceProvider extends ServiceProvider
             ]);
         }
         if (! $user->IsActive) {
+            LoginActivity::record('login_failed', $user->username, $user, 'Inactive account', $request);
             throw ValidationException::withMessages([
                 'username' => 'This account is inactive. Please contact your administrator.',
             ]);

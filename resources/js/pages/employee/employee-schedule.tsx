@@ -82,14 +82,7 @@ export default function EmployeeSchedule({
 
     const empId = Number(employee?.id);
 
-    const {
-        data,
-        setData,
-        processing,
-        errors,
-        reset,
-        clearErrors,
-    } = useForm({
+    const { data, setData, processing, errors, reset, clearErrors } = useForm({
         id: 0,
         EmpID: 0,
         DayOfWeek: 0,
@@ -173,23 +166,48 @@ export default function EmployeeSchedule({
                                         </Badge>
                                     </div>
                                     <p className="mt-1 text-sm text-muted-foreground">
-                                        {employee.PositionName ?? employee.Position ?? 'Employee'}
-                                        {employee.AreaName ? ` · ${employee.AreaName}` : ''}
+                                        {employee.PositionName ??
+                                            employee.Position ??
+                                            'Employee'}
+                                        {employee.AreaName
+                                            ? ` · ${employee.AreaName}`
+                                            : ''}
                                     </p>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-3 sm:min-w-64">
                                 <div className="rounded-lg bg-muted/50 px-3 py-2">
-                                    <p className="text-xs text-muted-foreground">Status</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Status
+                                    </p>
                                     <div className="mt-1 flex items-center gap-1.5 text-sm font-medium">
-                                        <span className={cn('size-2 rounded-full', employee.Status ? 'bg-emerald-500' : 'bg-muted-foreground')} />
-                                        {employee.Status ? 'Active' : 'Inactive'}
+                                        <span
+                                            className={cn(
+                                                'size-2 rounded-full',
+                                                employee.Status
+                                                    ? 'bg-emerald-500'
+                                                    : 'bg-muted-foreground',
+                                            )}
+                                        />
+                                        {employee.Status
+                                            ? 'Active'
+                                            : 'Inactive'}
                                     </div>
                                 </div>
                                 <div className="rounded-lg bg-muted/50 px-3 py-2">
-                                    <p className="text-xs text-muted-foreground">Assigned shifts</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Assigned shifts
+                                    </p>
                                     <p className="mt-1 text-sm font-medium">
-                                        {DAYS_OF_WEEK.filter((day) => templateGrid[empId]?.[day.value]).length} / {DAYS_OF_WEEK.length} days
+                                        {
+                                            DAYS_OF_WEEK.filter(
+                                                (day) =>
+                                                    templateGrid[empId]?.[
+                                                        day.value
+                                                    ],
+                                            ).length
+                                        }{' '}
+                                        / {DAYS_OF_WEEK.length} days
                                     </p>
                                 </div>
                             </div>
@@ -206,122 +224,156 @@ export default function EmployeeSchedule({
                                     Weekly schedule
                                 </CardTitle>
                                 <p className="mt-1 text-sm text-muted-foreground">
-                                    Click a day to assign a shift or update the schedule.
+                                    Click a day to assign a shift or update the
+                                    schedule.
                                 </p>
                             </div>
                             <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-primary" /> Working day</span>
-                                <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-secondary-foreground/30" /> Rest day</span>
+                                <span className="flex items-center gap-1.5">
+                                    <span className="size-2 rounded-full bg-primary" />{' '}
+                                    Working day
+                                </span>
+                                <span className="flex items-center gap-1.5">
+                                    <span className="size-2 rounded-full bg-secondary-foreground/30" />{' '}
+                                    Rest day
+                                </span>
                             </div>
                         </div>
                     </CardHeader>
                     <CardContent className="p-3 sm:p-4">
-                <div className="overflow-hidden rounded-xl border border-border/70 bg-background">
-                    <Table>
-                        <TableHeader className="sticky top-0 z-10 bg-muted">
-                            <TableRow>
-                                {DAYS_OF_WEEK.map((day) => (
-                                    <TableHead
-                                        key={`${day.value}-header`}
-                                        className="h-10 w-27.5 border-r bg-muted/40 px-2 text-center text-xs font-semibold uppercase tracking-wide last:border-r-0"
-                                    >
-                                        {day.label.slice(0, 3)}
-                                    </TableHead>
-                                ))}
-                            </TableRow>
-                            <TableRow className="hover:bg-transparent">
-                                {DAYS_OF_WEEK.map((day) => (
-                                    <TableHead
-                                        key={day.value}
-                                        className="hidden"
-                                    >
-                                        {day.label}
-                                    </TableHead>
-                                ))}
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            <TableRow>
-                                {DAYS_OF_WEEK.map((day) => {
-                                    const cell =
-                                        templateGrid[empId]?.[day.value];
+                        <div className="overflow-hidden rounded-xl border border-border/70 bg-background">
+                            <Table>
+                                <TableHeader className="sticky top-0 z-10 bg-muted">
+                                    <TableRow>
+                                        {DAYS_OF_WEEK.map((day) => (
+                                            <TableHead
+                                                key={`${day.value}-header`}
+                                                className="h-10 w-27.5 border-r bg-muted/40 px-2 text-center text-xs font-semibold tracking-wide uppercase last:border-r-0"
+                                            >
+                                                {day.label.slice(0, 3)}
+                                            </TableHead>
+                                        ))}
+                                    </TableRow>
+                                    <TableRow className="hover:bg-transparent">
+                                        {DAYS_OF_WEEK.map((day) => (
+                                            <TableHead
+                                                key={day.value}
+                                                className="hidden"
+                                            >
+                                                {day.label}
+                                            </TableHead>
+                                        ))}
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    <TableRow>
+                                        {DAYS_OF_WEEK.map((day) => {
+                                            const cell =
+                                                templateGrid[empId]?.[
+                                                    day.value
+                                                ];
 
-                                    return (
-                                        <TableCell
-                                            key={day.value}
-                                            className="border-r p-2 align-top last:border-r-0"
-                                        >
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <button
-                                                        type="button"
-                                                        className={cn(
-                                                            'group relative flex min-h-28 w-full items-center justify-center rounded-lg border px-2.5 py-3 text-center transition-all hover:-translate-y-0.5 hover:shadow-sm',
-                                                            cell
-                                                                ? cell
-                                                                      .shift_code
-                                                                      ?.IsWorkingDay
-                                                                    ? 'border-primary/20 bg-primary text-primary-foreground hover:bg-primary/90'
-                                                                    : 'border-border/60 bg-muted/50 hover:bg-muted'
-                                                                : 'border-dashed border-muted-foreground/25 bg-muted/10 hover:border-primary/40 hover:bg-primary/5',
-                                                        )}
-                                                        onClick={() =>
-                                                            openCell(
-                                                                empId,
-                                                                day.value,
-                                                            )
-                                                        }
-                                                    >
-                                                        {cell ? (
-                                                            <div className="relative flex h-full w-full items-center justify-center">
-                                                                <div className="flex flex-col items-center transition group-hover:opacity-30 group-hover:blur-[1px]">
-                                                                    {cell
-                                                                        .shift_code
-                                                                        ?.IsWorkingDay ? (
-                                                                        <>
-                                                                            <div className="mb-1.5 flex items-center gap-1 text-[11px] font-medium opacity-80">
-                                                                                <IconClock className="size-3" />
-                                                                                {cell.shift_code.Name}
-                                                                            </div>
-                                                                            <p className="text-sm font-semibold">
-                                                                                {formatTime(cell.shift_code?.TimeIn)}
-                                                                                <span className="mx-1.5 font-normal opacity-70">–</span>
-                                                                                {formatTime(cell.shift_code?.TimeOut)}
-                                                                            </p>
-                                                                        </>
-                                                                    ) : (
-                                                                        <div className="flex flex-col items-center gap-1">
-                                                                            <span className="text-sm font-semibold">Rest Day</span>
-                                                                            <span className="text-[11px] opacity-70">No shift assigned</span>
+                                            return (
+                                                <TableCell
+                                                    key={day.value}
+                                                    className="border-r p-2 align-top last:border-r-0"
+                                                >
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <button
+                                                                type="button"
+                                                                className={cn(
+                                                                    'group relative flex min-h-28 w-full items-center justify-center rounded-lg border px-2.5 py-3 text-center transition-all hover:-translate-y-0.5 hover:shadow-sm',
+                                                                    cell
+                                                                        ? cell
+                                                                              .shift_code
+                                                                              ?.IsWorkingDay
+                                                                            ? 'border-primary/20 bg-primary text-primary-foreground hover:bg-primary/90'
+                                                                            : 'border-border/60 bg-muted/50 hover:bg-muted'
+                                                                        : 'border-dashed border-muted-foreground/25 bg-muted/10 hover:border-primary/40 hover:bg-primary/5',
+                                                                )}
+                                                                onClick={() =>
+                                                                    openCell(
+                                                                        empId,
+                                                                        day.value,
+                                                                    )
+                                                                }
+                                                            >
+                                                                {cell ? (
+                                                                    <div className="relative flex h-full w-full items-center justify-center">
+                                                                        <div className="flex flex-col items-center transition group-hover:opacity-30 group-hover:blur-[1px]">
+                                                                            {cell
+                                                                                .shift_code
+                                                                                ?.IsWorkingDay ? (
+                                                                                <>
+                                                                                    <div className="mb-1.5 flex items-center gap-1 text-[11px] font-medium opacity-80">
+                                                                                        <IconClock className="size-3" />
+                                                                                        {
+                                                                                            cell
+                                                                                                .shift_code
+                                                                                                .Name
+                                                                                        }
+                                                                                    </div>
+                                                                                    <p className="text-sm font-semibold">
+                                                                                        {formatTime(
+                                                                                            cell
+                                                                                                .shift_code
+                                                                                                ?.TimeIn,
+                                                                                        )}
+                                                                                        <span className="mx-1.5 font-normal opacity-70">
+                                                                                            –
+                                                                                        </span>
+                                                                                        {formatTime(
+                                                                                            cell
+                                                                                                .shift_code
+                                                                                                ?.TimeOut,
+                                                                                        )}
+                                                                                    </p>
+                                                                                </>
+                                                                            ) : (
+                                                                                <div className="flex flex-col items-center gap-1">
+                                                                                    <span className="text-sm font-semibold">
+                                                                                        Rest
+                                                                                        Day
+                                                                                    </span>
+                                                                                    <span className="text-[11px] opacity-70">
+                                                                                        No
+                                                                                        shift
+                                                                                        assigned
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
                                                                         </div>
-                                                                    )}
-                                                                </div>
-                                                                <div className="absolute right-2 top-2 rounded-full bg-background/15 p-1 opacity-0 transition group-hover:opacity-100">
-                                                                    <IconTrash className="size-3.5" />
-                                                                </div>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="flex flex-col items-center gap-1.5">
-                                                        <span className="flex size-8 items-center justify-center rounded-full border border-dashed border-muted-foreground/30 bg-background text-muted-foreground transition group-hover:border-primary/40 group-hover:text-primary">
-                                                            <IconPlus className="size-4" />
-                                                        </span>
-                                                        <span className="text-xs font-medium text-muted-foreground">Assign shift</span>
-                                                    </div>
-                                                        )}
-                                                    </button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    {cell?.shift_code?.Name ??
-                                                        'Not set'}
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TableCell>
-                                    );
-                                })}
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                </div>
+                                                                        <div className="absolute top-2 right-2 rounded-full bg-background/15 p-1 opacity-0 transition group-hover:opacity-100">
+                                                                            <IconTrash className="size-3.5" />
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="flex flex-col items-center gap-1.5">
+                                                                        <span className="flex size-8 items-center justify-center rounded-full border border-dashed border-muted-foreground/30 bg-background text-muted-foreground transition group-hover:border-primary/40 group-hover:text-primary">
+                                                                            <IconPlus className="size-4" />
+                                                                        </span>
+                                                                        <span className="text-xs font-medium text-muted-foreground">
+                                                                            Assign
+                                                                            shift
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+                                                            </button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            {cell?.shift_code
+                                                                ?.Name ??
+                                                                'Not set'}
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TableCell>
+                                            );
+                                        })}
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        </div>
                     </CardContent>
                 </Card>
             </div>

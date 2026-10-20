@@ -75,14 +75,14 @@ export default function Login({ status, canResetPassword }: Props) {
             <Form
                 {...store.form()}
                 resetOnSuccess={['password']}
-                className="flex flex-col gap-7"
+                className="flex flex-col gap-6"
                 onError={handleError}
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-7">
-                            <div className="grid gap-3">
-                                <Label htmlFor="username" className="text-base">Username</Label>
+                        <div className="grid gap-5">
+                            <div className="grid gap-2">
+                                <Label htmlFor="username" className="text-sm font-semibold text-foreground">Username</Label>
                                 <Input
                                     id="username"
                                     type="text"
@@ -92,14 +92,14 @@ export default function Login({ status, canResetPassword }: Props) {
                                     tabIndex={1}
                                     autoComplete="username"
                                     placeholder="Username"
-                                    className="h-12 px-4 text-base"
+                                    className="h-12 rounded-lg border-border/80 bg-background px-4 text-left text-base shadow-sm transition-shadow placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/30"
                                 />
-                                <InputError message={usernameError} />
+                                <div className="text-center"><InputError message={usernameError} /></div>
                             </div>
 
-                            <div className="grid gap-3">
-                                <div className="flex items-center">
-                                    <Label htmlFor="password" className="text-base">Password</Label>
+                            <div className="grid gap-2">
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="password" className="text-sm font-semibold text-foreground">Password</Label>
                                     {/* {canResetPassword && (
                                         <TextLink
                                             href={request()}
@@ -117,23 +117,23 @@ export default function Login({ status, canResetPassword }: Props) {
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     placeholder="Password"
-                                    className="h-12 px-4 text-base"
+                                    className="h-12 rounded-lg border-border/80 bg-background px-4 text-left text-base shadow-sm transition-shadow placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/30"
                                 />
-                                <InputError message={errors.password} />
+                                <div className="text-center"><InputError message={errors.password} /></div>
                             </div>
 
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-3 rounded-lg border border-border/70 bg-muted/30 px-4 py-3">
                                 <Checkbox
                                     id="remember"
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">Remember me</Label>
+                                <Label htmlFor="remember" className="cursor-pointer text-sm font-medium text-muted-foreground">Remember me</Label>
                             </div>
 
                             <Button
                                 type="submit"
-                                className="mt-4 h-12 w-full justify-center text-base text-center"
+                                className="mt-1 h-12 w-full justify-center rounded-lg text-base font-semibold shadow-sm transition-all hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 tabIndex={4}
                                 disabled={processing || countDown > 0}
                                 data-test="login-button"
