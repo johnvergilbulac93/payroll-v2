@@ -32,7 +32,8 @@ class DatabaseSeeder extends Seeder
             PhilHealthContributionSeeder::class,
             HolidaySeeder::class,
             GovernmentMandatedSeeder::class,
-            DeductionTypeSeeder::class
+            DeductionTypeSeeder::class,
+            EmployeeSeeder::class,
 
         ]);
     }

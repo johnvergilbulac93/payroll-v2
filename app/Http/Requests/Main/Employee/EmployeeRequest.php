@@ -51,6 +51,7 @@ class EmployeeRequest extends FormRequest
             'DailyRate' => ['nullable', 'numeric'],
             'HourlyRate' => ['nullable', 'numeric'],
             'Status' => ['nullable', 'boolean'],
+            'MaritalStatus' => ['nullable', 'string', 'max:255'],
             'SSSNbr' => ['nullable', 'string'],
             'PHICNbr' => ['nullable', 'string'],
             'HDMFNbr' => ['nullable', 'string'],

@@ -26,10 +26,10 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
             {items.map((group, index) => (
                 <SidebarGroup
                     key={group.Label ?? `group-${index}`}
-                    className="px-2 py-0"
+                    className="px-0 py-0"
                 >
                     {group.Label && (
-                        <SidebarGroupLabel>{group.Label}</SidebarGroupLabel>
+                        <SidebarGroupLabel className="text-sidebar-foreground/65">{group.Label}</SidebarGroupLabel>
                     )}
                     <SidebarMenu>
                         {group.Items.map((item) => {
@@ -50,6 +50,7 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
                                             asChild
                                             isActive={!hasChildren && isCurrentUrl(item.Url)}
                                             tooltip={{ children: item.Label }}
+                                            className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:font-semibold data-[active=true]:text-sidebar-primary-foreground"
                                         >
                                             {hasChildren ? (
                                                 <CollapsibleTrigger>
@@ -72,6 +73,7 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
                                                             <SidebarMenuSubButton
                                                                 asChild
                                                                 isActive={isCurrentUrl(child.Url)}
+                                                                className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary/20 data-[active=true]:font-medium data-[active=true]:text-sidebar-primary"
                                                             >
                                                                 <Link href={child.Url} prefetch>
                                                                     <span>{child.Label}</span>

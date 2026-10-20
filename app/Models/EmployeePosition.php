@@ -6,9 +6,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
-
 #[Table('positions')]
-#[Fillable(['name'])]
+#[Fillable(['name', 'type'])]
 class EmployeePosition extends Model
 {
     //

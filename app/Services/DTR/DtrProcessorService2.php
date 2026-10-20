@@ -163,7 +163,8 @@ class DtrProcessorService2
         if (!empty($records)) {
 
             collect($records)
-                ->chunk(500)
+                // SQL Server allows at most 2,100 bound parameters per statement.
+                ->chunk(100)
                 ->each(function ($chunk) {
 
                     DTRRecord::upsert(

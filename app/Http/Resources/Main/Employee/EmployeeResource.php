@@ -33,6 +33,7 @@ class EmployeeResource extends JsonResource
             'DailyRate' => $this->DailyRate ? $this->DailyRate : 0,
             'HourlyRate' => $this->HourlyRate ? $this->HourlyRate : 0,
             'Status' => $this->Status,
+            'MaritalStatus' => $this->MaritalStatus,
             'SSSNbr' => $this->SSSNbr,
             'PHICNbr' => $this->PHICNbr,
             'HDMFNbr' => $this->HDMFNbr,

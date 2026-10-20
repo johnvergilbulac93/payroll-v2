@@ -1,4 +1,5 @@
 import { IconEye, IconRefresh } from '@tabler/icons-react';
+import { router } from '@inertiajs/react';
 import {
     columnFilteringFeature,
     columnVisibilityFeature,
@@ -97,26 +98,49 @@ export function ProcessDtrTable({
             cell: ({ row }) => {
                 const employee = row.original;
 
+                const needsSchedule =
+                    employee.Status === 'flagged' &&
+                    /no active schedule assigned|no schedule/i.test(
+                        employee.Remarks ?? '',
+                    );
+
+                const statusBadge = (
+                    <Badge
+                        variant="outline"
+                        className={cn(
+                            'capitalize',
+                            employee.Status === 'flagged' &&
+                                'bg-amber-600 text-primary-foreground',
+                            employee.Status === 'processed' &&
+                                'bg-primary text-primary-foreground',
+                            employee.Status === 'closed' &&
+                                'bg-destructive text-destructive-foreground',
+                            needsSchedule && 'cursor-pointer hover:bg-amber-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                        )}
+                    >
+                        {employee.Status}
+                    </Badge>
+                );
+
+                const badge = needsSchedule ? (
+                    <button
+                        type="button"
+                        className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        aria-label={`Assign schedule for ${employee.FullName}`}
+                        onClick={() =>
+                            router.visit(`/employee_schedule?emp_id=${employee.id}`)
+                        }
+                    >
+                        {statusBadge}
+                    </button>
+                ) : statusBadge;
+
                 return employee.Remarks ? (
                     <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Badge
-                                variant="outline"
-                                className={cn(
-                                    'capitalize',
-                                    employee.Status === 'flagged' &&
-                                        'bg-amber-600 text-primary-foreground',
-                                    employee.Status === 'processed' &&
-                                        'bg-primary text-primary-foreground',
-                                    employee.Status === 'closed' &&
-                                        'bg-destructive text-destructive-foreground',
-                                )}
-                            >
-                                {employee.Status}
-                            </Badge>
-                        </TooltipTrigger>
+                        <TooltipTrigger asChild>{badge}</TooltipTrigger>
                         <TooltipContent>
                             <p>{employee.Remarks}</p>
+                            {needsSchedule && <p className="mt-1 font-medium">Click to assign a schedule</p>}
                         </TooltipContent>
                     </Tooltip>
                 ) : (

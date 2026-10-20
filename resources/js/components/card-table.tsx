@@ -355,7 +355,10 @@ export function DataTable<T extends RowData>({
                         </Select>
                     </div>
                 </div>
-                {metaPagination.links.map((link, index) => {
+                {metaPagination.links
+                    .map((link, index) => ({ link, index }))
+                    .filter(({ index }) => index === 0 || index === metaPagination.links.length - 1)
+                    .map(({ link, index }) => {
                     const isPrevious = index === 0;
                     const isNext = index === metaPagination.links.length - 1;
 

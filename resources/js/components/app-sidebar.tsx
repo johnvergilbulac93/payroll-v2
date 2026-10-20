@@ -18,12 +18,20 @@ export function AppSidebar() {
     const { filteredNavGroups } = useNav();
 
     return (
-        <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader className="border-b border-sidebar-border/60">
+        <Sidebar
+            collapsible="icon"
+            variant="inset"
+            className="bg-sidebar text-sidebar-foreground [&_[data-slot=sidebar-inner]]:bg-sidebar [&_[data-slot=sidebar-inner]]:text-sidebar-foreground"
+        >
+            <SidebarHeader className="border-b border-white/10">
 
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" className="group-data-[collapsible=icon]:justify-center" asChild>
+                        <SidebarMenuButton
+                            size="lg"
+                            className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center"
+                            asChild
+                        >
                             <Link href={dashboard()} prefetch>
                                 <AppLogo />
                             </Link>
@@ -36,7 +44,7 @@ export function AppSidebar() {
                 <NavMain items={filteredNavGroups} />
             </SidebarContent>
 
-            <SidebarFooter className="border-t border-sidebar-border/60 p-2">
+            <SidebarFooter className="border-t border-white/10 p-2">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

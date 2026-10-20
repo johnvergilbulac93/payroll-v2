@@ -362,9 +362,9 @@ export function DataTable<T extends RowData>({
         </TableBody>
     );
     const pagination = (
-        <div className="flex items-center justify-between">
-            <span className="text-sm">{dataPagination.name}</span>
-            <div className="flex gap-1">
+        <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-sm text-muted-foreground">{dataPagination.name}</span>
+            <div className="flex flex-wrap items-center gap-1">
                 <div className="flex w-full items-center gap-8 lg:w-fit">
                     <div className="hidden items-center gap-2 lg:flex">
                         <Label
@@ -405,7 +405,10 @@ export function DataTable<T extends RowData>({
                         </Select>
                     </div>
                 </div>
-                {metaPagination.links.map((link, index) => {
+                {metaPagination.links
+                    .map((link, index) => ({ link, index }))
+                    .filter(({ index }) => index === 0 || index === metaPagination.links.length - 1)
+                    .map(({ link, index }) => {
                     const isPrevious = index === 0;
                     const isNext = index === metaPagination.links.length - 1;
 
@@ -437,8 +440,8 @@ export function DataTable<T extends RowData>({
         </div>
     );
     const tableControls = (
-        <div className="flex items-center justify-between">
-            <div className="relative w-1/2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative w-full sm:w-1/2 sm:max-w-md">
                 <IconSearch className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                     type="text"
@@ -575,14 +578,14 @@ export function DataTable<T extends RowData>({
     );
 
     return (
-        <div className="space-y-2">
+        <div className="space-y-4">
             {controlType === 'default' && tableControls}
             {controlType === 'process-dtr' && tableControls2}
             {controlType === 'payroll-period' && tableControls3}
 
-            <div className="w-full max-w-full overflow-x-auto rounded-lg border">
+            <div className="w-full max-w-full overflow-x-auto">
                 <Table className="w-full">
-                    <TableHeader className="sticky top-0 z-10 bg-muted">
+                    <TableHeader className="sticky top-0 z-10 bg-muted/60">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
