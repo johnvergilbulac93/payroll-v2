@@ -21,13 +21,15 @@ import type { DTRRecordsDetails } from '@/types/payroll-period';
 type DTRProps = {
     dailyTimeRecords: DTRRecordsDetails[];
     employeeId?: number | string;
+    onMissingPunch?: (date: string, type: 'IN' | 'OUT', recordId: number | null) => void;
+    onScheduleNeeded?: (date: string) => void;
 };
 
-export function EmployeeDtr({ dailyTimeRecords, employeeId }: DTRProps) {
+export function EmployeeDtr({ dailyTimeRecords, employeeId, onMissingPunch, onScheduleNeeded }: DTRProps) {
     const records = dailyTimeRecords.filter((dtr) => dtr.DTRDate !== 'TOTAL');
 
     return (
-        <div className="overflow-hidden rounded-xl border">
+        <div className="overflow-hidden rounded-xl">
             <div className="overflow-x-auto">
                 <Table>
                     <TableHeader className="bg-muted/70">
@@ -57,6 +59,21 @@ export function EmployeeDtr({ dailyTimeRecords, employeeId }: DTRProps) {
                             records.map((dtr, index) => {
                                 const hasPunches = dtr.Punches.length > 0;
                                 const hasRemarks = Boolean(dtr.Remarks);
+                                const remarks = (dtr.Remarks ?? '').toLowerCase();
+                                const hasIn = Boolean(dtr.IN?.trim()) && dtr.IN.trim() !== '—' && dtr.IN.trim() !== '-';
+                                const hasOut = Boolean(dtr.OUT?.trim()) && dtr.OUT.trim() !== '—' && dtr.OUT.trim() !== '-';
+                                // The viewer formats DTRDate as "Oct 21, 2026"; determine the missing
+                                // punch from the processor remark, then normalize the date before opening the form.
+                                const missingIn = !hasIn && hasOut && remarks.includes('assumed out');
+                                const missingOut = hasIn && !hasOut && remarks.includes('assumed in');
+                                const missingPunchType = missingIn ? 'IN' : missingOut ? 'OUT' : null;
+                                const needsSchedule = remarks.includes('no active schedule assigned');
+                                const normalizedDtrDate = (() => {
+                                    const parsed = new Date(dtr.DTRDate);
+                                    return Number.isNaN(parsed.getTime())
+                                        ? dtr.DTRDate
+                                        : `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`;
+                                })();
                                 const showDetails = hasRemarks || hasPunches;
 
                                 return (
@@ -102,6 +119,14 @@ export function EmployeeDtr({ dailyTimeRecords, employeeId }: DTRProps) {
                                                                     aria-label={`View attendance details for ${dtr.DTRDate}`}
                                                                     className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                                                     onClick={() => {
+                                                                        if (needsSchedule && onScheduleNeeded) {
+                                                                            onScheduleNeeded(normalizedDtrDate);
+                                                                            return;
+                                                                        }
+                                                                        if (missingPunchType && onMissingPunch) {
+                                                                            onMissingPunch(normalizedDtrDate, missingPunchType, dtr.id ?? null);
+                                                                            return;
+                                                                        }
                                                                         if (hasRemarks && employeeId) {
                                                                             router.visit(
                                                                                 `/employee_schedule?emp_id=${employeeId}&tab=per-date`,
@@ -110,7 +135,7 @@ export function EmployeeDtr({ dailyTimeRecords, employeeId }: DTRProps) {
                                                                     }}
                                                                 >
                                                                     {hasRemarks ? (
-                                                                        <IconMessageCircleFilled className="size-4 text-amber-500" />
+                                                                        <IconMessageCircleFilled className={`size-4 ${missingPunchType || needsSchedule ? 'text-amber-500' : ''}`} />
                                                                     ) : (
                                                                         <IconInfoCircleFilled className="size-4" />
                                                                     )}
@@ -153,7 +178,7 @@ export function EmployeeDtr({ dailyTimeRecords, employeeId }: DTRProps) {
                     </TableBody>
                 </Table>
             </div>
-            <div className="flex flex-col gap-1 border-t bg-muted/20 px-4 py-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-1 mt-2 bg-muted/20 px-4 py-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
                 <span>
                     Showing {records.length} attendance {records.length === 1 ? 'record' : 'records'}
                 </span>

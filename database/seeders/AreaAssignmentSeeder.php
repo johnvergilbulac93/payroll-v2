@@ -32,6 +32,6 @@ class AreaAssignmentSeeder extends Seeder
             ['name' => 'Laundry', 'type' => $non_teaching->id, 'created_at' => now(), 'updated_at' => now()],
         ];
 
-        AreaAssignment::insert($areas);
+        // AreaAssignment::insert($areas);
     }
 }

@@ -17,20 +17,27 @@ class DtrLockService
             ->pluck('value', 'label');
 
         $flagged = (int) $stats->get('Flagged', 0);
-        $pending = (int) $stats->get('Pending', 0);
 
         return [
             'total' => (int) $stats->get('Employees', 0),
             'processed' => (int) $stats->get('Processed', 0),
             'flagged' => $flagged,
-            'pending' => $pending,
-            'ready_to_lock' => $flagged === 0 && $pending === 0,
+            'no_entry' => (int) $stats->get('No Entry', 0),
+            'ready_to_lock' => $flagged === 0,
         ];
     }
 
     public function lock(PayrollPeriod $period): void
     {
         DB::transaction(function () use ($period) {
+            $validation = $this->validate($period);
+
+            if (! $validation['ready_to_lock']) {
+                throw new \RuntimeException(
+                    "Cannot lock DTR while {$validation['flagged']} flagged employee record(s) remain. Review and reprocess them first."
+                );
+            }
+
             DB::table('dtr_records')
                 ->where('PayrollPeriodID', $period->id)
                 ->where('PayrollStatus', 'pending')

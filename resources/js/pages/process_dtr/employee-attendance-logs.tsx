@@ -7,11 +7,13 @@ import {
     IconEdit,
     IconId,
     IconLoader2,
+    IconPlus,
     IconUser,
 } from '@tabler/icons-react';
 import { useState } from 'react';
 import { EmployeeDtr } from '@/pages/process_dtr/employee-dtr';
 import Heading from '@/components/heading';
+import { DatePicker } from '@/components/date-picker';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -24,11 +26,20 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import type { DTRRecordsDetails } from '@/types/payroll-period';
+import type { ShiftCode } from '@/types/schedule-template';
+import { storePerDate } from '@/routes/employee_schedule';
 
 type Employee = {
     id: number;
@@ -61,6 +72,7 @@ type Props = {
     };
     dtrRecords: DTRRecordsDetails[];
     payrollSummary: PayrollSummary;
+    shiftCodes: ShiftCode[];
 };
 
 const summaryItems = [
@@ -119,12 +131,31 @@ export default function EmployeeAttendanceLogs({
     period,
     dtrRecords,
     payrollSummary,
+    shiftCodes,
 }: Props) {
     const [editSummaryOpen, setEditSummaryOpen] = useState(false);
     const [summaryForm, setSummaryForm] = useState<
         Record<string, number | string>
     >({});
     const [isSubmittingSummary, setIsSubmittingSummary] = useState(false);
+    const [missingPunchDate, setMissingPunchDate] = useState('');
+    const [selectedDtrRecordId, setSelectedDtrRecordId] = useState<number | null>(null);
+    const [missingPunchType, setMissingPunchType] = useState<'IN' | 'OUT'>('IN');
+    const [missingPunchTime, setMissingPunchTime] = useState('');
+    const [missingPunchOpen, setMissingPunchOpen] = useState(false);
+    const [scheduleSetupOpen, setScheduleSetupOpen] = useState(false);
+    const [scheduleDate, setScheduleDate] = useState('');
+    const [scheduleShiftCodeId, setScheduleShiftCodeId] = useState('');
+    const [isSubmittingSchedule, setIsSubmittingSchedule] = useState(false);
+    const [isSubmittingPunch, setIsSubmittingPunch] = useState(false);
+    const hasMissingInRecord = dtrRecords.some((record) =>
+        record.DTRDate !== 'TOTAL' && !record.IN && Boolean(record.OUT) &&
+        (record.Remarks ?? '').toLowerCase().includes('assumed out'),
+    );
+    const hasMissingOutRecord = dtrRecords.some((record) =>
+        record.DTRDate !== 'TOTAL' && Boolean(record.IN) && !record.OUT &&
+        (record.Remarks ?? '').toLowerCase().includes('assumed in'),
+    );
 
     const openEditSummary = () => {
         if (!payrollSummary) {
@@ -149,6 +180,48 @@ export default function EmployeeAttendanceLogs({
         }));
     };
 
+    const submitMissingPunch = () => {
+        setIsSubmittingPunch(true);
+        router.post(
+            `/dtr/period/${period.id}/employee/${employee.id}/missing-punch`,
+            { date: missingPunchDate, dtr_record_id: selectedDtrRecordId, time: missingPunchTime, type: missingPunchType },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setMissingPunchOpen(false);
+                    setMissingPunchDate('');
+                    setSelectedDtrRecordId(null);
+                    setMissingPunchType('IN');
+                    setMissingPunchTime('');
+                },
+                onFinish: () => setIsSubmittingPunch(false),
+            },
+        );
+    };
+
+    const submitPerDateSchedule = () => {
+        if (!scheduleDate || !scheduleShiftCodeId) return;
+        setIsSubmittingSchedule(true);
+        router.post(storePerDate.url(), {
+            EmpID: employee.id,
+            ShiftCodeID: scheduleShiftCodeId,
+            EffectiveFrom: scheduleDate,
+            ScheduleType: 'per_date',
+            IsActive: true,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setScheduleSetupOpen(false);
+                router.post(
+                    `/dtr/period/${period.id}/employee/${employee.id}/dtr`,
+                    {},
+                    { preserveScroll: true },
+                );
+            },
+            onFinish: () => setIsSubmittingSchedule(false),
+        });
+    };
+
     const submitPayrollSummary = () => {
         setIsSubmittingSummary(true);
 
@@ -167,18 +240,20 @@ export default function EmployeeAttendanceLogs({
         <div className="min-h-full space-y-6 p-4 md:p-6">
             <Head title={`Attendance Logs — ${employee.FullName}`} />
 
-            <Button
-                variant="ghost"
-                className="-ml-3 text-muted-foreground hover:text-foreground"
-                onClick={() =>
-                    router.visit('/dtr', {
-                        data: { period: period.id },
-                    })
-                }
-            >
-                <IconArrowLeft className="size-4" />
-                Back to DTR Processing
-            </Button>
+            <div className="relative z-0 flex w-fit items-center">
+                <Button
+                    variant="ghost"
+                    className="static text-muted-foreground hover:text-foreground"
+                    onClick={() =>
+                        router.visit('/dtr', {
+                            data: { period: period.id },
+                        })
+                    }
+                >
+                    <IconArrowLeft className="size-4" />
+                    Back to DTR Processing
+                </Button>
+            </div>
 
             <div className="relative overflow-hidden rounded-2xl border bg-card shadow-sm">
                 <div className="absolute inset-y-0 left-0 w-1.5 bg-primary" />
@@ -263,8 +338,73 @@ export default function EmployeeAttendanceLogs({
                         {dtrRecords.filter((record) => record.DTRDate !== 'TOTAL').length} record days
                     </span>
                 </div>
-                <EmployeeDtr dailyTimeRecords={dtrRecords} />
+                <EmployeeDtr
+                    dailyTimeRecords={dtrRecords}
+                    onScheduleNeeded={(date) => {
+                        setScheduleDate(date);
+                        setScheduleShiftCodeId('');
+                        setScheduleSetupOpen(true);
+                    }}
+                    onMissingPunch={(date, type, recordId) => {
+                        setMissingPunchDate(date);
+                        setSelectedDtrRecordId(recordId);
+                        setMissingPunchType(type);
+                        setMissingPunchTime('');
+                        setMissingPunchOpen(true);
+                    }}
+                />
             </section>
+
+            <Dialog open={missingPunchOpen} onOpenChange={setMissingPunchOpen}>
+                <DialogContent className="sm:max-w-xl">
+                    <DialogHeader>
+                        <DialogTitle>Add missing {missingPunchType} punch</DialogTitle>
+                        <DialogDescription>
+                            Enter the verified arrival or departure time. Saving will add the punch and reprocess this employee’s DTR.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="grid gap-2">
+                                <Label htmlFor="missing-punch-date">Attendance date</Label>
+                                <DatePicker
+                                    id="missing-punch-date"
+                                    value={missingPunchDate}
+                                    onChange={setMissingPunchDate}
+                                    placeholder="Select attendance date"
+                                    fromDate={period.PeriodStart ? new Date(`${period.PeriodStart.slice(0, 10)}T00:00:00`) : undefined}
+                                    toDate={period.PeriodEnd ? new Date(`${period.PeriodEnd.slice(0, 10)}T00:00:00`) : undefined}
+                                    className="h-10"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="missing-punch-type">Punch to add</Label>
+                                <Select value={missingPunchType} onValueChange={(value) => setMissingPunchType(value as 'IN' | 'OUT')}>
+                                    <SelectTrigger id="missing-punch-type" className="h-10 w-full">
+                                        <SelectValue placeholder="Select punch type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {hasMissingInRecord && <SelectItem value="IN">IN — arrival time</SelectItem>}
+                                        {hasMissingOutRecord && <SelectItem value="OUT">OUT — departure time</SelectItem>}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid gap-2 sm:col-span-2">
+                                <Label htmlFor="missing-punch-time">Verified {missingPunchType} time</Label>
+                                <Input id="missing-punch-time" type="time" value={missingPunchTime} onChange={(event) => setMissingPunchTime(event.target.value)} className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none" required />
+                            </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{missingPunchType === 'IN' ? 'The IN time must be earlier than the existing OUT punch.' : 'The OUT time must be later than the existing IN punch.'} Processed or locked DTR records cannot be corrected here.</p>
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setMissingPunchOpen(false)} disabled={isSubmittingPunch}>Cancel</Button>
+                            <Button onClick={submitMissingPunch} disabled={isSubmittingPunch || !missingPunchDate || !missingPunchTime}>
+                                {isSubmittingPunch && <IconLoader2 className="size-4 animate-spin" />}
+                                {isSubmittingPunch ? 'Saving and reprocessing...' : 'Save and reprocess'}
+                            </Button>
+                        </DialogFooter>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             <section className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm sm:p-5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -303,6 +443,53 @@ export default function EmployeeAttendanceLogs({
                     </div>
                 )}
             </section>
+
+            <Dialog open={scheduleSetupOpen} onOpenChange={setScheduleSetupOpen}>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Set up per-date schedule</DialogTitle>
+                        <DialogDescription>
+                            This date has biometric punches but no active schedule. Assign a shift for this employee on {formatDate(scheduleDate)} to resolve the schedule review flag.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="per-date-schedule-date">Effective date</Label>
+                            <DatePicker
+                                id="per-date-schedule-date"
+                                value={scheduleDate}
+                                onChange={setScheduleDate}
+                                placeholder="Select schedule date"
+                                fromDate={period.PeriodStart ? new Date(`${period.PeriodStart.slice(0, 10)}T00:00:00`) : undefined}
+                                toDate={period.PeriodEnd ? new Date(`${period.PeriodEnd.slice(0, 10)}T00:00:00`) : undefined}
+                                className="h-10"
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="per-date-schedule-shift">Shift code</Label>
+                            <Select value={scheduleShiftCodeId} onValueChange={setScheduleShiftCodeId}>
+                                <SelectTrigger id="per-date-schedule-shift" className="h-10 w-full">
+                                    <SelectValue placeholder="Select a shift or rest day" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {shiftCodes.map((shift) => (
+                                        <SelectItem key={shift.id} value={String(shift.id)}>
+                                            {shift.Name}{shift.IsWorkingDay ? ` (${shift.TimeIn}–${shift.TimeOut})` : ' — Rest day'}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setScheduleSetupOpen(false)} disabled={isSubmittingSchedule}>Cancel</Button>
+                        <Button onClick={submitPerDateSchedule} disabled={isSubmittingSchedule || !scheduleDate || !scheduleShiftCodeId}>
+                            {isSubmittingSchedule && <IconLoader2 className="size-4 animate-spin" />}
+                            {isSubmittingSchedule ? 'Saving schedule...' : 'Save schedule'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={editSummaryOpen} onOpenChange={setEditSummaryOpen}>
                 <DialogContent className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl">

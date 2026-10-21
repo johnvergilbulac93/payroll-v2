@@ -49,7 +49,7 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
     const [processing, setProcessing] = useState(false);
     const { filters, updateFilters } = usePaginationIndexFilters({
         route: index.url(),
-        defaults: { period: '', search: '', page: 1, limit: 10 },
+        defaults: { period: '', search: '', status: '', page: 1, limit: 10 },
     });
 
     const selectedPeriodData = periods.find(
@@ -69,8 +69,7 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
                 preserveScroll: true,
                 preserveState: true,
                 onStart: () => setProcessing(true),
-                onSuccess: () => setProcessing(false),
-                onHttpException: () => setProcessing(false),
+                onFinish: () => setProcessing(false),
             },
         );
     };
@@ -82,8 +81,7 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
                 preserveScroll: true,
                 preserveState: true,
                 onStart: () => setProcessing(true),
-                onSuccess: () => setProcessing(false),
-                onHttpException: () => setProcessing(false),
+                onFinish: () => setProcessing(false),
             },
         );
     };
@@ -100,6 +98,20 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
     return (
         <div className="p-4">
             <Head title="Process DTR" />
+            {processing && (
+                <div
+                    className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 bg-background/85 backdrop-blur-sm"
+                    role="status"
+                    aria-live="polite"
+                    aria-label="Processing daily time records"
+                >
+                    <Spinner className="size-12 text-primary" />
+                    <div className="text-center">
+                        <p className="text-lg font-semibold">Processing DTR</p>
+                        <p className="mt-1 text-sm text-muted-foreground">Please wait while attendance records are being processed.</p>
+                    </div>
+                </div>
+            )}
             <Heading
                 title="Process DTR"
                 description="Manage and process employee daily time records (DTR) for payroll periods."
@@ -165,7 +177,7 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
                     </Field>
                 </FieldGroup>
 
-                {employees.data.length > 0 && (
+                {filters.period && (
                     <ProcessDtrTable
                         data={employees}
                         onSearch={(value) =>
@@ -174,6 +186,10 @@ export default function ProcessDtrPage({ employees, periods }: Props) {
                         onPerPage={(value) =>
                             updateFilters({ limit: value, page: 1 })
                         }
+                        onStatusChange={(value) =>
+                            updateFilters({ status: value, page: 1 })
+                        }
+                        initialStatus={filters.status}
                         onEdit={(record) => onEdit(record)}
                         onProcess={(record) => onProcessEmployee(record)}
                         processMode={processMode}

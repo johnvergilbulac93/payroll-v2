@@ -28,7 +28,7 @@ export default function AuthSimpleLayout({
                 />
                 <div className="relative z-10 flex max-w-lg flex-col items-center text-center">
                     <Link href={home()} aria-label="Go to home" className="mb-8">
-                        <div className="flex size-32 items-center justify-center rounded-[2rem] border border-white/15 bg-white/10 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                        <div className="flex size-32 items-center justify-center rounded-[2rem] border border-white/15  bg-sidebar-primary p-5 shadow-2xl shadow-black/20 ">
                             <AppLogoIcon className="size-full fill-current text-sidebar-primary-foreground" />
                         </div>
                     </Link>

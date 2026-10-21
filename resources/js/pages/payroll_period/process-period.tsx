@@ -44,7 +44,7 @@ const iconMap: Record<string, { icon: typeof IconUser; className: string }> = {
     Employees: { icon: IconUser, className: 'text-primary h-5' },
     Processed: { icon: IconCircleCheck, className: 'text-primary h-5' },
     Flagged: { icon: IconShield, className: 'text-primary h-5' },
-    Pending: { icon: IconClock, className: 'text-primary h-5' },
+    'No Entry': { icon: IconClock, className: 'text-muted-foreground h-5' },
 };
 
 const workflowSteps: StepperStep[] = [
@@ -168,10 +168,14 @@ export default function ProcessPeriodPage({ employee_details, period }: Props) {
                     const config = iconMap[item.label];
                     const Icon = config?.icon ?? IconUser;
                     const detailsHref =
-                        ['Flagged', 'Pending'].includes(item.label) &&
+                        item.label === 'Flagged' &&
                         Number(item.value) > 0
-                            ? dtrProcessIndex({ query: { period: period.id } })
-                                  .url
+                            ? dtrProcessIndex({
+                                  query: {
+                                      period: period.id,
+                                      status: 'flagged',
+                                  },
+                              }).url
                             : undefined;
 
                     return (

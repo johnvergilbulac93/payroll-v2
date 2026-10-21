@@ -20,6 +20,7 @@ import {
     IconChevronLeft,
     IconChevronRight,
     IconDatabase,
+    IconFilter,
     IconGripVertical,
     IconPlus,
     IconSearch,
@@ -160,6 +161,7 @@ export interface DataTableProps<T> {
     buttonText?: string;
     onSearch?: (value: string) => void;
     onAdd?: () => void;
+    onFilter?: () => void;
     onPerPage?: (value: number) => void;
     loading?: boolean;
     permissionKey?: string;
@@ -211,6 +213,7 @@ export function DataTable<T extends RowData>({
     onMonthChange,
     onStatusChange,
     onAdd,
+    onFilter,
     onPerPage,
     emptyMessage = 'No result found.',
     loading = false,
@@ -440,8 +443,8 @@ export function DataTable<T extends RowData>({
         </div>
     );
     const tableControls = (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative w-full sm:w-1/2 sm:max-w-md">
+        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
+            <div className="relative w-full sm:w-80 sm:flex-none">
                 <IconSearch className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                     type="text"
@@ -465,38 +468,69 @@ export function DataTable<T extends RowData>({
                 )}
             </div>
 
-            {can(permissionKey) && (
-                <Button onClick={onAdd} variant={'outline'}>
-                    <IconPlus data-icon="inline-start" />
-                    {buttonText}
-                </Button>
-            )}
+            <div className="flex flex-wrap items-center justify-end gap-2">
+                {onFilter && (
+                    <Button variant="outline" onClick={onFilter}>
+                        <IconFilter data-icon="inline-start" />
+                        Filter
+                    </Button>
+                )}
+                {can(permissionKey) && (
+                    <Button onClick={onAdd} variant="outline">
+                        <IconPlus data-icon="inline-start" />
+                        {buttonText}
+                    </Button>
+                )}
+            </div>
         </div>
     );
 
     const tableControls2 = (
-        <div className="relative w-full">
-            <IconSearch className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-                type="text"
-                id="input-button-group"
-                placeholder="Type to search..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pr-9 pl-9"
-            />
-            {search && (
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setSearch('')}
-                    className="absolute top-1/2 right-1 size-7 -translate-y-1/2 text-muted-foreground hover:bg-transparent hover:text-foreground"
-                >
-                    <IconX className="size-4" />
-                    <span className="sr-only">Clear search</span>
-                </Button>
-            )}
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+            <div className="relative w-full sm:w-80 sm:flex-none">
+                <IconSearch className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                    type="text"
+                    id="input-button-group"
+                    placeholder="Type to search..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pr-9 pl-9"
+                />
+                {search && (
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setSearch('')}
+                        className="absolute top-1/2 right-1 size-7 -translate-y-1/2 text-muted-foreground hover:bg-transparent hover:text-foreground"
+                    >
+                        <IconX className="size-4" />
+                        <span className="sr-only">Clear search</span>
+                    </Button>
+                )}
+            </div>
+            <Select
+                value={status || 'all'}
+                onValueChange={(value) => {
+                    const resolved = value === 'all' ? '' : value;
+                    setStatus(resolved);
+                    onStatusChange?.(resolved);
+                }}
+            >
+                <SelectTrigger id="process-dtr-status" className="w-full sm:w-44">
+                    <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectGroup>
+                        <SelectLabel>Status</SelectLabel>
+                        <SelectItem value="all">All statuses</SelectItem>
+                        <SelectItem value="no_entry">No Entry</SelectItem>
+                        <SelectItem value="flagged">For Review</SelectItem>
+                        <SelectItem value="processed">Processed</SelectItem>
+                    </SelectGroup>
+                </SelectContent>
+            </Select>
         </div>
     );
     const tableControls3 = (
@@ -585,7 +619,7 @@ export function DataTable<T extends RowData>({
 
             <div className="w-full max-w-full overflow-x-auto">
                 <Table className="w-full">
-                    <TableHeader className="sticky top-0 z-10 bg-muted/60">
+                    <TableHeader className="sticky top-0 z-10 bg-sidebar">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (

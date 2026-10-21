@@ -1,5 +1,4 @@
 import { IconEye, IconRefresh } from '@tabler/icons-react';
-import { router } from '@inertiajs/react';
 import {
     columnFilteringFeature,
     columnVisibilityFeature,
@@ -48,6 +47,8 @@ type ProcessDtrProps = {
     onSearch?: (value: string) => void;
     onAdd?: () => void;
     onPerPage?: (value: number) => void;
+    onStatusChange?: (status: string) => void;
+    initialStatus?: string;
     onEdit?: (record: EmployeeDtrPeriod) => void;
     onProcess?: (record: EmployeeDtrPeriod) => void;
     onDelete?: (value: number) => void;
@@ -59,6 +60,8 @@ export function ProcessDtrTable({
     onSearch,
     onAdd,
     onPerPage,
+    onStatusChange,
+    initialStatus,
     onEdit,
     onProcess,
     processMode,
@@ -98,12 +101,6 @@ export function ProcessDtrTable({
             cell: ({ row }) => {
                 const employee = row.original;
 
-                const needsSchedule =
-                    employee.Status === 'flagged' &&
-                    /no active schedule assigned|no schedule/i.test(
-                        employee.Remarks ?? '',
-                    );
-
                 const statusBadge = (
                     <Badge
                         variant="outline"
@@ -111,36 +108,29 @@ export function ProcessDtrTable({
                             'capitalize',
                             employee.Status === 'flagged' &&
                                 'bg-amber-600 text-primary-foreground',
+                            employee.Status === 'not_processed' &&
+                                'bg-red-500 text-primary-foreground',
                             employee.Status === 'processed' &&
                                 'bg-primary text-primary-foreground',
                             employee.Status === 'closed' &&
                                 'bg-destructive text-destructive-foreground',
-                            needsSchedule && 'cursor-pointer hover:bg-amber-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                         )}
                     >
-                        {employee.Status}
+                        {employee.Status === 'no_entry'
+                            ? 'No Entry'
+                            : employee.Status === 'not_processed'
+                              ? 'Not Processed'
+                              : employee.Status === 'flagged'
+                                ? 'For Review'
+                                : employee.Status}
                     </Badge>
                 );
 
-                const badge = needsSchedule ? (
-                    <button
-                        type="button"
-                        className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        aria-label={`Assign schedule for ${employee.FullName}`}
-                        onClick={() =>
-                            router.visit(`/employee_schedule?emp_id=${employee.id}`)
-                        }
-                    >
-                        {statusBadge}
-                    </button>
-                ) : statusBadge;
-
                 return employee.Remarks ? (
                     <Tooltip>
-                        <TooltipTrigger asChild>{badge}</TooltipTrigger>
+                        <TooltipTrigger asChild>{statusBadge}</TooltipTrigger>
                         <TooltipContent>
                             <p>{employee.Remarks}</p>
-                            {needsSchedule && <p className="mt-1 font-medium">Click to assign a schedule</p>}
                         </TooltipContent>
                     </Tooltip>
                 ) : (
@@ -154,9 +144,17 @@ export function ProcessDtrTable({
                                 'bg-emerald-600 text-primary-foreground',
                             employee.Status === 'pending' &&
                                 'bg-red-500 text-primary-foreground',
+                            employee.Status === 'not_processed' &&
+                                'bg-red-500 text-primary-foreground',
                         )}
                     >
-                        {employee.Status}
+                        {employee.Status === 'no_entry'
+                            ? 'No Entry'
+                            : employee.Status === 'not_processed'
+                              ? 'Not Processed'
+                              : employee.Status === 'flagged'
+                                ? 'For Review'
+                                : employee.Status}
                     </Badge>
                 );
             },
@@ -203,6 +201,8 @@ export function ProcessDtrTable({
             onSearch={onSearch}
             onAdd={onAdd}
             onPerPage={onPerPage}
+            onStatusChange={onStatusChange}
+            initialStatus={initialStatus}
             controlType="process-dtr"
         />
     );

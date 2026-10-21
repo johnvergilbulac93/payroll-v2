@@ -15,7 +15,8 @@ class DtrViewerService
         PayrollPeriod $period,
         ?string $search = null,
         ?int $limit = null,
-        ?int $groupId = null
+        ?int $groupId = null,
+        ?string $status = null
     ) {
         $periodLabel = Carbon::parse($period->PeriodStart)->format('M j')
             . ' – ' .
@@ -51,7 +52,7 @@ class DtrViewerService
                 DB::raw('COUNT(dtr_records.EmpID) as record_count'),
                 DB::raw("
                     CASE
-                        WHEN COUNT(dtr_records.EmpID) = 0 THEN 'pending'
+                        WHEN COUNT(dtr_records.EmpID) = 0 THEN 'no_entry'
                         WHEN MAX(dtr_records.Remarks) IS NULL THEN 'processed'
                         ELSE 'flagged'
                     END as status
@@ -65,6 +66,13 @@ class DtrViewerService
                 'employees.LastName',
                 'groups.name'
             )
+            ->when(in_array($status, ['no_entry', 'flagged', 'processed'], true), function ($query) use ($status) {
+                $query->havingRaw("CASE
+                    WHEN COUNT(dtr_records.EmpID) = 0 THEN 'no_entry'
+                    WHEN MAX(dtr_records.Remarks) IS NULL THEN 'processed'
+                    ELSE 'flagged'
+                END = ?", [$status]);
+            })
             ->orderBy('employees.LastName')
             ->paginate($limit ?: 10)
             ->onEachSide(1)
@@ -307,23 +315,28 @@ class DtrViewerService
             ->select(
                 'employees.id',
                 DB::raw('COUNT(dtr_records.EmpID) as record_count'),
-                DB::raw('MAX(dtr_records.Remarks) as last_remarks')
+                DB::raw('MAX(dtr_records.Remarks) as last_remarks'),
+                DB::raw("CASE
+                    WHEN COUNT(dtr_records.EmpID) = 0 THEN 'no_entry'
+                    WHEN MAX(dtr_records.Remarks) IS NULL THEN 'processed'
+                    ELSE 'flagged'
+                END as dtr_status")
             )
             ->groupBy('employees.id');
 
         $counts = DB::query()
             ->fromSub($grouped, 'g')
             ->selectRaw('COUNT(*) as total')
-            ->selectRaw('SUM(CASE WHEN record_count > 0 AND last_remarks IS NULL THEN 1 ELSE 0 END) as processed')
-            ->selectRaw('SUM(CASE WHEN record_count > 0 AND last_remarks IS NOT NULL THEN 1 ELSE 0 END) as flagged')
-            ->selectRaw('SUM(CASE WHEN record_count = 0 THEN 1 ELSE 0 END) as pending')
+            ->selectRaw("SUM(CASE WHEN dtr_status = 'processed' THEN 1 ELSE 0 END) as processed")
+            ->selectRaw("SUM(CASE WHEN dtr_status = 'flagged' THEN 1 ELSE 0 END) as flagged")
+            ->selectRaw("SUM(CASE WHEN dtr_status = 'no_entry' THEN 1 ELSE 0 END) as no_entry")
             ->first();
 
         return [
             ['label' => 'Employees', 'value' => (int) $counts->total],
             ['label' => 'Processed', 'value' => (int) $counts->processed],
             ['label' => 'Flagged', 'value' => (int) $counts->flagged],
-            ['label' => 'Pending', 'value' => (int) $counts->pending],
+            ['label' => 'No Entry', 'value' => (int) $counts->no_entry],
         ];
     }
     protected function buildEmployeeDtr(
@@ -357,6 +370,7 @@ class DtrViewerService
                 ?? $this->resolveSchedule($schedules, $date);
 
             return [
+                'id' => $record?->id,
                 'DTRDate' => $date->format('M d, Y'),
                 'Day' => $date->format('D'),
                 'IN' => $this->time($record?->IN),

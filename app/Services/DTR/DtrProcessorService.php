@@ -293,7 +293,13 @@ class DtrProcessorService
         $placeholders = implode(',', array_fill(0, $employeeIds->count(), '?'));
 
         $sql = "
-        WITH punches AS (
+        WITH raw_punches AS (
+            SELECT employee_id, punch_time
+            FROM biometric_logs
+            WHERE employee_id IN ($placeholders)
+            AND punch_time BETWEEN ? AND ?
+        ),
+        punches AS (
             SELECT
                 employee_id,
                 punch_time,
@@ -302,9 +308,7 @@ class DtrProcessorService
                     PARTITION BY employee_id, CAST(punch_time AS DATE)
                     ORDER BY punch_time
                 ) AS rn
-            FROM biometric_logs
-            WHERE employee_id IN ($placeholders)
-            AND punch_time BETWEEN ? AND ?
+            FROM raw_punches
         ),
         punches_gap AS (
             SELECT
@@ -351,9 +355,10 @@ class DtrProcessorService
         GROUP BY c.employee_id, c.dtr_date
         ";
 
+        $dateBindings = [$startDate->copy()->startOfDay(), $endDate->copy()->endOfDay()];
         $bindings = array_merge(
             $employeeIds->all(),
-            [$startDate->copy()->startOfDay(), $endDate->copy()->endOfDay()],
+            $dateBindings,
             [$this->clusterGapSeconds]
         );
 

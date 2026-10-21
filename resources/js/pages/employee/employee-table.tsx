@@ -49,6 +49,7 @@ type EmployeeTableProps = {
     onSelectionChange?: (selectedIds: string[]) => void;
     onSearch?: (value: string) => void;
     onAdd?: () => void;
+    onFilter?: () => void;
     onPerPage?: (value: number) => void;
     onEdit?: (employee: Employee) => void;
     onDelete?: (value: number) => void;
@@ -59,6 +60,7 @@ export function EmployeeTable({
     onSelectionChange,
     onSearch,
     onAdd,
+    onFilter,
     onPerPage,
     onEdit,
     onDelete,
@@ -203,6 +205,7 @@ export function EmployeeTable({
             permissionKey="employee-create"
             onSearch={onSearch}
             onAdd={onAdd}
+            onFilter={onFilter}
             onPerPage={onPerPage}
         />
     );

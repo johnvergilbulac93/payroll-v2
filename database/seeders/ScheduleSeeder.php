@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Employee;
+use App\Models\Group;
 use App\Models\ShiftCode;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,11 @@ class ScheduleSeeder extends Seeder
             $headerRow = null;
             $imported = 0;
             $missingEmployees = [];
+            $groups = Group::query()->get(['id', 'name']);
+            $groupIds = [
+                'T' => $groups->firstWhere('name', 'Teaching')?->id,
+                'N' => $groups->firstWhere('name', 'Non-Teaching')?->id,
+            ];
 
             foreach ($sheet->xpath('//x:sheetData/x:row') ?: [] as $row) {
                 $rowNumber = (int) $row['r'];
@@ -70,6 +76,17 @@ class ScheduleSeeder extends Seeder
                 if ($employee === null) {
                     $missingEmployees[] = $employeeNumber;
                     continue;
+                }
+
+                $groupCode = mb_strtoupper(trim((string) ($record['N/T'] ?? '')));
+                if (array_key_exists($groupCode, $groupIds)) {
+                    if ($groupIds[$groupCode] === null) {
+                        throw new RuntimeException("Group '{$groupCode}' maps to a missing group. Run GroupSeeder before ScheduleSeeder.");
+                    }
+                    if ((int) $employee->Group !== (int) $groupIds[$groupCode]) {
+                        $employee->Group = $groupIds[$groupCode];
+                        $employee->save();
+                    }
                 }
 
                 $shiftName = $this->shiftName($scheduleName);

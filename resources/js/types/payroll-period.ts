@@ -17,6 +17,7 @@ export type PunchesLogs = {
     IOState: number;
 };
 export type DTRRecordsDetails = {
+    id?: number | null;
     DTRDate: string;
     Day: string;
     IN: string;

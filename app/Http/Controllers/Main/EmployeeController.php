@@ -20,7 +20,12 @@ class EmployeeController extends Controller
     {
         $limit = $request->input("limit");
 
-        $employees = Employee::with(['group:id,name'])->filter($request->only(['search']))
+        $employees = Employee::with(['group:id,name', 'position:id,name'])
+            ->filter($request->only(['search']))
+            ->when($request->filled('group'), fn ($query) => $query->where('Group', $request->input('group')))
+            ->when($request->filled('position'), fn ($query) => $query->where('Position', $request->input('position')))
+            ->when($request->filled('employment_status'), fn ($query) => $query->where('EmploymentStatus', $request->input('employment_status')))
+            ->when($request->filled('tenure_status'), fn ($query) => $query->where('TenureStatus', $request->input('tenure_status')))
             ->orderBy('updated_at', 'desc')
             ->paginate($limit ?? 10)
             ->withQueryString();
@@ -28,7 +33,10 @@ class EmployeeController extends Controller
         return Inertia::render(
             'employee/employee',
             [
-                'employees' => EmployeeResourceCollection::make($employees)
+                'employees' => EmployeeResourceCollection::make($employees),
+                'groups' => Group::select('id as value', 'name as label')->orderBy('name')->get(),
+                'positions' => EmployeePosition::select('id as value', 'name as label')->orderBy('name')->get(),
+                'filters' => $request->only(['search', 'group', 'position', 'employment_status', 'tenure_status', 'limit']),
             ]
         );
     }
