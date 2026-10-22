@@ -135,7 +135,7 @@ export default function ProcessDtrPage({
             <Head title="Process DTR" />
             {processing && (
                 <div
-                    className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 bg-background/85 backdrop-blur-sm"
+                    className="fixed inset-0 z-100 flex flex-col items-center justify-center gap-4 bg-background/85 backdrop-blur-sm"
                     role="status"
                     aria-live="polite"
                     aria-label="Processing daily time records"

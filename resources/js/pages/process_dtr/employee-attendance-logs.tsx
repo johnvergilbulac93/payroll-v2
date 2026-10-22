@@ -7,13 +7,11 @@ import {
     IconEdit,
     IconId,
     IconLoader2,
-    IconPlus,
     IconUser,
 } from '@tabler/icons-react';
 import { useState } from 'react';
-import { EmployeeDtr } from '@/pages/process_dtr/employee-dtr';
-import Heading from '@/components/heading';
 import { DatePicker } from '@/components/date-picker';
+import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -37,9 +35,10 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { EmployeeDtr } from '@/pages/process_dtr/employee-dtr';
+import { storePerDate } from '@/routes/employee_schedule';
 import type { DTRRecordsDetails } from '@/types/payroll-period';
 import type { ShiftCode } from '@/types/schedule-template';
-import { storePerDate } from '@/routes/employee_schedule';
 
 type Employee = {
     id: number;
@@ -112,11 +111,15 @@ const formatSummaryValue = (value: number | string): number | string => {
 };
 
 const formatDate = (value: string): string => {
-    if (!value) return '—';
+    if (!value) {
+return '—';
+}
 
     const date = new Date(value);
 
-    if (Number.isNaN(date.getTime())) return value;
+    if (Number.isNaN(date.getTime())) {
+return value;
+}
 
     return new Intl.DateTimeFormat('en-PH', {
         day: '2-digit',
@@ -200,7 +203,10 @@ export default function EmployeeAttendanceLogs({
     };
 
     const submitPerDateSchedule = () => {
-        if (!scheduleDate || !scheduleShiftCodeId) return;
+        if (!scheduleDate || !scheduleShiftCodeId) {
+return;
+}
+
         setIsSubmittingSchedule(true);
         router.post(storePerDate.url(), {
             EmpID: employee.id,
@@ -306,21 +312,21 @@ export default function EmployeeAttendanceLogs({
                             <IconId className="size-4" />
                             <p className="text-xs font-semibold tracking-wide uppercase">Employee ID</p>
                         </div>
-                        <p className="mt-2 break-words text-base font-semibold">{employee.EmpNbr || '—'}</p>
+                        <p className="mt-2 wrap-break-word text-base font-semibold">{employee.EmpNbr || '—'}</p>
                     </div>
                     <div className="rounded-xl border bg-sidebar p-4 transition-colors hover:bg-muted/20">
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <IconUser className="size-4" />
                             <p className="text-xs font-semibold tracking-wide uppercase">Full name</p>
                         </div>
-                        <p className="mt-2 break-words text-base font-semibold">{employee.FullName}</p>
+                        <p className="mt-2 wrap-break-word text-base font-semibold">{employee.FullName}</p>
                     </div>
                     <div className="rounded-xl border bg-sidebar p-4 transition-colors hover:bg-muted/20 sm:col-span-2 xl:col-span-1">
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <IconBuilding className="size-4" />
                             <p className="text-xs font-semibold tracking-wide uppercase">Department / Assignment</p>
                         </div>
-                        <p className="mt-2 break-words text-base font-semibold">{employee.Department ?? employee.Assignment ?? '—'}</p>
+                        <p className="mt-2 wrap-break-word text-base font-semibold">{employee.Department ?? employee.Assignment ?? '—'}</p>
                         {employee.Department && employee.Assignment && employee.Department !== employee.Assignment && (
                             <p className="mt-1 text-xs text-muted-foreground">{employee.Assignment}</p>
                         )}
@@ -427,7 +433,7 @@ export default function EmployeeAttendanceLogs({
                 {payrollSummary ? (
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                         {summaryItems.map(([label, key], index) => (
-                            <div key={key} className={`rounded-xl border p-4 ${index < 3 ? 'bg-primary/[0.04]' : 'bg-muted/20'}`}>
+                            <div key={key} className={`rounded-xl border p-4 ${index < 3 ? 'bg-primary/4' : 'bg-muted/20'}`}>
                                 <p className="text-xs font-medium text-muted-foreground">{label}</p>
                                 <p className="mt-2 text-2xl font-semibold tracking-tight tabular-nums">
                                     {formatSummaryValue(payrollSummary[key])}
@@ -527,7 +533,11 @@ export default function EmployeeAttendanceLogs({
                                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                                     {group.keys.map((key) => {
                                         const item = summaryItems.find(([, itemKey]) => itemKey === key);
-                                        if (!item) return null;
+
+                                        if (!item) {
+return null;
+}
+
                                         const [label] = item;
 
                                         return (

@@ -42,7 +42,7 @@ export function AppSidebar() {
         <Sidebar
             collapsible="icon"
             variant="sidebar"
-            className="bg-sidebar text-sidebar-foreground [&_[data-slot=sidebar-inner]]:bg-sidebar [&_[data-slot=sidebar-inner]]:text-sidebar-foreground"
+            className="bg-sidebar text-sidebar-foreground **:data-[slot=sidebar-inner]:bg-sidebar **:data-[slot=sidebar-inner]:text-sidebar-foreground"
         >
             <SidebarHeader className="border-b border-white/10">
 

@@ -25,7 +25,6 @@ type Props = {
 export default function ScheduleEmployeePage({
     employees,
     employee,
-    templates,
     shiftCodes,
     perDateSchedules,
     defaultSchedule,
