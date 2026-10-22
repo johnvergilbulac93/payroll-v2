@@ -1,7 +1,10 @@
 import { Link } from '@inertiajs/react';
+import { IconSearch, IconX } from '@tabler/icons-react';
+import { useState } from 'react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { Input } from '@/components/ui/input';
 import {
     Sidebar,
     SidebarContent,
@@ -13,9 +16,6 @@ import {
 } from '@/components/ui/sidebar';
 import { useNav } from '@/hooks/use-navigation';
 import { dashboard } from '@/routes';
-import { useState } from 'react';
-import { IconSearch, IconX } from '@tabler/icons-react';
-import { Input } from '@/components/ui/input';
 
 export function AppSidebar() {
     const { filteredNavGroups } = useNav();
@@ -41,7 +41,7 @@ export function AppSidebar() {
     return (
         <Sidebar
             collapsible="icon"
-            variant="inset"
+            variant="sidebar"
             className="bg-sidebar text-sidebar-foreground [&_[data-slot=sidebar-inner]]:bg-sidebar [&_[data-slot=sidebar-inner]]:text-sidebar-foreground"
         >
             <SidebarHeader className="border-b border-white/10">
