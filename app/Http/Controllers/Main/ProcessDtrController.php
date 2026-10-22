@@ -30,7 +30,8 @@ class ProcessDtrController extends Controller
     {
         $search = $request->input('search');
         $limit = $request->input('limit');
-        $status = $request->input('status');
+        // Default to For Review when the status query parameter is omitted.
+        $status = $request->input('status', 'pending');
         $periodId =  $request->input('period');
         $periods =  PayrollPeriodResource::collection(PayrollPeriod::where('Status', PayrollPeriodStatus::Open)->get())->resolve();
 
@@ -45,12 +46,13 @@ class ProcessDtrController extends Controller
             );
         }
         $period = PayrollPeriod::findOrFail($periodId);
+        $statusCounts = $this->dtrViewerService->statusCounts($period);
         $employees = $this->dtrViewerService->employees(
             $period,
             $search,
             $limit,
             null,
-            in_array($status, ['no_entry', 'flagged', 'processed'], true) ? $status : null
+            in_array($status, ['no_entry', 'flagged', 'pending', 'processed'], true) ? $status : null
         );
         $this->dtrViewerService->attachDtrRecords(
             $employees,
@@ -63,6 +65,7 @@ class ProcessDtrController extends Controller
             [
                 'employees' => ProcessDtrResourceCollection::make($employees),
                 'periods' =>  $periods,
+                'statusCounts' => $statusCounts,
 
             ]
         );
@@ -137,91 +140,21 @@ class ProcessDtrController extends Controller
                     }
                 }
 
-                $punchDateTime = $punchTime->format('Y-m-d H:i:s');
-                $duplicate = DB::table('biometric_logs')
-                    ->where('employee_id', $employee->id)
-                    ->where('punch_time', $punchDateTime)
-                    ->exists();
-
-                if ($duplicate) {
-                    throw new \RuntimeException('A biometric punch already exists at that date and time.');
-                }
-
-                // Keep corrections in the same source table used by the DTR processor.
-                // biometric_logs requires a raw-log parent, so create an auditable
-                // synthetic import batch and raw-log row as well.
-                $now = now();
-                $deviceUserId = $employee->BiometricID;
-
-                if (! is_numeric($deviceUserId) || (int) $deviceUserId < 0) {
-                    throw new \RuntimeException('This employee does not have a valid numeric BiometricID, so the punch cannot be saved to biometric_logs.');
-                }
-
-                $batchId = DB::table('biometric_import_batches')->insertGetId([
-                    'original_filename' => 'manual-missing-punch-'.$employee->id.'-'.$date.'.txt',
-                    'stored_path' => 'manual-corrections/'.$employee->id.'/'.$date,
-                    'uploaded_by' => auth()->id(),
-                    'status' => 'completed',
-                    'total_rows' => 1,
-                    'imported_rows' => 1,
-                    'skipped_rows' => 0,
-                    'failed_rows' => 0,
-                    'duplicate_rows' => 0,
-                    'started_at' => $now,
-                    'finished_at' => $now,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ]);
-
-                $rawLine = implode("\t", [
-                    (string) (int) $deviceUserId,
-                    $punchDateTime,
-                    '1',
-                    '0',
-                    '1',
-                    '0',
-                ]);
-
-                $rawLogId = DB::table('biometric_raw_logs')->insertGetId([
-                    'import_batch_id' => $batchId,
-                    'device_user_id' => (int) $deviceUserId,
-                    'punch_time' => $punchDateTime,
-                    'status' => 1,
-                    'verify_mode' => 0,
-                    'io_state' => 1,
-                    'reserved' => 0,
-                    'raw_line' => mb_substr($rawLine.' | Manual '.$validated['type'].' correction', 0, 255),
-                    'imported_at' => $now,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ]);
-
-                DB::table('biometric_logs')->insert([
-                    'raw_log_id' => $rawLogId,
-                    'employee_id' => $employee->id,
-                    'device_user_id' => (int) $deviceUserId,
-                    'punch_time' => $punchDateTime,
-                    'status' => 1,
-                    'verify_mode' => 0,
-                    'io_state' => 1,
-                    'reserved' => 0,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ]);
-
-                // Rebuild this employee's DTR from biometric_logs, including the correction.
-                $this->dtrProcessor->processEmployeeForPeriod($employee, $payrollPeriod);
-
                 $punchColumn = $validated['type'] === 'OUT' ? 'OUT' : 'IN';
-                $refreshedRecord = DB::table('dtr_records')
-                    ->where('EmpID', $employee->id)
-                    ->where('PayrollPeriodID', $payrollPeriod->id)
-                    ->whereDate('DTRDate', $date)
-                    ->first(['id', $punchColumn]);
+                $now = now();
 
-                if (! $refreshedRecord || ! $refreshedRecord->{$punchColumn}
-                    || Carbon::parse($refreshedRecord->{$punchColumn})->format('H:i:s') !== $punchTime->format('H:i:s')) {
-                    throw new \RuntimeException("The punch was saved, but reprocessing did not produce the expected {$validated['type']} time in dtr_records.");
+                // Save the correction directly to dtr_records. Do not create a
+                // synthetic biometric import batch or raw/device log entries.
+                $updated = DB::table('dtr_records')
+                    ->where('id', $record->id)
+                    ->update([
+                        $punchColumn => $punchTime->format('Y-m-d H:i:s'),
+                        'Remarks' => null,
+                        'updated_at' => $now,
+                    ]);
+
+                if ($updated !== 1) {
+                    throw new \RuntimeException('The missing punch could not be saved to the DTR record.');
                 }
             });
         } catch (\RuntimeException $e) {
@@ -238,9 +171,9 @@ class ProcessDtrController extends Controller
                 'punch_time' => $punchTime->toDateTimeString(),
                 'punch_type' => $validated['type'],
             ])
-            ->log('Manual missing '.$validated['type'].' punch added and DTR reprocessed.');
+            ->log('Manual missing '.$validated['type'].' punch added directly to the DTR record.');
 
-        return back()->with('success', 'Missing '.$validated['type'].' punch added, recorded for audit, and DTR reprocessed successfully.');
+        return back()->with('success', 'Missing '.$validated['type'].' punch added directly to the DTR record successfully.');
     }
 
     public function updatePayrollSummary(Request $request, PayrollPeriod $payrollPeriod, Employee $employee)

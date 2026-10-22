@@ -121,7 +121,7 @@ export default function Dashboard({
             </div>
 
             <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-5">
-                <div className="rounded-xl border bg-card p-4 shadow-sm sm:p-6 xl:col-span-3">
+                <div className="rounded-xl border bg-sidebar p-4 shadow-sm sm:p-6 xl:col-span-3">
                     <div className="mb-16">
                         <h2 className="text-base font-semibold">
                             Payroll Overview
@@ -138,7 +138,7 @@ export default function Dashboard({
                         />
                 </div>
 
-                <div className="rounded-xl border bg-card shadow-sm xl:col-span-2">
+                <div className="rounded-xl border bg-sidebar shadow-sm xl:col-span-2">
                     <div className="border-b p-4 sm:p-6">
                         <div className="flex items-center justify-between gap-3">
                             <div>

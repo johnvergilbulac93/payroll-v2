@@ -215,6 +215,7 @@ export default function EmployeeSchedule({
                     </CardContent>
                 </Card>
 
+                {/* Weekly schedule UI is temporarily hidden; keep the code for future use.
                 <Card className="border-border/60 shadow-sm">
                     <CardHeader className="border-b bg-muted/20 px-5 py-4">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -376,6 +377,7 @@ export default function EmployeeSchedule({
                         </div>
                     </CardContent>
                 </Card>
+                */}
             </div>
             <FormDialog
                 key="schedule-dialog"

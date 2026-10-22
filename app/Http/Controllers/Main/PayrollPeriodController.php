@@ -78,9 +78,20 @@ class PayrollPeriodController extends Controller
             $validation = $this->dtrLockService->validate($payrollPeriod);
 
             if (!$validation['ready_to_lock']) {
+                $issues = [];
+                if ($validation['processed'] === 0) {
+                    $issues[] = 'no processed DTR records were found';
+                }
+                if ($validation['pending'] > 0) {
+                    $issues[] = "{$validation['pending']} employee(s) with biometric punches are still pending";
+                }
+                if ($validation['flagged'] > 0) {
+                    $issues[] = "{$validation['flagged']} employee(s) have flagged DTR records";
+                }
+
                 return back()->with(
                     'error',
-                    'Cannot lock DTR — some employees are flagged or pending.',
+                    'Cannot lock DTR: ' . implode('; ', $issues) . '. Process and review the period first.',
                 );
             }
 

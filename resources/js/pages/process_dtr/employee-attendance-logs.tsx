@@ -255,7 +255,7 @@ export default function EmployeeAttendanceLogs({
                 </Button>
             </div>
 
-            <div className="relative overflow-hidden rounded-2xl border bg-card shadow-sm">
+            <div className="relative overflow-hidden rounded-2xl border bg-sidebar shadow-sm">
                 <div className="absolute inset-y-0 left-0 w-1.5 bg-primary" />
                 <div className="flex flex-col gap-5 p-5 pl-7 sm:p-7 sm:pl-9 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0">
@@ -301,21 +301,21 @@ export default function EmployeeAttendanceLogs({
                     </div>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                    <div className="rounded-xl border bg-card p-4 transition-colors hover:bg-muted/20">
+                    <div className="rounded-xl border bg-sidebar p-4 transition-colors hover:bg-muted/20">
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <IconId className="size-4" />
                             <p className="text-xs font-semibold tracking-wide uppercase">Employee ID</p>
                         </div>
                         <p className="mt-2 break-words text-base font-semibold">{employee.EmpNbr || '—'}</p>
                     </div>
-                    <div className="rounded-xl border bg-card p-4 transition-colors hover:bg-muted/20">
+                    <div className="rounded-xl border bg-sidebar p-4 transition-colors hover:bg-muted/20">
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <IconUser className="size-4" />
                             <p className="text-xs font-semibold tracking-wide uppercase">Full name</p>
                         </div>
                         <p className="mt-2 break-words text-base font-semibold">{employee.FullName}</p>
                     </div>
-                    <div className="rounded-xl border bg-card p-4 transition-colors hover:bg-muted/20 sm:col-span-2 xl:col-span-1">
+                    <div className="rounded-xl border bg-sidebar p-4 transition-colors hover:bg-muted/20 sm:col-span-2 xl:col-span-1">
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <IconBuilding className="size-4" />
                             <p className="text-xs font-semibold tracking-wide uppercase">Department / Assignment</p>
@@ -328,7 +328,7 @@ export default function EmployeeAttendanceLogs({
                 </div>
             </section>
 
-            <section className="space-y-3 rounded-2xl border bg-card p-4 shadow-sm sm:p-5">
+            <section className="space-y-3 rounded-2xl border bg-sidebar p-4 shadow-sm sm:p-5">
                 <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h2 className="font-semibold tracking-tight">Daily time record</h2>
@@ -399,14 +399,14 @@ export default function EmployeeAttendanceLogs({
                             <Button type="button" variant="outline" onClick={() => setMissingPunchOpen(false)} disabled={isSubmittingPunch}>Cancel</Button>
                             <Button onClick={submitMissingPunch} disabled={isSubmittingPunch || !missingPunchDate || !missingPunchTime}>
                                 {isSubmittingPunch && <IconLoader2 className="size-4 animate-spin" />}
-                                {isSubmittingPunch ? 'Saving and reprocessing...' : 'Save and reprocess'}
+                                {isSubmittingPunch ? 'Submitting...' : 'Submit'}
                             </Button>
                         </DialogFooter>
                     </div>
                 </DialogContent>
             </Dialog>
 
-            <section className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm sm:p-5">
+            <section className="space-y-4 rounded-2xl border bg-sidebar p-4 shadow-sm sm:p-5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h2 className="font-semibold tracking-tight">Payroll summary</h2>
@@ -485,7 +485,7 @@ export default function EmployeeAttendanceLogs({
                         <Button type="button" variant="outline" onClick={() => setScheduleSetupOpen(false)} disabled={isSubmittingSchedule}>Cancel</Button>
                         <Button onClick={submitPerDateSchedule} disabled={isSubmittingSchedule || !scheduleDate || !scheduleShiftCodeId}>
                             {isSubmittingSchedule && <IconLoader2 className="size-4 animate-spin" />}
-                            {isSubmittingSchedule ? 'Saving schedule...' : 'Save schedule'}
+                            {isSubmittingSchedule ? 'Submitting...' : 'Submit'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

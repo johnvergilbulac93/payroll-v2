@@ -486,8 +486,8 @@ export function DataTable<T extends RowData>({
     );
 
     const tableControls2 = (
-        <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-            <div className="relative w-full sm:w-80 sm:flex-none">
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-start">
+            <div className={`relative w-full ${controlType === 'report' ? 'sm:flex-1' : 'sm:w-80 sm:flex-none'}`}>
                 <IconSearch className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                     type="text"
@@ -510,27 +510,7 @@ export function DataTable<T extends RowData>({
                     </Button>
                 )}
             </div>
-            <Select
-                value={status || 'all'}
-                onValueChange={(value) => {
-                    const resolved = value === 'all' ? '' : value;
-                    setStatus(resolved);
-                    onStatusChange?.(resolved);
-                }}
-            >
-                <SelectTrigger id="process-dtr-status" className="w-full sm:w-44">
-                    <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectGroup>
-                        <SelectLabel>Status</SelectLabel>
-                        <SelectItem value="all">All statuses</SelectItem>
-                        <SelectItem value="no_entry">No Entry</SelectItem>
-                        <SelectItem value="flagged">For Review</SelectItem>
-                        <SelectItem value="processed">Processed</SelectItem>
-                    </SelectGroup>
-                </SelectContent>
-            </Select>
+
         </div>
     );
     const tableControls3 = (
@@ -614,7 +594,7 @@ export function DataTable<T extends RowData>({
     return (
         <div className="space-y-4">
             {controlType === 'default' && tableControls}
-            {controlType === 'process-dtr' && tableControls2}
+            {(controlType === 'process-dtr' || controlType === 'report') && tableControls2}
             {controlType === 'payroll-period' && tableControls3}
 
             <div className="w-full max-w-full overflow-x-auto">

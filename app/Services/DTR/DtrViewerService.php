@@ -25,6 +25,45 @@ class DtrViewerService
         $paginated = DB::table('employees')
             ->where('employees.Status', 1)
             ->whereNull('employees.deleted_at')
+            ->when($status === 'no_entry', function ($query) use ($period) {
+                $query->whereNotExists(function ($subquery) use ($period) {
+                    $subquery->selectRaw('1')
+                        ->from('dtr_records as status_dtr')
+                        ->whereColumn('status_dtr.EmpID', 'employees.id')
+                        ->whereBetween('status_dtr.DTRDate', [$period->PeriodStart, $period->PeriodEnd]);
+                })->whereNotExists(function ($subquery) use ($period) {
+                    $subquery->selectRaw('1')
+                        ->from('biometric_logs as status_logs')
+                        ->whereColumn('status_logs.employee_id', 'employees.id')
+                        ->whereBetween('status_logs.punch_time', [
+                            Carbon::parse($period->PeriodStart)->startOfDay(),
+                            Carbon::parse($period->PeriodEnd)->endOfDay(),
+                        ]);
+                });
+            })
+            ->when($status === 'flagged', function ($query) use ($period) {
+                $query->whereExists(function ($subquery) use ($period) {
+                    $subquery->selectRaw('1')
+                        ->from('dtr_records as status_dtr')
+                        ->whereColumn('status_dtr.EmpID', 'employees.id')
+                        ->whereBetween('status_dtr.DTRDate', [$period->PeriodStart, $period->PeriodEnd])
+                        ->whereRaw("NULLIF(LTRIM(RTRIM(status_dtr.Remarks)), '') IS NOT NULL");
+                });
+            })
+            ->when($status === 'processed', function ($query) use ($period) {
+                $query->whereExists(function ($subquery) use ($period) {
+                    $subquery->selectRaw('1')
+                        ->from('dtr_records as status_dtr')
+                        ->whereColumn('status_dtr.EmpID', 'employees.id')
+                        ->whereBetween('status_dtr.DTRDate', [$period->PeriodStart, $period->PeriodEnd]);
+                })->whereNotExists(function ($subquery) use ($period) {
+                    $subquery->selectRaw('1')
+                        ->from('dtr_records as status_dtr')
+                        ->whereColumn('status_dtr.EmpID', 'employees.id')
+                        ->whereBetween('status_dtr.DTRDate', [$period->PeriodStart, $period->PeriodEnd])
+                        ->whereRaw("NULLIF(LTRIM(RTRIM(status_dtr.Remarks)), '') IS NOT NULL");
+                });
+            })
             ->leftJoin('groups', 'groups.id', '=', 'employees.Group')
             ->leftJoin('dtr_records', function ($join) use ($period) {
                 $join->on('dtr_records.EmpID', '=', 'employees.id')
@@ -50,14 +89,21 @@ class DtrViewerService
                 DB::raw('MAX(dtr_records.Remarks) as last_remarks'),
                 DB::raw('MAX(dtr_records.updated_at) as last_processed_at'),
                 DB::raw('COUNT(dtr_records.EmpID) as record_count'),
-                DB::raw("
-                    CASE
-                        WHEN COUNT(dtr_records.EmpID) = 0 THEN 'no_entry'
-                        WHEN MAX(dtr_records.Remarks) IS NULL THEN 'processed'
-                        ELSE 'flagged'
-                    END as status
-                ")
+                DB::raw("SUM(CASE WHEN NULLIF(LTRIM(RTRIM(dtr_records.Remarks)), '') IS NOT NULL THEN 1 ELSE 0 END) as flagged_record_count"),
             )
+            ->selectRaw("CASE
+                WHEN COUNT(dtr_records.id) = 0 AND NOT EXISTS (
+                    SELECT 1 FROM biometric_logs status_logs
+                    WHERE status_logs.employee_id = employees.id
+                        AND status_logs.punch_time BETWEEN ? AND ?
+                ) THEN 'no_entry'
+                WHEN SUM(CASE WHEN NULLIF(LTRIM(RTRIM(dtr_records.Remarks)), '') IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN 'flagged'
+                WHEN COUNT(dtr_records.id) = 0 THEN 'pending'
+                ELSE 'processed'
+            END as status", [
+                Carbon::parse($period->PeriodStart)->startOfDay(),
+                Carbon::parse($period->PeriodEnd)->endOfDay(),
+            ])
             ->groupBy(
                 'employees.id',
                 'employees.FullName',
@@ -66,12 +112,21 @@ class DtrViewerService
                 'employees.LastName',
                 'groups.name'
             )
-            ->when(in_array($status, ['no_entry', 'flagged', 'processed'], true), function ($query) use ($status) {
+            ->when(in_array($status, ['no_entry', 'flagged', 'pending', 'processed'], true), function ($query) use ($status, $period) {
                 $query->havingRaw("CASE
-                    WHEN COUNT(dtr_records.EmpID) = 0 THEN 'no_entry'
-                    WHEN MAX(dtr_records.Remarks) IS NULL THEN 'processed'
-                    ELSE 'flagged'
-                END = ?", [$status]);
+                    WHEN COUNT(dtr_records.id) = 0 AND NOT EXISTS (
+                        SELECT 1 FROM biometric_logs status_logs
+                        WHERE status_logs.employee_id = employees.id
+                            AND status_logs.punch_time BETWEEN ? AND ?
+                    ) THEN 'no_entry'
+                    WHEN SUM(CASE WHEN NULLIF(LTRIM(RTRIM(dtr_records.Remarks)), '') IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN 'flagged'
+                    WHEN COUNT(dtr_records.id) = 0 THEN 'pending'
+                    ELSE 'processed'
+                END = ?", [
+                    Carbon::parse($period->PeriodStart)->startOfDay(),
+                    Carbon::parse($period->PeriodEnd)->endOfDay(),
+                    $status,
+                ]);
             })
             ->orderBy('employees.LastName')
             ->paginate($limit ?: 10)
@@ -300,8 +355,54 @@ class DtrViewerService
         ];
     }
 
+    public function statusCounts(PayrollPeriod $period): array
+    {
+        $employeeStatuses = DB::table('employees')
+            ->where('employees.Status', 1)
+            ->whereNull('employees.deleted_at')
+            ->leftJoin('dtr_records', function ($join) use ($period) {
+                $join->on('dtr_records.EmpID', '=', 'employees.id')
+                    ->whereBetween('dtr_records.DTRDate', [$period->PeriodStart, $period->PeriodEnd]);
+            })
+            ->select('employees.id')
+            ->selectRaw("CASE
+                WHEN COUNT(dtr_records.id) = 0 AND NOT EXISTS (
+                    SELECT 1 FROM biometric_logs status_logs
+                    WHERE status_logs.employee_id = employees.id
+                        AND status_logs.punch_time BETWEEN ? AND ?
+                ) THEN 'no_entry'
+                WHEN SUM(CASE WHEN NULLIF(LTRIM(RTRIM(dtr_records.Remarks)), '') IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN 'flagged'
+                WHEN COUNT(dtr_records.id) = 0 THEN 'pending'
+                ELSE 'processed'
+            END as status", [
+                Carbon::parse($period->PeriodStart)->startOfDay(),
+                Carbon::parse($period->PeriodEnd)->endOfDay(),
+            ])
+            ->groupBy('employees.id');
+
+        $counts = DB::query()
+            ->fromSub($employeeStatuses, 'employee_statuses')
+            ->selectRaw("SUM(CASE WHEN status = 'flagged' THEN 1 ELSE 0 END) as flagged")
+            ->selectRaw("SUM(CASE WHEN status = 'no_entry' THEN 1 ELSE 0 END) as no_entry")
+            ->selectRaw("SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending")
+            ->selectRaw("SUM(CASE WHEN status = 'processed' THEN 1 ELSE 0 END) as processed")
+            ->first();
+
+        return [
+            'flagged' => (int) ($counts->flagged ?? 0),
+            'no_entry' => (int) ($counts->no_entry ?? 0),
+            'pending' => (int) ($counts->pending ?? 0),
+            'processed' => (int) ($counts->processed ?? 0),
+        ];
+    }
+
     public function summary(PayrollPeriod $period): array
     {
+        // Do not report No Entry before DTR processing has generated records for this period.
+        $hasProcessedDtr = DB::table('dtr_records')
+            ->whereBetween('DTRDate', [$period->PeriodStart, $period->PeriodEnd])
+            ->exists();
+
         $grouped = DB::table('employees')
             ->where('employees.Status', 1)
             ->whereNull('employees.deleted_at')
@@ -315,19 +416,28 @@ class DtrViewerService
             ->select(
                 'employees.id',
                 DB::raw('COUNT(dtr_records.EmpID) as record_count'),
-                DB::raw('MAX(dtr_records.Remarks) as last_remarks'),
-                DB::raw("CASE
-                    WHEN COUNT(dtr_records.EmpID) = 0 THEN 'no_entry'
-                    WHEN MAX(dtr_records.Remarks) IS NULL THEN 'processed'
-                    ELSE 'flagged'
-                END as dtr_status")
+                DB::raw('MAX(dtr_records.Remarks) as last_remarks')
             )
+            ->selectRaw("CASE
+                WHEN COUNT(dtr_records.EmpID) = 0 AND NOT EXISTS (
+                    SELECT 1 FROM biometric_logs status_logs
+                    WHERE status_logs.employee_id = employees.id
+                        AND status_logs.punch_time BETWEEN ? AND ?
+                ) THEN 'no_entry'
+                WHEN COUNT(dtr_records.EmpID) = 0 THEN 'pending'
+                WHEN SUM(CASE WHEN NULLIF(LTRIM(RTRIM(dtr_records.Remarks)), '') IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN 'flagged'
+                ELSE 'processed'
+            END as dtr_status", [
+                Carbon::parse($period->PeriodStart)->startOfDay(),
+                Carbon::parse($period->PeriodEnd)->endOfDay(),
+            ])
             ->groupBy('employees.id');
 
         $counts = DB::query()
             ->fromSub($grouped, 'g')
             ->selectRaw('COUNT(*) as total')
             ->selectRaw("SUM(CASE WHEN dtr_status = 'processed' THEN 1 ELSE 0 END) as processed")
+            ->selectRaw("SUM(CASE WHEN dtr_status = 'pending' THEN 1 ELSE 0 END) as pending")
             ->selectRaw("SUM(CASE WHEN dtr_status = 'flagged' THEN 1 ELSE 0 END) as flagged")
             ->selectRaw("SUM(CASE WHEN dtr_status = 'no_entry' THEN 1 ELSE 0 END) as no_entry")
             ->first();
@@ -335,8 +445,9 @@ class DtrViewerService
         return [
             ['label' => 'Employees', 'value' => (int) $counts->total],
             ['label' => 'Processed', 'value' => (int) $counts->processed],
+            ['label' => 'Pending', 'value' => (int) $counts->pending + (!$hasProcessedDtr ? (int) $counts->no_entry : 0)],
             ['label' => 'Flagged', 'value' => (int) $counts->flagged],
-            ['label' => 'No Entry', 'value' => (int) $counts->no_entry],
+            ['label' => 'No Entry', 'value' => $hasProcessedDtr ? (int) $counts->no_entry : 0],
         ];
     }
     protected function buildEmployeeDtr(

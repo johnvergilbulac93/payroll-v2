@@ -14,15 +14,31 @@ class ScheduleResolverService
         $schedules = DB::table('employee_schedules')
             ->whereIn('EmpID', $employeeIds)
             ->where('IsActive', true)
-            ->where('ScheduleType', 'per_date')
-            ->whereBetween('EffectiveFrom', [$startDate->toDateString(), $endDate->toDateString()])
+            ->where(function ($query) use ($startDate, $endDate) {
+                $query
+                    ->where('ScheduleType', 'default')
+                    ->orWhere(function ($query) use ($startDate, $endDate) {
+                        $query->where('ScheduleType', 'per_date')
+                            ->whereBetween('EffectiveFrom', [$startDate->toDateString(), $endDate->toDateString()]);
+                    });
+
+                // Date-range schedule query is intentionally disabled.
+                // ->orWhere(function ($query) use ($startDate, $endDate) {
+                //     $query->where('ScheduleType', 'date_range')
+                //         ->where('EffectiveFrom', '<=', $endDate->toDateString())
+                //         ->where('EffectiveTo', '>=', $startDate->toDateString());
+                // });
+            })
+            ->orderByDesc('EffectiveFrom')
             ->get()
             ->groupBy('EmpID');
 
-        $templates = DB::table('employee_schedule_templates')
-            ->whereIn('EmpID', $employeeIds)
-            ->get()
-            ->groupBy('EmpID');
+        // Weekly template schedules are disabled; only default and per-date schedules are used.
+        // $templates = DB::table('employee_schedule_templates')
+        //     ->whereIn('EmpID', $employeeIds)
+        //     ->get()
+        //     ->groupBy('EmpID');
+        $templates = collect();
 
         $shiftCodes = ShiftCode::where('IsActive', true)->get()->keyBy('id');
 
@@ -33,7 +49,7 @@ class ScheduleResolverService
     {
         $dateStr = $date->toDateString();
 
-        // Future: 1. per_date override
+        // 1. Per-date override
         $rows = $ctx->schedules->get($employeeId, collect());
 
         $perDate = $rows->first(fn($s) => $s->ScheduleType === 'per_date' && $s->EffectiveFrom === $dateStr);
@@ -41,35 +57,31 @@ class ScheduleResolverService
             return $perDate->ShiftCodeID ? $ctx->shiftCodes->get($perDate->ShiftCodeID) : null;
         }
 
-        // Future: 2. date_range override
-        // $dateRange = $rows->first(
-        //     fn($s) => $s->ScheduleType === 'date_range'
-        //         && $s->EffectiveFrom <= $dateStr
-        //         && $s->EffectiveTo >= $dateStr
+        // 2. Default schedule applies to employees with a configured default shift.
+        $default = $rows->first(fn($s) => $s->ScheduleType === 'default');
+        if ($default) {
+            // Sunday is a rest day by default. An explicit per-date schedule above
+            // takes precedence, allowing an employee to be scheduled on a Sunday.
+            if ($date->isSunday()) {
+                return $ctx->shiftCodes->first(
+                    fn ($shift) => mb_strtolower(trim($shift->Name)) === 'rest day'
+                );
+            }
+
+            return $default->ShiftCodeID ? $ctx->shiftCodes->get($default->ShiftCodeID) : null;
+        }
+
+        // Weekly template fallback is intentionally disabled.
+        // $dayOfWeek = $date->dayOfWeek; // Carbon: 0 = Sunday ... 6 = Saturday
+        // $templateRows = $ctx->templatesByEmployee->get($employeeId, collect());
+        //
+        // $template = $templateRows->first(
+        //     fn($t) => (int) $t->DayOfWeek === $dayOfWeek
         // );
-        // if ($dateRange) {
-        //     return $dateRange->ShiftCodeID ? $ctx->shiftCodes->get($dateRange->ShiftCodeID) : null;
-        // }
+        //
+        // return $template ? $ctx->shiftCodes->get($template->ShiftCodeID) : null;
 
-        // Future: 3. default open-ended override
-        // $default = $rows->first(
-        //     fn($s) => $s->ScheduleType === 'default'
-        //         && $s->EffectiveFrom <= $dateStr
-        //         && (!$s->EffectiveTo || $s->EffectiveTo >= $dateStr)
-        // );
-        // if ($default) {
-        //     return $default->ShiftCodeID ? $ctx->shiftCodes->get($default->ShiftCodeID) : null;
-        // }
-
-        // 4. weekly template — currently the only source of truth
-        $dayOfWeek = $date->dayOfWeek; // Carbon: 0 = Sunday ... 6 = Saturday
-        $templateRows = $ctx->templatesByEmployee->get($employeeId, collect());
-
-        $template = $templateRows->first(
-            fn($t) => (int) $t->DayOfWeek === $dayOfWeek
-        );
-
-        return $template ? $ctx->shiftCodes->get($template->ShiftCodeID) : null;
+        return null;
     }
     /**
      * Counts scheduled work days for an employee within a date range —

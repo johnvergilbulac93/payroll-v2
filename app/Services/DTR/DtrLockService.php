@@ -13,17 +13,20 @@ class DtrLockService
     public function __construct(protected DtrViewerService $dtrViewerService) {}
     public function validate(PayrollPeriod $period): array
     {
-        $stats = collect($this->dtrViewerService->summary($period))
-            ->pluck('value', 'label');
+        $stats = $this->dtrViewerService->statusCounts($period);
 
-        $flagged = (int) $stats->get('Flagged', 0);
+        $processed = (int) ($stats['processed'] ?? 0);
+        $pending = (int) ($stats['pending'] ?? 0);
+        $flagged = (int) ($stats['flagged'] ?? 0);
+        $noEntry = (int) ($stats['no_entry'] ?? 0);
 
         return [
-            'total' => (int) $stats->get('Employees', 0),
-            'processed' => (int) $stats->get('Processed', 0),
+            'total' => $processed + $pending + $flagged + $noEntry,
+            'processed' => $processed,
+            'pending' => $pending,
             'flagged' => $flagged,
-            'no_entry' => (int) $stats->get('No Entry', 0),
-            'ready_to_lock' => $flagged === 0,
+            'no_entry' => $noEntry,
+            'ready_to_lock' => $processed > 0 && $pending === 0 && $flagged === 0,
         ];
     }
 
@@ -33,8 +36,19 @@ class DtrLockService
             $validation = $this->validate($period);
 
             if (! $validation['ready_to_lock']) {
+                $issues = [];
+                if ($validation['processed'] === 0) {
+                    $issues[] = 'no processed DTR records were found';
+                }
+                if ($validation['pending'] > 0) {
+                    $issues[] = "{$validation['pending']} employee(s) with punches still have pending DTR records";
+                }
+                if ($validation['flagged'] > 0) {
+                    $issues[] = "{$validation['flagged']} employee(s) have flagged DTR records";
+                }
+
                 throw new \RuntimeException(
-                    "Cannot lock DTR while {$validation['flagged']} flagged employee record(s) remain. Review and reprocess them first."
+                    'Cannot lock DTR: ' . implode('; ', $issues) . '. Process or review the period first.'
                 );
             }
 

@@ -141,7 +141,7 @@ export function ReportEmployeeDtrTable({
             onSearch={onSearch}
             onAdd={onAdd}
             onPerPage={onPerPage}
-            controlType="process-dtr"
+            controlType="report"
         />
     );
 }

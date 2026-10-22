@@ -104,7 +104,7 @@ export function PerDateSchedule({
     const scheduleCount = perDateSchedules?.length ?? 0;
 
     return (
-        <div className="rounded-xl border bg-card p-4 shadow-sm">
+        <div className="rounded-xl border bg-sidebar p-4 shadow-sm">
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2">
                     <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">

@@ -16,7 +16,7 @@ export function DashboardCard({
 }: DashboardCardProps) {
     return (
         <div
-            className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+            className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-xl border bg-sidebar shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
             onClick={onClick}
             role={onClick ? 'button' : undefined}
             tabIndex={onClick ? 0 : undefined}

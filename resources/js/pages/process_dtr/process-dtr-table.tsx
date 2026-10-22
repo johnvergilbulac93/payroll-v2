@@ -98,6 +98,7 @@ export function ProcessDtrTable({
         }),
         columnHelper.display({
             id: 'Status',
+            header: 'Status',
             cell: ({ row }) => {
                 const employee = row.original;
 
@@ -203,7 +204,7 @@ export function ProcessDtrTable({
             onPerPage={onPerPage}
             onStatusChange={onStatusChange}
             initialStatus={initialStatus}
-            controlType="process-dtr"
+            controlType="process-dtr-table"
         />
     );
 }

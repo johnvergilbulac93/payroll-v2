@@ -22,6 +22,7 @@ class EmployeeScheduleController extends Controller
         $employee = null;
         $templates = null;
         $perDateSchedule = null;
+        $defaultSchedule = null;
 
 
         if ($employeeId) {
@@ -31,7 +32,9 @@ class EmployeeScheduleController extends Controller
 
             $templates = $employee->load('scheduleTemplate.shiftCode:id,Name,TimeIn,TimeOut,IsWorkingDay')
                 ->scheduleTemplate;
-            $perDateSchedule = $employee->load('schedule.shiftCode:id,Name,TimeIn,TimeOut,IsWorkingDay')->schedule;
+            $schedules = $employee->load('schedule.shiftCode:id,Name,TimeIn,TimeOut,IsWorkingDay')->schedule;
+            $perDateSchedule = $schedules->where('ScheduleType', 'per_date')->values();
+            $defaultSchedule = $schedules->firstWhere('ScheduleType', 'default');
         }
 
         return Inertia::render('schedule_employee/schedule-employee', [
@@ -48,7 +51,8 @@ class EmployeeScheduleController extends Controller
             'employee' => $employee,
             'templates' => $templates,
             'shiftCodes' => ShiftResource::collection(ShiftCode::get())->resolve(),
-            'perDateSchedules' => $perDateSchedule
+            'perDateSchedules' => $perDateSchedule,
+            'defaultSchedule' => $defaultSchedule,
         ]);
     }
     public function store(ScheduleEmployeeRequest $request)

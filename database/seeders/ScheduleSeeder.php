@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Employee;
+use App\Models\EmployeeSchedule;
 use App\Models\Group;
 use App\Models\ShiftCode;
 use Illuminate\Database\Seeder;
@@ -91,12 +92,28 @@ class ScheduleSeeder extends Seeder
 
                 $shiftName = $this->shiftName($scheduleName);
                 $workingShiftId = ShiftCode::query()->where('Name', $shiftName)->value('id');
-                $restDayShiftId = ShiftCode::query()->where('Name', 'Rest Day')->value('id');
-
-                if ($workingShiftId === null || $restDayShiftId === null) {
-                    throw new RuntimeException('Required shift codes are missing. Run ShiftSeeder before ScheduleSeeder.');
+                if ($workingShiftId === null) {
+                    throw new RuntimeException('Required shift code is missing. Run ShiftSeeder before ScheduleSeeder.');
                 }
 
+                // Seed the employee's assigned shift as their default schedule.
+                // Per-date schedules can override this default for specific dates.
+                EmployeeSchedule::updateOrCreate(
+                    [
+                        'EmpID' => $employee->id,
+                        'ScheduleType' => 'default',
+                    ],
+                    [
+                        'ShiftCodeID' => $workingShiftId,
+                        'EffectiveFrom' => null,
+                        'EffectiveTo' => null,
+                        'Remarks' => null,
+                        'IsActive' => true,
+                    ],
+                );
+
+                /*
+                // Previous weekly-template seeding retained for reference.
                 // Carbon/PHP weekday numbering: Sunday = 0, Monday = 1, ..., Saturday = 6.
                 // Sunday is the only rest day; all other days use the employee's assigned shift.
                 foreach ([0, 1, 2, 3, 4, 5, 6] as $dayOfWeek) {
@@ -118,6 +135,7 @@ class ScheduleSeeder extends Seeder
                         DB::table('employee_schedule_templates')->insert($scheduleKey + $scheduleValues + ['created_at' => now()]);
                     }
                 }
+                */
 
                 $imported++;
             }

@@ -27,8 +27,12 @@ export default function AuthSimpleLayout({
                     }}
                 />
                 <div className="relative z-10 flex max-w-lg flex-col items-center text-center">
-                    <Link href={home()} aria-label="Go to home" className="mb-8">
-                        <div className="flex size-32 items-center justify-center rounded-[2rem] border border-white/15  bg-sidebar-primary p-5 shadow-2xl shadow-black/20 ">
+                    <Link
+                        href={home()}
+                        aria-label="Go to home"
+                        className="mb-8"
+                    >
+                        <div className="flex size-32 items-center justify-center rounded-[2rem] border border-white/15 bg-sidebar-primary p-5 shadow-2xl shadow-black/20">
                             <AppLogoIcon className="size-full fill-current text-sidebar-primary-foreground" />
                         </div>
                     </Link>
@@ -36,7 +40,8 @@ export default function AuthSimpleLayout({
                         {name || 'Payroll Management System'}
                     </h2>
                     <p className="mt-4 max-w-md text-sm leading-7 text-sidebar-foreground/75 xl:text-base">
-                        {companyDescription || 'A simpler way to manage your workforce and payroll.'}
+                        {companyDescription ||
+                            'A simpler way to manage your workforce and payroll.'}
                     </p>
                     <div className="mt-10 h-1 w-16 rounded-full bg-sidebar-primary" />
                 </div>
@@ -49,8 +54,8 @@ export default function AuthSimpleLayout({
                 <div className="w-full max-w-md">
                     <div className="mb-8 flex flex-col gap-3 lg:mb-10">
                         <div className="mb-2 flex items-center gap-3 lg:hidden">
-                            <div className="flex size-12 items-center justify-center rounded-xl bg-sidebar p-2 text-sidebar-primary-foreground shadow-md">
-                                <AppLogoIcon className="size-full fill-current" />
+                            <div className="flex size-12 items-center justify-center rounded-xl bg-sidebar-primary p-2 text-sidebar-primary-foreground shadow-md ring-1 ring-sidebar-primary/20">
+                                <AppLogoIcon className="size-full fill-current text-sidebar-primary-foreground" />
                             </div>
                             <span className="text-sm font-semibold text-foreground">
                                 {name || 'Payroll Management System'}
