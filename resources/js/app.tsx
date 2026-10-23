@@ -38,7 +38,7 @@ createInertiaApp({
                 <Toaster
                     position="top-right"
                     duration={2000}
-                    closeButton
+                    closeButton={false}
                     swipeDirections={['right']}
                     icons={{
                         success: (

@@ -1,4 +1,3 @@
-import { router } from '@inertiajs/react';
 import {
     IconInfoCircleFilled,
     IconMessageCircleFilled,
@@ -12,10 +11,11 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+} from '@/components/ui/hover-card';
+import { Button } from '@/components/ui/button';
 import type { DTRRecordsDetails } from '@/types/payroll-period';
 
 type DTRProps = {
@@ -25,7 +25,7 @@ type DTRProps = {
     onScheduleNeeded?: (date: string) => void;
 };
 
-export function EmployeeDtr({ dailyTimeRecords, employeeId, onMissingPunch, onScheduleNeeded }: DTRProps) {
+export function EmployeeDtr({ dailyTimeRecords, onMissingPunch, onScheduleNeeded }: DTRProps) {
     const records = dailyTimeRecords.filter((dtr) => dtr.DTRDate !== 'TOTAL');
 
     return (
@@ -112,48 +112,30 @@ export function EmployeeDtr({ dailyTimeRecords, employeeId, onMissingPunch, onSc
                                                 <TableCell className="text-center tabular-nums">{dtr.DW ?? '—'}</TableCell>
                                                 <TableCell className="text-center">
                                                     {showDetails && (
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <button
-                                                                    type="button"
-                                                                    aria-label={`View attendance details for ${dtr.DTRDate}`}
-                                                                    className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                                                    onClick={() => {
-                                                                        if (needsSchedule && onScheduleNeeded) {
-                                                                            onScheduleNeeded(normalizedDtrDate);
-                                                                            return;
-                                                                        }
-                                                                        if (missingPunchType && onMissingPunch) {
-                                                                            onMissingPunch(normalizedDtrDate, missingPunchType, dtr.id ?? null);
-                                                                            return;
-                                                                        }
-                                                                        if (hasRemarks && employeeId) {
-                                                                            router.visit(
-                                                                                `/employee_schedule?emp_id=${employeeId}&tab=per-date`,
-                                                                            );
-                                                                        }
-                                                                    }}
+                                                        <HoverCard openDelay={200} closeDelay={100}>
+                                                            <HoverCardTrigger asChild>
+                                                                <span
+                                                                    aria-label={`Attendance details for ${dtr.DTRDate}`}
+                                                                    className="inline-flex size-8 cursor-default items-center justify-center rounded-md text-muted-foreground"
                                                                 >
                                                                     {hasRemarks ? (
                                                                         <IconMessageCircleFilled className={`size-4 ${missingPunchType || needsSchedule ? 'text-amber-500' : ''}`} />
                                                                     ) : (
                                                                         <IconInfoCircleFilled className="size-4" />
                                                                     )}
-                                                                </button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent side="left" className="max-w-sm">
-                                                                <div className="flex min-w-24 flex-col gap-1.5">
-                                                                    <span className="mb-1 border-b pb-1 text-xs font-semibold">
-                                                                        {dtr.IsDayOff
-                                                                            ? 'Day off'
-                                                                            : dtr.ShiftName || 'No shift assigned'}
-                                                                    </span>
-                                                                    {dtr.Remarks && (
-                                                                        <span className="text-xs">{dtr.Remarks}</span>
+                                                                </span>
+                                                            </HoverCardTrigger>
+                                                            <HoverCardContent side="left" align="end" className="w-80 max-w-sm">
+                                                                <div className="flex min-w-24 flex-col gap-2">
+                                                                    {dtr.Remarks?.trim() && (
+                                                                        <div className="flex flex-col gap-1">
+                                                                            <span className="text-xs font-semibold text-muted-foreground">Remarks</span>
+                                                                            <p className="text-xs">{dtr.Remarks}</p>
+                                                                        </div>
                                                                     )}
                                                                     {hasPunches && (
-                                                                        <div className="mt-1 flex flex-col gap-1 border-t pt-1">
-                                                                            <span className="text-xs font-semibold">Punch times</span>
+                                                                        <div className={`flex flex-col gap-1 ${dtr.Remarks?.trim() ? 'border-t pt-2' : ''}`}>
+                                                                            <span className="text-xs font-semibold text-muted-foreground">Punch Time</span>
                                                                             {dtr.Punches.map((punch, punchIndex) => (
                                                                                 <span
                                                                                     key={`${punch.PunchTime}-${punchIndex}`}
@@ -164,9 +146,23 @@ export function EmployeeDtr({ dailyTimeRecords, employeeId, onMissingPunch, onSc
                                                                             ))}
                                                                         </div>
                                                                     )}
+                                                                    {needsSchedule && onScheduleNeeded && (
+                                                                        <div className="flex justify-end border-t pt-2">
+                                                                            <Button type="button" size="sm" onClick={() => onScheduleNeeded(normalizedDtrDate)}>
+                                                                                Add
+                                                                            </Button>
+                                                                        </div>
+                                                                    )}
+                                                                    {!needsSchedule && missingPunchType && onMissingPunch && (
+                                                                        <div className="flex justify-end border-t pt-2">
+                                                                            <Button type="button" size="sm" onClick={() => onMissingPunch(normalizedDtrDate, missingPunchType, dtr.id ?? null)}>
+                                                                                Add missing {missingPunchType} punch
+                                                                            </Button>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
-                                                            </TooltipContent>
-                                                        </Tooltip>
+                                                            </HoverCardContent>
+                                                        </HoverCard>
                                                     )}
                                                 </TableCell>
                                             </>

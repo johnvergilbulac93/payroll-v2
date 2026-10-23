@@ -21,6 +21,14 @@ import {
     FieldTitle,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import {
+    Combobox,
+    ComboboxContent,
+    ComboboxEmpty,
+    ComboboxInput,
+    ComboboxItem,
+    ComboboxList,
+} from '@/components/ui/combobox';
 
 import {
     Select,
@@ -153,13 +161,14 @@ export default function EmployeeForm({
         DailyRateDivisor: employee?.DailyRateDivisor ?? '',
     });
 
-    const filteredAreas = !data.Group
-        ? areas
-        : areas.filter((area) => String(area.type) === data.Group);
+    // Group/type filtering is disabled so all areas and positions are available.
+    // const filteredAreas = !data.Group
+    //     ? areas
+    //     : areas.filter((area) => String(area.type) === data.Group);
 
-    const filteredPositions = !data.Group
-        ? positions
-        : positions.filter((position) => String(position.type) === data.Group);
+    // const filteredPositions = !data.Group
+    //     ? positions
+    //     : positions.filter((position) => String(position.type) === data.Group);
 
     const onSubmit = () => {
         post(store.url(), {
@@ -171,6 +180,7 @@ export default function EmployeeForm({
     const onUpdate = () => {
         post(update.url(Number(data.id)), {
             forceFormData: true,
+            preserveScroll: true,
             onSuccess: () => {
                 toast.success('Changes saved successfully');
             },
@@ -486,34 +496,29 @@ export default function EmployeeForm({
                             Position
                         </FieldLabel>
                         <div className="flex items-center gap-2">
-                            <Select
-                                value={data.Position}
-                                onValueChange={(value) =>
-                                    setData('Position', value)
-                                }
+                            <Combobox
+                                items={positions.filter((position) => position.value !== '')}
+                                value={positions.find((position) => position.value === data.Position) ?? null}
+                                onValueChange={(position: Option | null) => setData('Position', position?.value ?? '')}
+                                itemToStringLabel={(position: Option) => position.label}
+                                itemToStringValue={(position: Option) => position.value}
                             >
-                                <SelectTrigger
-                                    id="employee.Position"
+                                <ComboboxInput
+                                    placeholder="Select a position"
                                     className="w-full"
-                                    tabIndex={10}
                                     aria-invalid={!!errors.Position}
-                                >
-                                    <SelectValue placeholder="Select a Position" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectLabel>Positions</SelectLabel>
-                                        {filteredPositions.map((position) => (
-                                            <SelectItem
-                                                key={position.value}
-                                                value={position.value}
-                                            >
+                                />
+                                <ComboboxContent>
+                                    <ComboboxEmpty>No positions found.</ComboboxEmpty>
+                                    <ComboboxList>
+                                        {(position: Option) => (
+                                            <ComboboxItem key={position.value} value={position}>
                                                 {position.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
+                                            </ComboboxItem>
+                                        )}
+                                    </ComboboxList>
+                                </ComboboxContent>
+                            </Combobox>
 
                             <Tooltip>
                                 <TooltipTrigger asChild>
@@ -542,34 +547,29 @@ export default function EmployeeForm({
                             Area of assignment
                         </FieldLabel>
                         <div className="flex items-center gap-2">
-                            <Select
-                                value={data.Assignment}
-                                onValueChange={(value) =>
-                                    setData('Assignment', value)
-                                }
+                            <Combobox
+                                items={areas.filter((area) => area.value !== '')}
+                                value={areas.find((area) => area.value === data.Assignment) ?? null}
+                                onValueChange={(area: Option | null) => setData('Assignment', area?.value ?? '')}
+                                itemToStringLabel={(area: Option) => area.label}
+                                itemToStringValue={(area: Option) => area.value}
                             >
-                                <SelectTrigger
-                                    id="employee.Assignment"
+                                <ComboboxInput
+                                    placeholder="Select an area"
                                     className="w-full"
-                                    tabIndex={11}
                                     aria-invalid={!!errors.Assignment}
-                                >
-                                    <SelectValue placeholder="Select a area" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectLabel>Areas</SelectLabel>
-                                        {filteredAreas.map((area) => (
-                                            <SelectItem
-                                                key={area.value}
-                                                value={area.value}
-                                            >
+                                />
+                                <ComboboxContent>
+                                    <ComboboxEmpty>No areas found.</ComboboxEmpty>
+                                    <ComboboxList>
+                                        {(area: Option) => (
+                                            <ComboboxItem key={area.value} value={area}>
                                                 {area.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
+                                            </ComboboxItem>
+                                        )}
+                                    </ComboboxList>
+                                </ComboboxContent>
+                            </Combobox>
 
                             <Tooltip>
                                 <TooltipTrigger asChild>

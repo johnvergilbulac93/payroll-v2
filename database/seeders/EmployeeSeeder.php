@@ -11,62 +11,48 @@ use App\Models\Group;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Concerns\ToArray;
+use Maatwebsite\Excel\Facades\Excel;
 use RuntimeException;
-use SimpleXMLElement;
-use ZipArchive;
 
 class EmployeeSeeder extends Seeder
 {
     public function run(): void
     {
         $path = database_path('seeders/data/Employee Master for Upload.xlsx');
-        $zip = new ZipArchive;
-        if ($zip->open($path) !== true) {
-            throw new RuntimeException("Unable to open employee workbook: {$path}");
-        }
-        try {
-            $strings = $this->sharedStrings($zip);
-            $xml = $zip->getFromName('xl/worksheets/sheet1.xml');
-            $sheet = $xml === false ? false : simplexml_load_string($xml);
-            if (! $sheet instanceof SimpleXMLElement) {
-                throw new RuntimeException('Unable to read the employee worksheet.');
-            }
-            $sheet->registerXPathNamespace('x', 'http://schemas.openxmlformats.org/spreadsheetml/2006/main');
-            $headers = [];
-            $lastGroup = null;
-            foreach ($sheet->xpath('//x:sheetData/x:row') ?: [] as $row) {
-                $rowNumber = (int) $row['r'];
-                $values = $this->rowValues($row, $strings);
-                if ($rowNumber === 2) {
-                    foreach ($values as $column => $value) {
-                        if (trim((string) $value) !== '') {
-                            $headers[$column] = trim((string) $value);
-                        }
-                    }
+        $sheets = Excel::toArray(new class implements ToArray
+        {
+            public function array(array $array): void {}
+        }, $path);
+        $rows = $sheets[0] ?? [];
 
-                    continue;
-                }
-                if ($rowNumber < 3) {
-                    continue;
-                }
-                $record = [];
-                foreach ($headers as $column => $header) {
+        if (! isset($rows[1])) {
+            throw new RuntimeException('Unable to read the employee worksheet or find headers on row 2.');
+        }
+
+        $headers = array_map(static fn ($value) => trim((string) $value), $rows[1]);
+        $lastGroup = null;
+
+        foreach (array_slice($rows, 2, null, true) as $index => $values) {
+            $record = [];
+            foreach ($headers as $column => $header) {
+                if ($header !== '') {
                     $record[$header] = $values[$column] ?? null;
                 }
-                $employeeNumber = $this->text($record['Employee No.'] ?? null);
-                $groupValue = $this->text($record['N/T'] ?? null);
-                if ($groupValue !== null) {
-                    $lastGroup = $groupValue;
-                } elseif ($lastGroup !== null) {
-                    // Some rows leave N/T blank; carry down the last explicit group value.
-                    $record['N/T'] = $lastGroup;
-                } else {
-                    throw new RuntimeException('Employee '.$employeeNumber.' has no N/T group value and no preceding group to inherit (worksheet row '.$rowNumber.').');
-                }
-                $this->importEmployee($record, $employeeNumber);
             }
-        } finally {
-            $zip->close();
+
+            $employeeNumber = $this->text($record['Employee No.'] ?? null);
+            $groupValue = $this->text($record['N/T'] ?? null);
+            if ($groupValue !== null) {
+                $lastGroup = $groupValue;
+            } elseif ($lastGroup !== null) {
+                // Some rows leave N/T blank; carry down the last explicit group value.
+                $record['N/T'] = $lastGroup;
+            } else {
+                throw new RuntimeException('Employee '.$employeeNumber.' has no N/T group value and no preceding group to inherit (worksheet row '.($index + 1).').');
+            }
+
+            $this->importEmployee($record, $employeeNumber);
         }
     }
 
@@ -150,53 +136,6 @@ class EmployeeSeeder extends Seeder
         });
     }
 
-    private function sharedStrings(ZipArchive $zip): array
-    {
-        $xml = $zip->getFromName('xl/sharedStrings.xml');
-        if ($xml === false) {
-            return [];
-        }
-        $root = simplexml_load_string($xml);
-        if (! $root instanceof SimpleXMLElement) {
-            return [];
-        }
-        $root->registerXPathNamespace('x', 'http://schemas.openxmlformats.org/spreadsheetml/2006/main');
-        $result = [];
-        foreach ($root->xpath('//x:si') ?: [] as $item) {
-            // XPath namespace registrations are local to each SimpleXMLElement context.
-            $item->registerXPathNamespace('x', 'http://schemas.openxmlformats.org/spreadsheetml/2006/main');
-            $value = '';
-            foreach ($item->xpath('.//x:t') ?: [] as $part) {
-                $value .= (string) $part;
-            }
-            $result[] = $value;
-        }
-
-        return $result;
-    }
-
-    private function rowValues(SimpleXMLElement $row, array $strings): array
-    {
-        $namespace = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
-        $row->registerXPathNamespace('x', $namespace);
-        $result = [];
-        foreach ($row->xpath('./x:c') ?: [] as $cell) {
-            preg_match('/^[A-Z]+/', (string) $cell['r'], $match);
-            $column = $match[0] ?? '';
-            $value = isset($cell->v) ? (string) $cell->v : null;
-            if ((string) $cell['t'] === 's' && $value !== null) {
-                $value = $strings[(int) $value] ?? null;
-            } elseif ((string) $cell['t'] === 'inlineStr') {
-                $value = (string) ($cell->is->t ?? '');
-            }
-            if ($column !== '') {
-                $result[$column] = $value;
-            }
-        }
-
-        return $result;
-    }
-
     private function groupName(mixed $value): string
     {
         return match (mb_strtolower(trim((string) $value))) {
@@ -276,7 +215,7 @@ class EmployeeSeeder extends Seeder
             'regular' => EmploymentStatus::Regular->value,
             'probationary' => EmploymentStatus::Probationary->value,
             'contractual' => EmploymentStatus::Contractual->value,
-            'consultant' => EmploymentStatus::Consultant->value,    
+            'consultant' => EmploymentStatus::Consultant->value,
             default => null,
         };
     }
